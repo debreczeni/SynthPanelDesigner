@@ -1,0 +1,532 @@
+<!--
+# Synth Panels Designer - Free Inkscape extension to draw musical instruments user interfaces
+# Copyright (C) 2020 Francesco Mulassano
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Synth Panels Designer</_name>
+  <id>com.Faselunare.SPD.SynthPanelsDesign</id>
+  <dependency type="executable" location="inx">SynthPanelsDesign/SynthPanelsDesign.py</dependency>
+  <hbox>
+        <vbox>
+            <image>SynthPanelsDesign/assets/spd_logo.svg</image>
+        </vbox>
+  </hbox>
+  <separator/>
+  <param name="part" type="optiongroup" gui-text="which part do you want to draw?" appearance="combo" gui-description="The first thing you need to do is: Choose what you want to draw!">
+       <option value="1">Panel</option>
+       <option value="2">UI - Knob</option>
+       <option value="3">UI - Knob scales</option>
+       <option value="4">UI - Slider</option>
+       <option value="5">UI - Slider scales</option>
+  </param>
+  <separator/>
+  <param name="paneltab" type="notebook">
+        <page name="Options" gui-text="PANEL">
+            <hbox>
+                <vbox>
+                    <label appearance="header">PANEL DESIGNER</label>
+                    <separator/>
+                    <param name="panel_type" type="optiongroup" appearance="combo" gui-text="Format                      ">
+                        <item value="e3u">Eurorack - 3U</item>
+                        <item value="e1uij">Eurorack - 1U - IJ</item>
+                        <item value="e1upl">Eurorack - 1U - PL</item>
+                        <item value="vcv">VCV Rack</item>
+                        <item value="m5u">Moog - 5U</item>
+                        <item value="api">API 500</item>
+                        <item value="custom">Custom</item>
+                    </param>
+                <separator/>
+                     <label xml:space="preserve">
+- Eurorack 1U - IJ = Intellijel standard
+- Eurorack 1U - PL = Pulp Logic standard
+                    </label>
+                    <spacer/>
+                    <separator/>
+                    <param name="panel_color" type="color" appearance="colorbutton" _gui-text="Color" default="#e6e6e6"></param>
+                   
+                    </vbox>
+                    <spacer/>
+                    <separator/>
+                    <spacer/>
+                    <vbox>
+                    <label appearance="header"  gui-description="Set the panel dimensions!">DIMENSIONS</label>
+                    <separator/>
+                    <label appearance="header">Eurorack</label>
+                    <param name="eurorack_panel_hp" type="int" min="2" max="72"  _gui-text="HP">4</param>
+                    <!-- <param name="eurorack_panel_hp" type="optiongroup" appearance="combo" _gui-text="HP">
+                        <item value="9.80">2</item>
+                        <item value="20.00">4</item>
+                        <item value="30.00">6</item>
+                        <item value="40.30">8</item>
+                        <item value="50.50">10</item>
+                        <item value="60.60">12</item>
+                        <item value="70.80">14</item>
+                        <item value="80.90">16</item>
+                        <item value="91.30">18</item>
+                        <item value="101.30">20</item>
+                        <item value="160.30">21</item>
+                        <item value="111.40">22</item>
+                        <item value="141.90">28</item>
+                        <item value="213.00">42</item>
+                    </param> -->
+                    <separator/>
+                    <label appearance="header">MOOG</label>
+                    <param name="moog_panel_units" type="optiongroup" appearance="combo" min="2" max="104" _gui-text="MU">
+                        <item value="1">Single</item>
+                        <item value="2">Double</item>
+                        <item value="4">Quad</item>
+                        <item value="8">Octal</item>
+                    </param>
+                    <separator/>
+                    <label appearance="header">API 500</label>
+                    <param name="api_panel_units" type="int" min="1" max="104" _gui-text="Units">1</param>
+                    <separator/>
+                    <label appearance="header">Custom</label>
+                    <param name="panel_custom_width" type="float" min="1" max="10000" default="10" precision="2" _gui-text="Width">10</param>
+                    <param name="panel_custom_height" type="float" min="1" max="10000" default="10" precision="2" _gui-text="Height">10</param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">MOUNTING HOLES</label>
+                    <separator/>
+                    <hbox>
+                        <vbox>
+                            <param name="panel_holes" type="boolean" _gui-text="Add holes">false</param>
+                            <param name="panel_centers" type="boolean" _gui-text="Mark Hole Centers">false</param>
+                         </vbox>
+                         <vbox>
+                            <param name="panel_oval" type="boolean" _gui-text="Oval Holes">false</param>
+                            
+                        </vbox>
+                    </hbox>
+                    <spacer/>
+                    <label appearance="header">SCREWS</label>
+                    <separator/>
+                        <param name="panel_screws" type="boolean" _gui-text="Add screws">false</param>
+                        <param name="panel_screw_type" type="optiongroup" appearance="combo"  _gui-text="Screw type">
+                            <item value="1">Knurled</item>
+                            <item value="2">Pan</item>
+                            <item value="3">Phillips</item>
+                        </param>
+                        <param name="panel_screw_radius" type="float" min="1" max="5" default="5" precision="2" _gui-text="Screw dimension">5</param>
+                        <param name="panel_screw_color" type="color" appearance="colorbutton" _gui-text="Screw color" default="#fefefe"></param>
+                        <param name="panel_screw_stroke_color" type="color" appearance="colorbutton" _gui-text="Screw stroke color" default="#fefefe"></param>
+                        <param name="panel_screw_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Screw stroke width">0.3</param>
+                        <!-- <param name="panel_screw_tick_color" type="color" appearance="colorbutton" _gui-text="Screw tick color" default="#fefefe"></param>
+                        <param name="panel_screw_tick_width" type="float" min="1" max="10" default="0.3" precision="2" _gui-text="Screw tick width">0.3</param> -->
+                    <spacer/>
+                    <label appearance="header">UTILITIES</label>
+                    <separator/>
+                    <param name="panel_lasercut" type="boolean" _gui-text="Use lasercut design">false</param>
+                    <spacer/>
+                    <!-- <param name="panel_logo" type="boolean" _gui-text="Use your logo?">false</param> -->
+                </vbox>
+            </hbox>
+        </page>
+        <page name="Knobs" gui-text="KNOBS">
+            <hbox>
+                <vbox>
+                    <label appearance="header" >KNOB DESIGNER</label>
+                    <separator/>
+                    <param name="knob_name" type="string" gui-text="Name"></param>
+                    <spacer/>
+                    <param name="knob_main_style" type="optiongroup" _gui-text="Knob style" default="1">
+                       <option value="1">Regular</option>
+                       <option value="2">Vintage</option>
+                    </param>
+                    
+                    
+                    <separator/>
+                    <!--param name="knob_presets" type="optiongroup" appearance="combo" gui-text="Presets">
+                       <option value="1">Custom</option>
+                       <option value="2">Preset 1</option>
+                       <option value="3">Preset 2</option>
+                       <option value="4">Preset 3</option>
+                       <option value="5">Preset 4</option>
+                       <option value="6">Preset 5</option>
+                       <option value="7">Preset 6</option>
+                       <option value="8">Preset 7</option>
+                    </param-->
+                    
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">COLORS</label>
+                    <separator/>
+                    <param name="knob_main_color" type="color" appearance="colorbutton" _gui-text="Main color" default="#fefefe"></param>
+                    <param name="knob_main_stroke_color" type="color" appearance="colorbutton" _gui-text="Main stroke color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_vintage_color" type="color" appearance="colorbutton" _gui-text="Vintage color" default="#333333"></param>
+                    <param name="knob_vintage_stroke_color" type="color" appearance="colorbutton" _gui-text="Vintage stroke color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_add_skirt" type="boolean" _gui-text="Add Skirt">False</param>
+                    <param name="knob_skirt_color" type="color" appearance="colorbutton" _gui-text="Skirt color" default="#fefefe"></param>
+                    <param name="knob_skirt_stroke_color" type="color" appearance="colorbutton" _gui-text="Skirt stroke color" default="#333333"></param>
+                    <spacer size="expand"/>
+                    
+                    <separator/>
+                    
+                    <param name="knob_tick_color" type="color" appearance="colorbutton" _gui-text="Tick color" default="#333333"></param>
+                    <param name="knob_tick_type" type="optiongroup" gui-text="Tick type">
+                       <option value="1">Line</option>
+                       <option value="2">Dot</option>
+                    </param>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">DIMENSIONS</label>
+                    <separator/>
+                    <param name="knob_main_dimension" type="float" min="4" max="40" default="10" precision="2" _gui-text="Main dimension">10</param>
+                    <param name="knob_main_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Main stroke width" default="#000000">0.5</param>
+                    <separator/>
+                    <param name="knob_vintage_dimension" type="float" min="1" max="40" default="10" precision="2" _gui-text="Vintage dimension">10</param>
+                    <param name="knob_vintage_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Vintage sroke width">0.3</param>
+                    <separator/>
+                    
+                    <param name="knob_skirt_dimension" type="float" min="4" max="40" default="12" precision="1" _gui-text="Skirt dimension">12</param>
+                    <param name="knob_skirt_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Skirt stroke">0.5</param>
+                    <spacer/>
+                    <separator/>
+                    <param name="knob_tick_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Tick width" default="#000000">0.5</param>
+                    <param name="knob_tick_lenght" type="float" min="0" max="40" default="5.5" precision="1" _gui-text="Tick leght/position" default="#000000">5.5</param>
+
+                </vbox>
+            </hbox>
+        </page>
+        <page name="Knob_Scale" gui-text="KNOB SCALE">
+            <hbox>
+                <vbox>
+                    <label appearance="header">ARC</label>
+                    <param name="knob_scale_arc_color" type="color" appearance="colorbutton" _gui-text="Arc color" default="#333333"></param>
+
+                    <separator/>
+                    <param name="knob_scale_add_arc" type="boolean" _gui-text="Draw arc">True</param>
+                    <param indent="1" name="knob_scale_add_outer_arc" type="boolean" _gui-text="Draw outer arc">False</param>
+                    
+                    <param name="knob_scale_outer_arc_offset" type="float" min="-10" max="10" default="0.5" precision="2" _gui-text="Outer arc offset" >0.5</param>
+                    <param name="knob_scale_arc_width" type="float" min="0" max="10" default="0.5" precision="1" _gui-text="Arc line width">0.5</param>
+                    <param name="knob_scale_arc_radius" type="float" min="0" max="40" default="1" precision="1" _gui-text="Scale radius">10</param>
+                    <param name="knob_scale_arc_angle" type="int" min="-360" max="360" default="135" precision="1" _gui-text="Angle">45</param> 
+                    <param name="knob_scale_arc_rotation" type="int" min="-360" max="360" default="45" precision="1" _gui-text="Rotation">145</param>  
+                    <param name="knob_scale_arc_angle_offset" type="float" min="-360" max="360" default="1" precision="3" _gui-text="Arc angle offset">10</param>
+                    <param name="knob_scale_outer_arc_angle_offset" type="float" min="-360" max="360" default="1" precision="3" _gui-text="Outer arc angle offset">10</param>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">TICKS</label>
+                    <param name="knob_scale_ticks_color" type="color" appearance="colorbutton" _gui-text="Ticks color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_scale_add_ticks" type="boolean" _gui-text="Add ticks">False</param>
+                    <param name="knob_scale_inner_ticks" type="boolean" _gui-text="Inner ticks">False</param>
+                    <param name="knob_scale_ticks_type" type="optiongroup" gui-text="Ticks type">
+                       <option value="1">Marks</option>
+                       <option value="2">Dots</option>
+                    </param>
+                    <spacer/>
+                    <param name="knob_scale_ticks_number" type="int" min="2" max="360" default="10" precision="1" _gui-text="Number of tick">10</param>
+                    <param name="knob_scale_ticks_lenght" type="float" min="0" max="20" default="1" precision="2" _gui-text="Ticks lenght/radius">2</param>
+                    <param name="knob_scale_ticks_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Ticks width">2</param>
+                    <param name="knob_scale_ticks_accent_number" type="int" min="0" max="360" default="0" precision="1" _gui-text="Accent every x ticks">2</param>
+                    <param name="Knob_scale_ticks_accent_lenght" type="float" min="0" max="20" default="1" precision="2" _gui-text="Accent lenght">1</param>
+                    <param name="knob_scale_ticks_accent_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Accent width">2</param>
+                    <param name="knob_scale_ticks_offset" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Ticks offset">0</param>
+
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header" >SUBTICKS</label>
+                    <param name="knob_scale_subticks_color" type="color" appearance="colorbutton" _gui-text="Subticks color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_scale_add_subticks" type="boolean" _gui-text="Add subticks">False</param>
+                    <param name="knob_scale_subticks_type" type="optiongroup" gui-text="Subticks type" appearance="radio">
+                       <option value="1">Marks</option>
+                       <option value="2">Dots</option>
+                    </param>
+                    <spacer/>
+                    <param name="knob_scale_subticks_number" type="int" min="1" max="360" default="0" precision="1" _gui-text="Number of subticks">1</param>
+                    <param name="knob_scale_subticks_lenght" type="float" min="0.1" max="20" default="1" precision="2" _gui-text="Subticks lenght/radius">1</param>
+                    <param name="knob_scale_subticks_width" type="float" min="0.1" max="10" default="1" precision="2" _gui-text="Subticks width">1</param>
+                    <param name="knob_scale_subticks_offset" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Subticks offset">0</param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">LABELS</label>
+                    <param name="knob_scale_label_color" type="color" appearance="colorbutton" _gui-text="Label color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
+                    <param name="knob_scale_label_start_number" type="float" min="-9999" max="10000" default="1" precision="1" _gui-text="Start value">1</param>
+                    <param name="knob_scale_label_end_number" type="float" min="-99999" default="10" max="10000" precision="1" _gui-text="End value">10</param>
+                    <param name="knob_scale_label_rounding_float" type="int" min="0" max="3" default="0" precision="1" _gui-text="Rounding float">0</param>
+                    <param name="knob_scale_label_leftright" type="boolean" _gui-text="Left/Right">false</param>
+                    <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
+                    <param name="knob_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label size">10</param>
+                    <param name="knob_scale_label_offset" type="float" min="-10" max="10" default="1" precision="2" _gui-text="Label offset">10</param>
+                    <param name="knob_scale_label_add_suffix" type="string" gui-text="Label suffix"></param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">UTILITIES</label> 
+                    <param name="knob_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
+                    <separator/>
+                    <param name="knob_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
+                    <param name="knob_scale_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
+                        <option value="2">Cross</option>
+                        <option value="3">Dot</option>
+                        <option value="4">Circle</option>
+                    </param>
+                    <param name="knob_scale_utilities_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="knob_scale_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <separator/>
+                    <param name="knob_scale_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
+                    <separator/>
+                    <!-- <param name="knob_scale_linlog" type="optiongroup" _gui-text="Lin/log" appearance="radio">
+                        <option value="1">Lin</option>
+                        <option value="2">Log</option>
+                    </param> -->
+                </vbox>
+            </hbox>
+        </page>
+        <page name="Sliders" gui-text="SLIDERS">
+            <hbox>
+                <vbox>
+                    <label appearance="header">SLIDER DESIGNER</label>
+                    <separator/>
+                    <param name="slider_name" type="string" gui-text="Name"></param>
+                    <spacer/>
+                    
+                    <param name="slider_orientation" type="optiongroup" gui-text="Orientation">
+                       <option value="1">Vertical</option>
+                       <option value="2">Horizontal</option>
+                    </param>
+                    <separator/>
+                    <!--param name="slider_presets" type="optiongroup" appearance="combo" gui-text="Presets">
+                       <option value="1">Custom</option>
+                       <option value="2">Preset 1</option>
+                       <option value="3">Preset 2</option>
+                       <option value="4">Preset 3</option>
+                       <option value="5">Preset 4</option>
+                       <option value="6">Preset 5</option>
+                       <option value="7">Preset 6</option>
+                       <option value="8">Preset 7</option>
+                    </param-->
+                    
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">COLORS</label>
+                    <separator/>
+                    <param name="slider_coarse_color" type="color" appearance="colorbutton" _gui-text="Coarse color" default="#fefefe"></param>
+                    <param name="slider_coarse_stroke_color" type="color" appearance="colorbutton" _gui-text="Coarse stroke color" default="#333333"></param>
+                    <spacer/>
+                    <spacer/>
+                    <spacer/>
+                    <spacer/>
+                    <separator/>
+                    <spacer/>
+                    <param name="slider_cursor_color" type="color" appearance="colorbutton" _gui-text="Cursor color" default="#333333"></param>
+                    <param name="slider_cursor_stroke_color" type="color" appearance="colorbutton" _gui-text="Cursor stroke color" default="#333333"></param>
+                    <param name="slider_cursor_type" type="optiongroup" gui-text="Cursor type">
+                       <option value="1">Dot</option>
+                       <option value="2">Rectangle</option>
+                    </param>
+
+                    <spacer/>
+
+                    <separator/>
+                    <param name="slider_cursor_tick_color" type="color" appearance="colorbutton" _gui-text="Cursor tick color" default="#333333"></param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">DIMENSIONS</label>
+                    <separator/>
+                     <param name="slider_coarse_lenght" type="float" min="1" max="120" default="60" precision="2" _gui-text="Coarse">60</param>
+                     <param name="slider_coarse_gap" type="float" min="1" max="120" default="60" precision="2" _gui-text="Gap">6</param>
+                     <param name="slider_coarse_stroke_width" type="float" min="0" max="5" default="1" precision="1" _gui-text="Coarse stroke width" default="#000000">1</param>
+                     <param name="slider_coarse_round_edges" type="boolean" _gui-text="Round the edges">false</param>
+
+                    <separator/>
+                     <param name="slider_cursor_height" type="float" min="1" max="40" default="6" precision="2" _gui-text="Cursor height">6</param>
+                     <param name="slider_cursor_width" type="float" min="1" max="40" default="12" precision="2" _gui-text="Cursor width/radius">12</param>
+                     <param name="slider_cursor_stroke_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Cursor Stroke width">1</param>
+                     <param name="slider_cursor_round_edges" type="float" _gui-text="Round the cursor edges" min="0" precision="2" default="0">0</param>
+                     <spacer />
+                     <spacer />
+                     <separator/>
+                     <param name="slider_cursor_tick_width" type="float" min="0" max="120" default="1" precision="2" _gui-text="Cursor tick width">0.5</param>
+                </vbox>
+            </hbox>
+            <spacer />
+        </page>
+        <page name="Slider_Scale" gui-text="SLIDER SCALE">
+            <hbox>
+                <vbox>
+                    <label appearance="header">SCALE</label>
+                    <separator/>
+                    <param name="slider_scale_position" default="3" type="optiongroup" appearance="combo" gui-text="Position">
+                       <option value="1">Left/Top</option>
+                       <option value="2">Right/Bottom</option>
+                       <option value="3">Both</option>
+                    </param>
+
+                    <param name="slider_scale_h_offset" type="float" min="0" max="30" default="10" precision="2" _gui-text="H offset">10</param>
+                    <param name="slider_scale_v_offset" type="float" min="0" max="10" default="4" precision="2" _gui-text="V offset">4</param>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">TICKS</label>
+                    <param name="slider_scale_tick_color" type="color" appearance="colorbutton" _gui-text="Ticks color" default="#333333"></param>
+                    <separator/>
+                    <param name="slider_scale_ticks_number" type="int" min="2" max="999" default="10" precision="2" _gui-text="Number of ticks">10</param>
+                    <param name="slider_scale_ticks_start_size" type="float" min="0.1" max="2" default="1" precision="1" _gui-text="Ticks start size">2</param>
+                    <param name="slider_scale_ticks_end_size" type="float" min="0" max="2" default="1" precision="1" _gui-text="Ticks end size">2</param>
+                    <param name="slider_scale_ticks_start_lenght" type="float" min="0.1" max="999" default="1" precision="1" _gui-text="Ticks start lenght">2</param>
+                    <param name="slider_scale_ticks_end_lenght" type="float" min="0" max="999" default="1" precision="1" _gui-text="Ticks end lenght">2</param>
+                    <spacer/>
+                    <label appearance="header">LINE</label>
+                    <separator/>
+                    <param name="slider_scale_add_perpendicular_line" type="boolean" _gui-text="Add perpendicular line">False</param>
+                    <param name="slider_scale_perpendicular_line_width" type="float" min="0.1" max="20" default="0.2" precision="1" _gui-text="Perpendicular line width">0.2</param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">SUBTICKS</label>
+                    <param name="slider_scale_subtick_color" type="color" appearance="colorbutton" _gui-text="Subticks color" default="#333333"></param>
+                    <separator/>
+                    <param name="slider_scale_add_subticks" type="boolean" _gui-text="Add subticks">False</param>
+                    <param name="slider_scale_subticks_number" type="int" min="1" max="100" default="0" precision="1" _gui-text="Number of subticks">1</param>
+                    <param name="slider_scale_subticks_size" type="float" min="0.1" max="20" default="1" precision="1" _gui-text="Subticks size">1</param>
+                    <param name="slider_scale_subtick_lenght" type="float" min="0.1" max="20" default="1" precision="1" _gui-text="Subticks lenght">2</param>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">LABELS</label>
+                    <param name="slider_scale_label_color" type="color" appearance="colorbutton" _gui-text="Label color" default="#333333"></param>
+                    <separator/>
+                    <param name="slider_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
+                    <param name="slider_scale_label_start" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Start value">1</param>
+                    <param name="slider_scale_label_end" type="float" min="-999" default="10" max="999" precision="2" _gui-text="End value">10</param>
+                    <param name="slider_scale_label_rounding_float" type="int" min="0" max="3" default="1" precision="1" _gui-text="Rounding float">1</param>
+                    <param name="slider_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
+                    <param name="slider_scale_label_position" default="3" type="optiongroup" appearance="combo" gui-text="Label position">
+                       <option value="1">Left</option>
+                       <option value="2">Right</option>
+                       <option value="3">Both</option>
+                    </param>
+                    <param name="slider_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label font size">1</param>
+                    <param name="slider_scale_label_offset_tl" type="float" min="-10" max="30" default="1" precision="2" _gui-text="Label offset Left/Top">0</param>
+                    <param name="slider_scale_label_offset_br" type="float" min="-10" max="30" default="1" precision="2" _gui-text="Label offset Right/Bottom">0</param>
+                    <param name="slider_scale_label_offset_adj" type="float" min="-10" max="30" default="1" precision="2" _gui-text="Label fine positioning">0</param>
+                    <param name="slider_scale_label_add_suffix" type="string" gui-text="Label suffix"></param>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">UTILITIES</label> 
+                    <param name="slider_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
+                    <separator/>
+                    <param name="slider_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
+                    <!-- <param name="slider_scale_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
+                        <option value="2">Cross</option>
+                        <option value="3">Dot</option>
+                        <option value="4">Contour</option>
+                    </param> -->
+                    <param name="slider_scale_utilities_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <separator/>
+                    <param name="slider_scale_utilities_guide_round_edges" type="boolean" _gui-text="Round the edges">false</param>
+                    <!-- <param name="slider_scale_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param> -->
+                    <separator/>
+                    <!-- <param name="slider_scale_linlog" type="optiongroup" _gui-text="Lin/log" appearance="radio">
+                        <option value="1">Lin</option>
+                        <option value="2">Log</option>
+                    </param> -->
+                </vbox>
+            </hbox>
+        </page>
+        <page name="About" gui-text="About">
+            <label appearance="header" xml:space="preserve">Need help? Check our website</label>
+            <label indent="1" appearance="url">https://synthpanels.design</label>
+            <spacer/>
+             
+            
+            <label appearance="header">SPONSORED BY</label>
+            <separator/>
+            <hbox>
+                <vbox>
+                    <label appearance="header">SOUNDMIT - ITALIAN SNTHS and PEDALS EXPO (since 2011)</label>
+                    <label appearance="url">https://soundmit.com</label>
+                    <image>SynthPanelsDesign/assets/sm_logo.svg</image>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">FASELUNARE</label>
+                    <label appearance="url">https://faselunare.com</label>
+                    <image>SynthPanelsDesign/assets/fl_logo.svg</image>
+                    <spacer/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+            </hbox>
+        </page>
+
+
+</param>
+    <effect>
+        <object-type>all</object-type>
+        <effects-menu>
+            <submenu _name="Render"/>
+        </effects-menu>
+    </effect>
+
+  <script>
+    <command reldir="extensions" interpreter="python">SynthPanelsDesign/SynthPanelsDesign.py</command>
+  </script>
+</inkscape-extension>
