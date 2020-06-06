@@ -46,18 +46,30 @@
                         <item value="e1uij">Eurorack - 1U - IJ</item>
                         <item value="e1upl">Eurorack - 1U - PL</item>
                         <item value="vcv">VCV Rack</item>
-                        <item value="m5u">Moog - 5U</item>
+                        <item value="m5u">Moog</item>
+                        <item value="d5u">Dotcom</item>
+                        <item value="buchla">Buchla</item>
+                        <item value="serge">Serge</item>
+                        <item value="lw">Loudest Warning</item>
+                        <item value="fracrack">Fracrack</item>
                         <item value="api">API 500</item>
+                        <item value="nineteen">19-inch Standard</item>
+                        <item value="hammond">Common Pedals enclosure</item>
                         <item value="custom">Custom</item>
                     </param>
                 <separator/>
                      <label xml:space="preserve">
+- All product names, logos, and brands are property of their respective owners.
 - Eurorack 1U - IJ = Intellijel standard
 - Eurorack 1U - PL = Pulp Logic standard
                     </label>
+                    
                     <spacer/>
                     <separator/>
-                    <param name="panel_color" type="color" appearance="colorbutton" _gui-text="Color" default="#e6e6e6"></param>
+                    <param name="panel_name" type="string"  translatable="no" gui-text="Name"></param>
+                    <spacer/>
+                    <separator/>
+                    <param name="panel_color" type="color" appearance="colorbutton" translatable="no" gui-text="Color" default="#e6e6e6"></param>
                    
                     </vbox>
                     <spacer/>
@@ -66,42 +78,68 @@
                     <vbox>
                     <label appearance="header"  gui-description="Set the panel dimensions!">DIMENSIONS</label>
                     <separator/>
-                    <label appearance="header">Eurorack</label>
+                    <label appearance="header">Eurorack / VCVRack</label>
                     <param name="eurorack_panel_hp" type="int" min="2" max="72"  _gui-text="HP">4</param>
-                    <!-- <param name="eurorack_panel_hp" type="optiongroup" appearance="combo" _gui-text="HP">
-                        <item value="9.80">2</item>
-                        <item value="20.00">4</item>
-                        <item value="30.00">6</item>
-                        <item value="40.30">8</item>
-                        <item value="50.50">10</item>
-                        <item value="60.60">12</item>
-                        <item value="70.80">14</item>
-                        <item value="80.90">16</item>
-                        <item value="91.30">18</item>
-                        <item value="101.30">20</item>
-                        <item value="160.30">21</item>
-                        <item value="111.40">22</item>
-                        <item value="141.90">28</item>
-                        <item value="213.00">42</item>
-                    </param> -->
                     <separator/>
-                    <label appearance="header">MOOG</label>
-                    <param name="moog_panel_units" type="optiongroup" appearance="combo" min="2" max="104" _gui-text="MU">
-                        <item value="1">Single</item>
-                        <item value="2">Double</item>
-                        <item value="4">Quad</item>
-                        <item value="8">Octal</item>
+                    
+                    <label appearance="header">Moog / Dotcom</label>
+                    <param name="moog_panel_units" type="optiongroup" appearance="combo" min="2" max="104" translatable="no" gui-text="Units">
+                        <item value="1" translatable="no">Single</item>
+                        <item value="2" translatable="no">Double</item>
+                        <item value="4" translatable="no">Quad</item>
+                        <item value="8" translatable="no">Octal</item>
                     </param>
                     <separator/>
-                    <label appearance="header">API 500</label>
-                    <param name="api_panel_units" type="int" min="1" max="104" _gui-text="Units">1</param>
+                    
+                    <label appearance="header">Buchla / Serge / Loudest Warning</label>
+                    <param name="lw_panel_units" type="int" min="1" max="104" translatable="no" gui-text="Units">1</param>
                     <separator/>
-                    <label appearance="header">Custom</label>
-                    <param name="panel_custom_width" type="float" min="1" max="10000" default="10" precision="2" _gui-text="Width">10</param>
-                    <param name="panel_custom_height" type="float" min="1" max="10000" default="10" precision="2" _gui-text="Height">10</param>
+                    <label appearance="header">FracRack</label>
+                    <param name="fracrack_panel_units" type="optiongroup" appearance="combo" min="1" max="3"  translatable="no" gui-text="Places">
+                        <item value="1" translatable="no">2</item>
+                        <item value="2" translatable="no">4</item>
+                        <item value="3" translatable="no">6</item>
+                    </param>
+                    <separator/>
+                </vbox>
+                <spacer/>
+                    <separator/>
+                    <spacer/>
+                    <vbox>
+                    <spacer/>
+                    <label appearance="header">API500</label>
+                    <param name="api_panel_units" type="int" min="1" max="104" translatable="no" gui-text="Units">1</param>
+                    <separator/>
+                    <label appearance="header">19-inch Rack</label>
+                    <param name="nineteen_panel_units" type="int" min="1" max="104" translatable="no" gui-text="Units">1</param>
+                    <separator/>
+
+                  
+                    <label appearance="header">Common Pedals enclosure</label>
+                    <param name="hammond_panel_units" type="optiongroup" appearance="combo" min="1" max="200"  translatable="no" gui-text="Model">
+                        <item value="1" translatable="no">1590LB - 51x51</item>
+                        <item value="2" translatable="no">1590A - 39x93</item>
+                        <item value="3" translatable="no">1590B - 60x112</item>
+                        <item value="4" translatable="no">1590N1 - 66x121</item>
+                        <item value="5" translatable="no">1590YBK - 92x92</item>
+                        <item value="6" translatable="no">99x112</item>
+                        <item value="7" translatable="no">108x108</item>
+                        <item value="8" translatable="no">114x114</item>
+                        <item value="9" translatable="no">118x133</item>
+                        <item value="10" translatable="no">1590BB - 119x94</item>
+                        <item value="11" translatable="no">145x95</item>
+                        <item value="12" translatable="no">170x138</item>
+                        <item value="13" translatable="no">171x130</item>
+                        <item value="14" translatable="no">190x122</item>
+                    </param>
+                    <separator/>
+                    <label appearance="header" translatable="no">Custom</label>
+                    <param name="panel_custom_width" type="float" min="1" max="10000" default="10" precision="2" translatable="no" gui-text="Width">10</param>
+                    <param name="panel_custom_height" type="float" min="1" max="10000" default="10" precision="2" translatable="no" gui-text="Height">10</param>
                 </vbox>
                 <spacer/>
                 <separator/>
+               
                 <spacer/>
                 <vbox>
                     <label appearance="header">MOUNTING HOLES</label>
@@ -117,7 +155,7 @@
                         </vbox>
                     </hbox>
                     <spacer/>
-                    <label appearance="header">SCREWS</label>
+                    <label appearance="header">SCREWS for VCVRack</label>
                     <separator/>
                         <param name="panel_screws" type="boolean" _gui-text="Add screws">false</param>
                         <param name="panel_screw_type" type="optiongroup" appearance="combo"  _gui-text="Screw type">
@@ -331,17 +369,6 @@
                        <option value="2">Horizontal</option>
                     </param>
                     <separator/>
-                    <!--param name="slider_presets" type="optiongroup" appearance="combo" gui-text="Presets">
-                       <option value="1">Custom</option>
-                       <option value="2">Preset 1</option>
-                       <option value="3">Preset 2</option>
-                       <option value="4">Preset 3</option>
-                       <option value="5">Preset 4</option>
-                       <option value="6">Preset 5</option>
-                       <option value="7">Preset 6</option>
-                       <option value="8">Preset 7</option>
-                    </param-->
-                    
                 </vbox>
                 <spacer/>
                 <separator/>

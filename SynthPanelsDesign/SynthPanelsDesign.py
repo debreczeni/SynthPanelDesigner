@@ -43,20 +43,28 @@ class SynthPanelEffect(inkex.Effect):
         #Parts
         pars.add_argument('--part', type=int, default=1, help='Select which part you want to draw')
 
-        #Panel
+        #Panel standards
         pars.add_argument('--panel_type', default='e3u', help='Panel type')
+        pars.add_argument('--panel_name', default='Panel', help='Panel name')
         pars.add_argument('--eurorack_panel_hp', type=int, default=1, help='Panel HP?')
         pars.add_argument('--api_panel_units', type=int, default=1, help='API Units?')
         pars.add_argument('--moog_panel_units', type=int, default=1, help='Moog Units?')
+        pars.add_argument('--nineteen_panel_units', type=int, default=1, help='19inch Units?')
+        pars.add_argument('--lw_panel_units', type=int, default=1, help='Loudest Warning Units?')
+        pars.add_argument('--hammond_panel_units', type=int, default=1, help='Hammond Units?')
+        pars.add_argument('--fracrack_panel_units', type=int, default=1, help='Frackrack Units?')
+
+        #panel color
         pars.add_argument('--panel_color', type=inkex.Color, default='#e6e6e6', help='Panel color')
 
+        #panel custom dimension
         pars.add_argument('--panel_custom_width', type=float, default='100', help='Set the panel custom width')
         pars.add_argument('--panel_custom_height', type=float, default='100', help='Set the panel custom height')
 
+        #panel utility
         pars.add_argument('--panel_holes', type=inkex.Boolean, default='False', help='Want do drill the mounting holes?')
         pars.add_argument('--panel_centers', type=inkex.Boolean, default='False', help='Mark centers?')
         pars.add_argument('--panel_oval', type=inkex.Boolean, default='False', help='Oval holes?')
-
         pars.add_argument('--panel_lasercut', type=inkex.Boolean, default='False', help='Lasercut style?')
         
         #Screws
@@ -68,8 +76,6 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--panel_screw_stroke_width', type=float, default='100', help='Screw stroke width')
         pars.add_argument('--panel_screw_tick_color', type=inkex.Color, default='#e6e6e6', help='Screw tick color')
         pars.add_argument('--panel_screw_tick_width', type=float, default='100', help='Screw tick width')
-
-        # pars.add_argument('--panel_logo', type=inkex.Boolean, default='True', help='Use your logo?')
 
         #UI
         #KNOBS
@@ -190,8 +196,6 @@ class SynthPanelEffect(inkex.Effect):
 
 
         #SLIDER SCALES
-        #pars.add_argument('--slider_addticks', type=inkex.Boolean, default='False', help='Add scale')
-        #pars.add_argument('--slider_scale_orientation_style', type=int, default='1', help='Orientation')
         pars.add_argument('--slider_scale_position', type=int, default='1', help='Position')
         pars.add_argument('--slider_scale_h_offset', type=float, default='1', help='H offset')
         pars.add_argument('--slider_scale_v_offset', type=float, default='1', help='V offset')
@@ -240,7 +244,6 @@ class SynthPanelEffect(inkex.Effect):
         """ pars.add_argument('--slider_scale_utilities_guide_dimension', type=float, default='10', help='Guide dimension') """
         pars.add_argument('--slider_scale_utilities_guide_round_edges', type=inkex.Boolean, default='False', help='Round guide edges')
 
-
         #Settings
         pars.add_argument('--author', help='Author name')
         pars.add_argument('--brand', help='Company name')
@@ -261,161 +264,106 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--uitab')
 
     def draw_rectangle(self, w, h, x, y, rx, ry):
-        rect = Rectangle(x=str(x), y=str(y), width=str(w), height=str(h), rx=str(rx), ry=str(ry))
+        rect = Rectangle(
+            x=str(x), y=str(y), width=str(w), height=str(h), rx=str(rx), ry=str(ry)
+        )
         return rect
 
-    def draw_circle(self, x, y, radius):
-        circ = inkex.PathElement()
-        circ.set('sodipodi:type', 'arc')
-        circ.set('sodipodi:cx', x)
-        circ.set('sodipodi:cy', y)
-        circ.set('sodipodi:rx', radius)
-        circ.set('sodipodi:ry', radius)
+    def draw_circle(self, x, y, radius, mark_angle, mark_length):
+        cx = x + radius * cos(mark_angle)
+        cy = y + radius * sin(mark_angle)
+        r = mark_length / 2.0
+        circ = PathElement.arc((cx, cy), r)
         return circ
 
     def draw_vintage_circle(self, x, y, radius, radius2, sides):
-
         circ = inkex.PathElement()
-        circ.set('sodipodi:type', 'star')
-        circ.set('sodipodi:cx', x)
-        circ.set('sodipodi:cy', y)
-        circ.set('sodipodi:arg1', 0.85)
-        circ.set('sodipodi:arg2', 1.3)
-        circ.set('inkscape:rounded', 0.5)
-        circ.set('sodipodi:sides', sides)
-        circ.set('sodipodi:r1', radius)
-        circ.set('sodipodi:r2', radius2)
+        circ.set("sodipodi:type", "star")
+        circ.set("sodipodi:cx", x)
+        circ.set("sodipodi:cy", y)
+        circ.set("sodipodi:arg1", 0.85)
+        circ.set("sodipodi:arg2", 1.3)
+        circ.set("inkscape:rounded", 0.5)
+        circ.set("sodipodi:sides", sides)
+        circ.set("sodipodi:r1", radius)
+        circ.set("sodipodi:r2", radius2)
         return circ
 
     def draw_knurled_screw(self, x, y, radius, radius2, sides):
-
         knurled = inkex.PathElement()
-        knurled.set('sodipodi:type', 'star')
-        knurled.set('sodipodi:cx', x)
-        knurled.set('sodipodi:cy', y)
-        knurled.set('sodipodi:arg1', 0.78539816)
-        knurled.set('sodipodi:arg2', 0.84823001)
-        knurled.set('inkscape:rounded', 0)
-        knurled.set('sodipodi:sides', sides)
-        knurled.set('sodipodi:r1', radius)
-        knurled.set('sodipodi:r2', radius2)
+        knurled.set("sodipodi:type", "star")
+        knurled.set("sodipodi:cx", x)
+        knurled.set("sodipodi:cy", y)
+        knurled.set("sodipodi:arg1", 0.78539816)
+        knurled.set("sodipodi:arg2", 0.84823001)
+        knurled.set("inkscape:rounded", 0)
+        knurled.set("sodipodi:sides", sides)
+        knurled.set("sodipodi:r1", radius)
+        knurled.set("sodipodi:r2", radius2)
         return knurled
+
+    def draw_line_mark(self, x, y, radius, mark_angle, mark_length):
+        x1 = x + radius * cos(mark_angle)
+        y1 = y + radius * sin(mark_angle)
+        x2 = x + (radius + mark_length) * cos(mark_angle)
+        y2 = y + (radius + mark_length) * sin(mark_angle)
+
+        line = inkex.PathElement()
+        line.path = "M {},{} L {},{}".format(x1, y1, x2, y2)
+        return line
 
     def draw_line(self, x1, y1, x2, y2):
         line = inkex.PathElement()
-        line.path = 'M {},{} L {},{}'.format(x1, y1, x2, y2)
+        line.path = "M {},{} L {},{}".format(x1, y1, x2, y2)
         return line
 
-    def draw_knob_scale_arc(self, x, y, angle, radius):
-        end = (angle - pi)/2.0
-        start = pi - end
-
-        arc = inkex.PathElement()
-        arc.set('sodipodi:type', 'arc')
-        arc.set('sodipodi:cx', x)
-        arc.set('sodipodi:cy', y)
-        arc.set('sodipodi:rx', radius)
-        arc.set('sodipodi:ry', radius)
-        arc.set('sodipodi:start', start)
-        arc.set('sodipodi:end', end)
-        arc.set('sodipodi:open', True)
-        return arc
-
-    def draw_knob_scale_arc_complex(self, x, y, angle, rotation, radius):
-
-        end = ((angle + rotation - pi)/2.0)
-        start = (pi - end + rotation)
-     
-
-        arc = inkex.PathElement()
-        arc.set('sodipodi:type', 'arc')
-        arc.set('sodipodi:cx', x)
-        arc.set('sodipodi:cy', y)
-        arc.set('sodipodi:rx', radius)
-        arc.set('sodipodi:ry', radius)
-        arc.set('sodipodi:start', start)
-        arc.set('sodipodi:end', end)
-        arc.set('sodipodi:open', True)
+    def draw_knob_scale_arc(self, cx, cy, angle, rotation, radius):
+        end = (angle + rotation - pi) / 2.0
+        start = pi - end + rotation
+        arc = PathElement.arc((cx, cy), radius, start=start, end=end, open=True)
         return arc
 
     def draw_text(self, x, y, textvalue, radius, angular_position, text_size):
-
         # Create text element
         text = TextElement()
         text.text = textvalue
-
         # Set text position to center of document.
-        text.set('x', str(x + radius*cos(angular_position)))
-        text.set('y', str(y + radius*sin(angular_position) + text_size/2))
-
+        text.set("x", str(x + radius * cos(angular_position)))
+        text.set("y", str(y + radius * sin(angular_position) + text_size / 2))
         return text
-    
+
     def draw_slider_text(self, x, y, textvalue, text_size):
-
         # Create text element
         text = TextElement()
         text.text = textvalue
-
         # Set text position to center of document.
-        text.set('x', str(x))
-        text.set('y', str(y + text_size/2))
-
-        return text
-    
-    def draw_debug_text(self, x, y, textvalue):
-
-        # Create text element
-        text = TextElement()
-        text.text = textvalue
-
-        # Set text position to center of document.
-        text.set('x', str(x))
-        text.set('y', str(y))
-        
-        text.style['text-align'] ='center'
-        text.style['text-anchor'] = 'middle'
-        text.style['alignment-baseline'] = 'center'
-        text.style['vertical-align'] = 'middle'
-        text.style['font-size'] = '3'
-        text.style['color'] = '#ff0000'
-
+        text.set("x", str(x))
+        text.set("y", str(y + text_size / 2))
         return text
 
-    def draw_circle_mark(self, x, y, radius, mark_angle, mark_length):
-        cx = x + radius*cos(mark_angle)
-        cy = y + radius*sin(mark_angle)
-        r = mark_length / 2.0
+   
 
-        circ = inkex.PathElement()
-        circ.set('sodipodi:type', 'arc')
-        circ.set('sodipodi:cx', cx)
-        circ.set('sodipodi:cy', cy)
-        circ.set('sodipodi:rx', r)
-        circ.set('sodipodi:ry', r)
-        return circ
-
-    def draw_line_mark(self, x, y, radius, mark_angle, mark_length):
-        x1 = x + radius*cos(mark_angle)
-        y1 = y + radius*sin(mark_angle)
-        x2 = x + (radius + mark_length)*cos(mark_angle)
-        y2 = y + (radius + mark_length)*sin(mark_angle)
-
-        line = inkex.PathElement()
-        line.path = 'M {},{} L {},{}'.format(x1, y1, x2, y2)
-        return line
 
     def effect(self):
         euro_hp = self.options.eurorack_panel_hp
         api_units = self.options.api_panel_units
+        moog_units = {1: 53.721, 2: 107.696, 4: 215.646, 8: 431.546}[
+            self.options.moog_panel_units
+        ]
+        fracrack_units = {1: 38.1, 2: 76.3, 3: 114.3}[
+            self.options.fracrack_panel_units
+        ]
 
-        if self.options.moog_panel_units == 1:              #single
-            moog_units = 53.721 
-        elif self.options.moog_panel_units == 2:            #double
-            moog_units = 107.696
-        elif self.options.moog_panel_units == 4:            #quad
-            moog_units = 215.646    
-        elif self.options.moog_panel_units == 8:            #octal
-            moog_units = 431.546
+        hammond_units_width = {1: 51, 2: 39, 3: 60, 4: 66, 5: 92 , 6: 99, 7: 108, 8: 114, 9: 118, 10: 119, 11: 145, 12: 170, 13: 131, 14: 190 }[
+            self.options.hammond_panel_units
+        ]
+
+        hammond_units_height = {1: 51, 2: 93, 3: 112, 4: 121, 5: 92, 6: 112, 7: 108, 8: 114, 9: 133, 10: 94, 11: 95, 12: 138, 13: 130, 14: 122 }[
+            self.options.hammond_panel_units
+        ]
+
+        nineteen_units = self.options.nineteen_panel_units
+        lw_units = self.options.lw_panel_units
 
         oval = self.options.panel_oval
         centers = self.options.panel_centers
@@ -456,9 +404,37 @@ class SynthPanelEffect(inkex.Effect):
             #MOOG UNIT 5U
             #https://www.dsl-man.de/display/FRONTPANELS/5U+Format+specifications
 
-            elif self.options.panel_type == "m5u":
+            elif self.options.panel_type == "m5u" or self.options.panel_type == "d5u":
                 height = 222.25
                 width  = moog_units
+            
+            # Draw  19-inch standard
+            # https://sdiy.info/w/index.php?title=19-inch_rack
+
+            elif self.options.panel_type == "nineteen":
+                height = nineteen_units * 44.50
+                width = 482.60
+
+            # Draw  Loudest Warning standard
+            # http://www.loudestwarning.co.uk/portfolio/4u-modular-specs/
+
+            elif self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" :
+                height = 175
+                width = lw_units * 25.4 #25.4 correspond to 1 inch, real panels are "few tenths of a mm less..."
+
+            # Draw  Fracrack standard
+            # https://www.paia.com/fracrak.asp
+
+            elif self.options.panel_type == "fracrack" :
+                height = 133.35
+                width = fracrack_units
+
+            # Draw  Hammond standard
+            # https://www.guitarpedalx.com/news/gpx-blog/the-key-pedal-enclosure-sizes-you-are-most-likely-to-encounter
+
+            elif self.options.panel_type == "hammond" :
+                height = hammond_units_height
+                width = hammond_units_width
             
             #custom
             
@@ -473,8 +449,10 @@ class SynthPanelEffect(inkex.Effect):
             pwidth =  width * unitfactor
 
             # New panel group
-            panel_group = self.svg.add(inkex.Group.new('Panel Group'))
+            #panel_group = self.svg.add(inkex.Group.new('Panel Group'))
 
+            panel_group = self.svg.add(inkex.Group.new(self.options.panel_name))
+    
             # Panel sub layer
             panel_layer = panel_group.add(inkex.Layer.new('Panel'))  #panel
 
@@ -516,6 +494,13 @@ class SynthPanelEffect(inkex.Effect):
             self.svg.set('height', str(ph))
             self.svg.set('viewBox', '{} {} {} {}'.format(0,0,str(pwidth),str(pheight)))
 
+            #define
+            TopHoles = 0
+            BottomHoles = 0
+            LeftHoles = 0
+            RightHoles = 0
+            HoleRadius = 0
+
             # Draw  Eurorack and VCV Holes
             # http://www.doepfer.de/a100_man/a100m_e.htm
             if self.options.panel_type == "e1uij" or self.options.panel_type == "e3u" or self.options.panel_type == "vcv"  :
@@ -555,14 +540,50 @@ class SynthPanelEffect(inkex.Effect):
 
             # Draw  Moog Holes
             # https://www.dsl-man.de/display/FRONTPANELS/5U+Format+specifications
-            elif self.options.panel_type == "m5u":
+            elif self.options.panel_type == "m5u" or self.options.panel_type == "d5u":
                 TopHoles = 4.445
                 BottomHoles = height - 4.445
                 LeftHoles = 26.86
                 RightHoles = self.options.moog_panel_units * 53.975 - 53.975/2
                 HoleRadius = 2.159
 
-            if self.options.panel_type != "custom":
+            # Draw  Loudest Warning Holes
+            # http://www.loudestwarning.co.uk/portfolio/4u-modular-specs/
+            elif self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" :
+                TopHoles = 3
+                BottomHoles = height - 3
+                LeftHoles = 12.7
+                RightHoles = self.options.lw_panel_units * 25.4 - 12.7
+                HoleRadius = 1.6
+
+            # Draw  FracRack Holes
+            # https://www.paia.com/fracrak.asp
+            elif self.options.panel_type == "fracrack" :
+                TopHoles = 3
+                BottomHoles = height - 3
+                
+                if self.options.fracrack_panel_units == 2: #4 places
+                    LeftHoles = width/2 - 19.05
+                    RightHoles = width/2 + 19.05
+                elif self.options.fracrack_panel_units == 3:    #6 places
+                    LeftHoles = width/2 - 38.1
+                    RightHoles = width/2 + 38.1
+                else: #2 places
+                    LeftHoles = width/2
+                    RightHoles = 0
+                
+                HoleRadius = 1.524
+
+            # Draw 19-inch standard Holes
+            # https://sdiy.info/w/index.php?title=19-inch_rack
+            elif self.options.panel_type == "nineteen":
+                TopHoles = 6.35
+                BottomHoles = TopHoles + self.options.nineteen_panel_units * (15.88*2) + self.options.nineteen_panel_units * 12.7 - 12.7
+                LeftHoles = 7.928
+                RightHoles = LeftHoles + 465.12
+                HoleRadius = 2.18
+
+            if self.options.panel_type != "custom" or self.options.panel_type != "hammond" :
                 topH = TopHoles * unitfactor
                 bottomH = BottomHoles * unitfactor
                 leftH = LeftHoles * unitfactor
@@ -571,7 +592,7 @@ class SynthPanelEffect(inkex.Effect):
                 gap = holeR/2
 
             #screws
-            if self.options.panel_screws == True and self.options.panel_type != "custom":
+            if self.options.panel_screws == True and self.options.panel_type == "vcv" and self.options.panel_lasercut == False :
                 self.options.panel_holes == False #remove holes
 
                 screw_radius = self.options.panel_screw_radius /2
@@ -626,7 +647,7 @@ class SynthPanelEffect(inkex.Effect):
 
             #holes
             if self.options.panel_holes == True and self.options.panel_type != "custom":
-                if  self.options.panel_type == "api" or self.options.panel_type == "m5u":
+                if  self.options.panel_type == "api" or self.options.panel_type == "m5u" or self.options.panel_type == "d5u" or self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" or self.options.panel_type == "fracrack" :
                     oval = False
                 if oval == False:  # Draw Round holes
                     r = HoleRadius * unitfactor
@@ -635,8 +656,30 @@ class SynthPanelEffect(inkex.Effect):
                     # Top Left
                     holes_group.append(Circle(cx=str(leftH), cy=str(topH), r=str(r)))
 
+                    if self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  2:
+                        # Center top
+                        holes_group.append(Circle(cx=str(width/2), cy=str(topH), r=str(r)))
+                        
+                        #Center bottom
+                        holes_group.append(Circle(cx=str(width/2), cy=str(bottomH), r=str(r)))
+
                     # Draw Left-side Centers
                     if centers == True:
+                        #only for fracrack
+                        if self.options.panel_type == "fracrack":   
+                            # Top center Centers
+                            # Horizontal Line
+                            center_layer_g.append(self.draw_line( width/2-holeR+gap, topH, width/2+holeR-gap, topH))
+
+                            # Vertical Line
+                            center_layer_g.append(self.draw_line( width/2, topH+holeR-gap, width/2, topH-holeR+gap))
+
+                            #Bottom center centers
+                            # Horizontal Line
+                            center_layer_g.append(self.draw_line(width/2-holeR+gap, bottomH, width/2+holeR-gap, bottomH))
+                            # Vertical Line
+                            center_layer_g.append(self.draw_line( width/2, bottomH+holeR-gap, width/2, bottomH-holeR+gap))
+
                         # Bottom Left Centers
                         # Horizontal Line
                         center_layer_g.append(self.draw_line(leftH-holeR+gap, bottomH, leftH+holeR-gap, bottomH))
@@ -651,7 +694,7 @@ class SynthPanelEffect(inkex.Effect):
                         # Vertical Line
                         center_layer_g.append(self.draw_line( leftH, topH+holeR-gap, leftH, topH-holeR+gap))
                     # Draw the Righthand side Mounting holes
-                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl" or self.options.panel_type == "vcv") and euro_hp > 10 or (self.options.panel_type == "api" and api_units >=2) or (self.options.panel_type == "m5u"  and self.options.moog_panel_units >=2) :
+                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl" or self.options.panel_type == "vcv") and euro_hp > 10 or (self.options.panel_type == "api" and api_units >=2) or (self.options.panel_type == "m5u"  and self.options.moog_panel_units >=2) or (self.options.panel_type == "d5u"  and self.options.moog_panel_units >=2) or self.options.panel_type == "nineteen" or self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" or (self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  1) :
                         # Bottom Right
                         holes_group.append(Circle(cx=str(rightH), cy=str(bottomH), r=str(r)))
                         # Top Right
@@ -668,10 +711,14 @@ class SynthPanelEffect(inkex.Effect):
                             center_layer_g.append(self.draw_line(rightH, topH+holeR-gap, rightH, topH-holeR+gap))
 
                 else: # oval == True
+                
                     # Oval Holes: (a square with rounded corners)
-                    oval_size = 5.5  # 3.2mm hole. Oval is 5.5mm across
+                    
+                    if self.options.panel_type == "nineteen":
+                        oval_size = 7
+                    else:
+                        oval_size = 5.5  # 3.2mm hole. Oval is 5.5mm across
                     oval_stretch = oval_size/2 # 2.75
-                    #
                     gapH = oval_stretch*unitfactor - gap
                     oval_offset = (oval_stretch-HoleRadius)*unitfactor # 1.15
                     oval_width = oval_size*unitfactor
@@ -698,8 +745,10 @@ class SynthPanelEffect(inkex.Effect):
                         for i in range(3):
                             center_layer_g.append(self.draw_line( leftH+offset, topH+holeR-gap, leftH+offset, topH-holeR+gap))
                             offset += oval_offset
+
                     # Draw the Righthand side Mounting holes
-                    if euro_hp > 10:
+
+                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl" or self.options.panel_type == "vcv")  and euro_hp > 10 or (self.options.panel_type == "lw" and lw_units > 2) or (self.options.panel_type == "nineteen"):
                         # Bottom Right
                         holes_group.append(self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,bottomH-holeR, holeR,0))
                         # Top Right
@@ -741,39 +790,6 @@ class SynthPanelEffect(inkex.Effect):
                     center_layer_g.style['fill'] = 'none'
 
         elif part == 2: #knobs
-            # if self.options.knob_presets == 1: #custom
-            #     preset = [
-            #         self.options.knob_main_dimension,                   #main dimension
-            #         self.options.knob_main_color,                       #main color
-            #         self.options.knob_main_stroke_color,                #main stroke color
-            #         self.options.knob_main_stroke_width,                #stroke width
-            #         self.options.knob_add_skirt,                        #add skirt
-            #         self.options.knob_skirt_dimension,                  #skirt dimension
-            #         self.options.knob_skirt_color,                      #skirt color
-            #         self.options.knob_skirt_stroke_color,               #skirt stroke color
-            #         self.options.knob_skirt_stroke_width,               #skirt stroke
-            #         self.options.knob_tick_color,                       #tick color
-            #         self.options.knob_tick_width,                       #tick size
-            #         self.options.knob_tick_lenght,                      #tick lenght
-            #         self.options.knob_tick_type,                        #tick type
-            #         self.options.knob_main_style                        #knob style
-            #     ]
-            # else: #preset
-            #     preset =  knob_presets(self, self.options.knob_presets)
-            #     self.options.knob_main_dimension     = preset[0]        #main dimension
-            #     self.options.knob_main_color         = preset[1]        #main color
-            #     self.options.knob_main_stroke_color   = preset[2]       #main stroke color
-            #     self.options.knob_main_stroke_width  = preset[3]        #stroke width
-            #     self.options.knob_add_skirt          = preset[4]        #add skirt
-            #     self.options.knob_skirt_dimension    = preset[5]        #skirt dimension
-            #     self.options.knob_skirt_color        = preset[6]        #skirt color
-            #     self.options.knob_skirt_stroke_color  = preset[7]       #skirt stroke color
-            #     self.options.knob_skirt_stroke_width = preset[8]        #skirt stroke
-            #     self.options.knob_tick_color          = preset[9]       #tick color
-            #     self.options.knob_tick_width          = preset[10]      #tick size
-            #     self.options.knob_tick_lenght         = preset[11]      #tick lenght
-            #     self.options.knob_tick_type           = preset[12]      #tick type
-            #     self.options.knob_main_style          = preset[13]      #knob style
 
             if self.svg.getElementById('knobs-group') is not None:
                 knobs = self.svg.getElementById('knobs-group')
@@ -959,7 +975,7 @@ class SynthPanelEffect(inkex.Effect):
                         knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
                         
                         if self.options.knob_scale_add_arc:
-                            arc = self.draw_knob_scale_arc_complex(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
+                            arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
                             
                             arc.style['fill'] = 'none'
                             arc.style['stroke'] = self.options.knob_scale_arc_color
@@ -968,7 +984,7 @@ class SynthPanelEffect(inkex.Effect):
                             knob_scale_arc.append(arc)
                         
                         if self.options.knob_scale_add_outer_arc:
-                            outer_arc = self.draw_knob_scale_arc_complex(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
+                            outer_arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
 
                             outer_arc.style['fill'] = 'none'
                             outer_arc.style['stroke'] = self.options.knob_scale_arc_color
@@ -1019,7 +1035,7 @@ class SynthPanelEffect(inkex.Effect):
 
                                     else:
                                         tick_length = self.options.knob_scale_ticks_lenght
-                                        scale_tick = self.draw_circle_mark(bbox.center_x, bbox.center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
+                                        scale_tick = self.draw_circle(bbox.center_x, bbox.center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
 
                                         scale_tick.style['fill'] = self.options.knob_scale_ticks_color
                                         scale_tick.style['stroke'] = 'none'
@@ -1084,9 +1100,9 @@ class SynthPanelEffect(inkex.Effect):
                                                 knob_scale_subtick.style['stroke-width'] = self.options.knob_scale_subticks_width
                                             else:
                                                 if self.options.knob_scale_inner_ticks:
-                                                    knob_scale_subtick = self.draw_circle_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                                    knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
                                                 else:
-                                                    knob_scale_subtick = self.draw_circle_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                                    knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
                                                 knob_scale_subtick.style['fill'] = self.options.knob_scale_subticks_color
                                                 knob_scale_subtick.style['stroke'] = 'none'
                                                 knob_scale_subtick.style['stroke-width'] = 0
@@ -1101,43 +1117,6 @@ class SynthPanelEffect(inkex.Effect):
                 inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color."))
 
         elif part == 4: #sliders
-            # if self.options.slider_presets == 1: #custom
-            #     preset = [
-            #         self.options.slider_orientation,                          #orientation
-            #         self.options.slider_coarse_color,                         #coarse color
-            #         self.options.slider_coarse_stroke_color,                  #coarse stroke color
-            #         self.options.slider_coarse_lenght,                        #coarse lenght
-            #         self.options.slider_coarse_gap,                         #coarse width
-            #         self.options.slider_coarse_stroke_width,                  #coarse stroke width
-            #         self.options.slider_coarse_round_edges,                   #coarse round edges
-            #         self.options.slider_cursor_color,                         #cursor color
-            #         self.options.slider_cursor_stroke_color,                  #cursor stroke color
-            #         self.options.slider_cursor_type,                          #cursor type
-            #         self.options.slider_cursor_height,                        #cursor height
-            #         self.options.slider_cursor_width,                         #cursor width
-            #         self.options.slider_cursor_stroke_width,                  #cursor stroke width
-            #         self.options.slider_cursor_round_edges,                   #cursor round edges
-            #         self.options.slider_cursor_tick_width,                    #cursor tick width
-            #         self.options.slider_cursor_tick_color,                    #cursor tick color
-            #     ]
-            # else: #preset
-            #     preset =  slider_presets(self, self.options.slider_presets)
-            #     self.options.slider_orientation = preset[0]                   #orientation
-            #     self.options.slider_coarse_color = preset[1]                  #coarse color
-            #     self.options.slider_coarse_stroke_color = preset[2]           #coarse stroke color
-            #     self.options.slider_coarse_lenght = preset[3]                 #coarse lenght
-            #     self.options.slider_coarse_gap = preset[4]                  #coarse width
-            #     self.options.slider_coarse_stroke_width = preset[5]           #coarse stroke width
-            #     self.options.slider_coarse_round_edges = preset[6]            #coarse round edges
-            #     self.options.slider_cursor_color = preset[7]                  #cursor color  
-            #     self.options.slider_cursor_stroke_color = preset[8]           #cursor stroke color
-            #     self.options.slider_cursor_type = preset[9]                   #cursor type
-            #     self.options.slider_cursor_height = preset[10]                #cursor height
-            #     self.options.slider_cursor_width = preset[11]                 #cursor width
-            #     self.options.slider_cursor_stroke_width = preset[12]          #cursor stroke width
-            #     self.options.slider_cursor_round_edges = preset[13]           #cursor round edges
-            #     self.options.slider_cursor_tick_width = preset[14]            #cursor tick width
-            #     self.options.slider_cursor_tick_color = preset[15]            #cursor tick color
             
             if self.options.slider_orientation == 1:
                 coarse_width = self.options.slider_coarse_gap - self.options.slider_coarse_stroke_width
@@ -1309,11 +1288,7 @@ class SynthPanelEffect(inkex.Effect):
                                                         bbox.bottom - ticks_delta * (n_ticks -1) - (self.options.slider_scale_v_offset /2) - end_size /2)
 
                                     for tick in range(n_ticks):
-                                        #if self.options.slider_scale_linlog == 2:
-                                            #log
-                                        #    ticks_delta = (log(tick+2,10)-log(tick+1,10)) * ((bbox.height - self.options.slider_scale_v_offset)/(n_ticks))/((log(n_ticks+2,10)-log(n_ticks+1,10)))
-                                        #else:
-                                            #lin
+                                        
                                         ticks_delta = (bbox.height - self.options.slider_scale_v_offset) / (n_ticks - 1)
 
                                         tick_length = (ticks_delta_lenght * tick) + tick_length_start
@@ -1619,8 +1594,6 @@ class SynthPanelEffect(inkex.Effect):
                         
                     else:
                         inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's coarse.")) 
- 
-                    
 
                 if self.options.slider_scale_utilities_add_drill_guide:
                     slider_scale_drill_guide = slider_scale_layer.add(inkex.Layer.new('Drill guide'))
@@ -1644,4 +1617,3 @@ class SynthPanelEffect(inkex.Effect):
 if __name__ == '__main__':
     # Create effect instance and apply it.
     SynthPanelEffect().run()
-
