@@ -21,6 +21,7 @@ import sys
 import inkex
 import argparse
 import os
+from inkex.elements import ShapeElement
 # import SPD_presets
 # from SPD_presets import knob_presets, slider_presets
 
@@ -341,9 +342,6 @@ class SynthPanelEffect(inkex.Effect):
         text.set("y", str(y + text_size / 2))
         return text
 
-   
-
-
     def effect(self):
         euro_hp = self.options.eurorack_panel_hp
         api_units = self.options.api_panel_units
@@ -437,7 +435,6 @@ class SynthPanelEffect(inkex.Effect):
                 width = hammond_units_width
             
             #custom
-            
             else:
                 width = self.options.panel_custom_width
                 height = self.options.panel_custom_height
@@ -794,7 +791,7 @@ class SynthPanelEffect(inkex.Effect):
             if self.svg.getElementById('knobs-group') is not None:
                 knobs = self.svg.getElementById('knobs-group')
             else:
-                knobs = self.svg.add(inkex.Group.new('Knobs Group'))
+                knobs = self.svg.add(inkex.Layer.new('Knobs Group'))
                 knobs.set('id', 'knobs-group')
 
             # Knob sub layer
@@ -812,12 +809,10 @@ class SynthPanelEffect(inkex.Effect):
 
                 #append the knob layer to the knobs group
                 knobs.append(knob_layer)
-
-                if self.svg.set_selected('panel'):
-                    bbox_panel = self.svg.get_selected_bbox() #get the bbox of the panel
-                else:
-                    bbox_panel = self.svg.get_page_bbox() #otherwise get the center of the page
-                    
+            
+                #get the page's bounding box
+                bbox_panel = self.svg.get_page_bbox()
+                
                 if self.options.knob_main_style == 2:
                     vintage_knob = self.draw_vintage_circle(x=str(bbox_panel.center_x), y=str(bbox_panel.center_y), radius=str(self.options.knob_vintage_dimension / 2), radius2 = str(self.options.knob_vintage_dimension / 2 + 1 ), sides = 7)
                     mainknob = Circle(cx=str(bbox_panel.center_x), cy=str(bbox_panel.center_y), r=str(self.options.knob_main_dimension / 2))
@@ -873,8 +868,11 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 3: #knobs scales
                 
-            knob = self.svg.get_selected()
-            bbox = self.svg.get_selected_bbox() 
+            sknob = self.svg.get_selected()
+            for knob in self.svg.get_selected():   
+                bbox = knob.bounding_box(composed_transform(knob))
+                break
+
             missing_knob = False
 
             #scale layers
@@ -885,7 +883,7 @@ class SynthPanelEffect(inkex.Effect):
             if self.svg.getElementById('knob-scales-group') is not None:
                 knob_scales = self.svg.getElementById('knob-scales-group')
             else:
-                knob_scales = self.svg.add(inkex.Group.new('Knob Scales Group'))
+                knob_scales = self.svg.add(inkex.Layer.new('Knob Scales Group'))
                 knob_scales.set('id', 'knob-scales-group')
 
             if self.options.knob_scale_label_leftright:
@@ -902,216 +900,215 @@ class SynthPanelEffect(inkex.Effect):
 
             is_knob_selected = False
 
-            if bbox is not None:
-                for node in knob:
-                    is_knob_selected = True
-                    
-                    bbox_parent =  node.getparent()
-                    layer = bbox_parent.getparent()
-                    selected_label = bbox_parent.get('inkscape:label')
+            for node in sknob:
+                is_knob_selected = True
                 
-                    if(selected_label != 'Main color' or selected_label == 'none'):
-                        inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color.\nYou have selected the knob %s") % selected_label)
-                    else:    
-                        knob_name = layer.get('inkscape:label')
-                        knob_scale_layer = knob_scales.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
+                bbox_parent =  node.getparent()
+                layer = bbox_parent.getparent()
+                selected_label = bbox_parent.get('inkscape:label')
+            
+                if(selected_label == 'none'):
+                    inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color.\nYou have selected the knob %s") % selected_label)
+                else:    
+                    knob_name = layer.get('inkscape:label')
+                    knob_scale_layer = knob_scales.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
 
-                        angle = self.options.knob_scale_arc_angle*pi/180.0
-                        arc_rotation = self.options.knob_scale_arc_rotation*pi/180.0 *2
+                    angle = self.options.knob_scale_arc_angle*pi/180.0
+                    arc_rotation = self.options.knob_scale_arc_rotation*pi/180.0 *2
+                    
+                    radius = self.options.knob_scale_arc_radius
+                    offset_radius = self.options.knob_scale_arc_radius + self.options.knob_scale_outer_arc_offset - (self.options.knob_scale_arc_width /2)
+
+                    if self.options.knob_scale_add_centering_circle:
+                        knob_scale_cc = knob_scale_layer.add(inkex.Layer.new('Centering circle'))
+                        centering_circle = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(radius + 3))
+
+                        centering_circle.style['fill'] = "none"
+                        centering_circle.style['stroke'] = self.options.knob_scale_utilities_color
+                        centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+
+                        knob_scale_cc.append(centering_circle)
                         
-                        radius = self.options.knob_scale_arc_radius
-                        offset_radius = self.options.knob_scale_arc_radius + self.options.knob_scale_outer_arc_offset - (self.options.knob_scale_arc_width /2)
-
-                        if self.options.knob_scale_add_centering_circle:
-                            knob_scale_cc = knob_scale_layer.add(inkex.Layer.new('Centering circle'))
-                            centering_circle = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(radius + 3))
-
-                            centering_circle.style['fill'] = "none"
-                            centering_circle.style['stroke'] = self.options.knob_scale_utilities_color
-                            centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
-
-                            knob_scale_cc.append(centering_circle)
+                    if self.options.knob_scale_utilities_add_drill_guide:
+                        knob_scale_drill_guide = knob_scale_layer.add(inkex.Layer.new('Drill guide'))
+                        if self.options.knob_scale_utilities_drill_guide_type == 2: #cross
+                            cross_v = self.draw_line( 
+                            bbox.center_x + self.options.knob_scale_utilities_guide_dimension /2, 
+                            bbox.center_y, 
+                            bbox.center_x - self.options.knob_scale_utilities_guide_dimension /2, 
+                            bbox.center_y)
                             
-                        if self.options.knob_scale_utilities_add_drill_guide:
-                            knob_scale_drill_guide = knob_scale_layer.add(inkex.Layer.new('Drill guide'))
-                            if self.options.knob_scale_utilities_drill_guide_type == 2: #cross
-                                cross_v = self.draw_line( 
-                                bbox.center_x + self.options.knob_scale_utilities_guide_dimension /2, 
-                                bbox.center_y, 
-                                bbox.center_x - self.options.knob_scale_utilities_guide_dimension /2, 
-                                bbox.center_y)
-                                
-                                cross_h = self.draw_line( 
-                                bbox.center_x, 
-                                bbox.center_y + self.options.knob_scale_utilities_guide_dimension /2, 
-                                bbox.center_x, 
-                                bbox.center_y - self.options.knob_scale_utilities_guide_dimension /2)
-                                
-                                cross_v.style['fill'] = cross_h.style['fill'] = "none"
-                                cross_v.style['stroke'] = cross_h.style['stroke'] = self.options.knob_scale_utilities_color
-                                cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = self.options.knob_scale_utilities_line_width
-
-                                knob_scale_drill_guide.append(cross_v)
-                                knob_scale_drill_guide.append(cross_h)
+                            cross_h = self.draw_line( 
+                            bbox.center_x, 
+                            bbox.center_y + self.options.knob_scale_utilities_guide_dimension /2, 
+                            bbox.center_x, 
+                            bbox.center_y - self.options.knob_scale_utilities_guide_dimension /2)
                             
-                            elif self.options.knob_scale_utilities_drill_guide_type == 3: #dot
-                                drill_dot = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(self.options.knob_scale_utilities_guide_dimension /2))
+                            cross_v.style['fill'] = cross_h.style['fill'] = "none"
+                            cross_v.style['stroke'] = cross_h.style['stroke'] = self.options.knob_scale_utilities_color
+                            cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = self.options.knob_scale_utilities_line_width
 
-                                drill_dot.style['fill'] = self.options.knob_scale_utilities_color
-                                drill_dot.style['stroke'] = "none"
-                                drill_dot.style['stroke-width'] = 0
-
-                                knob_scale_drill_guide.append(drill_dot)
-
-                            elif self.options.knob_scale_utilities_drill_guide_type == 4: #circle  
-                                drill_circle = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(self.options.knob_scale_utilities_guide_dimension /2 - self.options.knob_scale_utilities_line_width /2))
-
-                                drill_circle.style['fill'] = "none"
-                                drill_circle.style['stroke'] = self.options.knob_scale_utilities_color
-                                drill_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
-
-                                knob_scale_drill_guide.append(drill_circle)
-
-                        knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
+                            knob_scale_drill_guide.append(cross_v)
+                            knob_scale_drill_guide.append(cross_h)
                         
-                        if self.options.knob_scale_add_arc:
-                            arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
-                            
-                            arc.style['fill'] = 'none'
-                            arc.style['stroke'] = self.options.knob_scale_arc_color
-                            arc.style['stroke-width'] = self.options.knob_scale_arc_width
-                            
-                            knob_scale_arc.append(arc)
+                        elif self.options.knob_scale_utilities_drill_guide_type == 3: #dot
+                            drill_dot = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(self.options.knob_scale_utilities_guide_dimension /2))
+
+                            drill_dot.style['fill'] = self.options.knob_scale_utilities_color
+                            drill_dot.style['stroke'] = "none"
+                            drill_dot.style['stroke-width'] = 0
+
+                            knob_scale_drill_guide.append(drill_dot)
+
+                        elif self.options.knob_scale_utilities_drill_guide_type == 4: #circle  
+                            drill_circle = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(self.options.knob_scale_utilities_guide_dimension /2 - self.options.knob_scale_utilities_line_width /2))
+
+                            drill_circle.style['fill'] = "none"
+                            drill_circle.style['stroke'] = self.options.knob_scale_utilities_color
+                            drill_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+
+                            knob_scale_drill_guide.append(drill_circle)
+
+                    knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
+                    
+                    if self.options.knob_scale_add_arc:
+                        arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
                         
-                        if self.options.knob_scale_add_outer_arc:
-                            outer_arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
+                        arc.style['fill'] = 'none'
+                        arc.style['stroke'] = self.options.knob_scale_arc_color
+                        arc.style['stroke-width'] = self.options.knob_scale_arc_width
+                        
+                        knob_scale_arc.append(arc)
+                    
+                    if self.options.knob_scale_add_outer_arc:
+                        outer_arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
 
-                            outer_arc.style['fill'] = 'none'
-                            outer_arc.style['stroke'] = self.options.knob_scale_arc_color
-                            outer_arc.style['stroke-width'] = self.options.knob_scale_arc_width
+                        outer_arc.style['fill'] = 'none'
+                        outer_arc.style['stroke'] = self.options.knob_scale_arc_color
+                        outer_arc.style['stroke-width'] = self.options.knob_scale_arc_width
 
-                            knob_scale_arc.append(outer_arc)
+                        knob_scale_arc.append(outer_arc)
 
-                            #draw the arc before when the mark are dots
-                            if self.options.knob_scale_ticks_type == 2:
-                                knob_scale_layer.append(knob_scale_arc)
+                        #draw the arc before when the mark are dots
+                        if self.options.knob_scale_ticks_type == 2:
+                            knob_scale_layer.append(knob_scale_arc)
 
-                        if self.options.knob_scale_add_ticks:
-                            if n_ticks > 0:
-                                knob_scale_tick = knob_scale_layer.add(inkex.Layer.new('Ticks'))
-                                if n_subticks > 0 and self.options.knob_scale_add_subticks:
-                                        knob_scale_sub_tick_layer = knob_scale_layer.add(inkex.Layer.new('Subticks'))
+                    if self.options.knob_scale_add_ticks:
+                        if n_ticks > 0:
+                            knob_scale_tick = knob_scale_layer.add(inkex.Layer.new('Ticks'))
+                            if n_subticks > 0 and self.options.knob_scale_add_subticks:
+                                    knob_scale_sub_tick_layer = knob_scale_layer.add(inkex.Layer.new('Subticks'))
 
-                                ticks_start_angle = (1.5*pi - 0.5*angle) + (arc_rotation/2)
+                            ticks_start_angle = (1.5*pi - 0.5*angle) + (arc_rotation/2)
 
-                                ticks_delta = angle / (n_ticks - 1)
-                                knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
-                                
-                                for tick in range(n_ticks):
-                                    if self.options.knob_scale_ticks_type == 1:
-                                        if(self.options.knob_scale_ticks_accent_number != 0):
-                                            if(tick % self.options.knob_scale_ticks_accent_number):
-                                                tick_length = self.options.knob_scale_ticks_lenght
-                                            else:    
-                                                tick_length = self.options.knob_scale_ticks_lenght + self.options.Knob_scale_ticks_accent_lenght
-                                        else:
+                            ticks_delta = angle / (n_ticks - 1)
+                            knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
+                            
+                            for tick in range(n_ticks):
+                                if self.options.knob_scale_ticks_type == 1:
+                                    if(self.options.knob_scale_ticks_accent_number != 0):
+                                        if(tick % self.options.knob_scale_ticks_accent_number):
                                             tick_length = self.options.knob_scale_ticks_lenght
-                                            
-                                        if self.options.knob_scale_inner_ticks:
-                                            scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_ticks_offset - tick_length , ticks_start_angle + ticks_delta*tick, tick_length)
-                                        else:
-                                            scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_ticks_offset, ticks_start_angle + ticks_delta*tick, tick_length)
-                                                
-                                        if(self.options.knob_scale_ticks_accent_number != 0):
-                                            if(tick % self.options.knob_scale_ticks_accent_number):
-                                                scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
-                                            else:    
-                                                scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_accent_width
-                                        else:
-                                            scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
-
-                                        scale_tick.style['stroke'] = self.options.knob_scale_ticks_color    
-                                        knob_scale_tick.append(scale_tick)    
-
+                                        else:    
+                                            tick_length = self.options.knob_scale_ticks_lenght + self.options.Knob_scale_ticks_accent_lenght
                                     else:
                                         tick_length = self.options.knob_scale_ticks_lenght
-                                        scale_tick = self.draw_circle(bbox.center_x, bbox.center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
-
-                                        scale_tick.style['fill'] = self.options.knob_scale_ticks_color
-                                        scale_tick.style['stroke'] = 'none'
-                                        scale_tick.style['stroke-width'] = 0
-
-                                        knob_scale_tick.append(scale_tick)
-
-                                    if self.options.knob_scale_add_label:
-                                        if self.options.knob_scale_label_leftright:
-                                            tick_text = ['L', 'R']
-                                            label = self.draw_text(bbox.center_x, bbox.center_y, tick_text[tick], radius + tick_length + text_spacing,
-                                                    ticks_start_angle + ticks_delta*tick, text_size)
+                                        
+                                    if self.options.knob_scale_inner_ticks:
+                                        scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_ticks_offset - tick_length , ticks_start_angle + ticks_delta*tick, tick_length)
+                                    else:
+                                        scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_ticks_offset, ticks_start_angle + ticks_delta*tick, tick_length)
+                                            
+                                    if(self.options.knob_scale_ticks_accent_number != 0):
+                                        if(tick % self.options.knob_scale_ticks_accent_number):
+                                            scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
                                         else:    
-                                            if self.options.knob_scale_label_rounding_float > 0:
-                                                if self.options.knob_scale_label_reverse_order:
-                                                    #reverse
-                                                    tick_text = str(round(start_num +
-                                                                        float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
-                                                else:
-                                                    #forward
-                                                    tick_text = str(round(start_num +
-                                                                        float(tick) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
+                                            scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_accent_width
+                                    else:
+                                        scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
+
+                                    scale_tick.style['stroke'] = self.options.knob_scale_ticks_color    
+                                    knob_scale_tick.append(scale_tick)    
+
+                                else:
+                                    tick_length = self.options.knob_scale_ticks_lenght
+                                    scale_tick = self.draw_circle(bbox.center_x, bbox.center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
+
+                                    scale_tick.style['fill'] = self.options.knob_scale_ticks_color
+                                    scale_tick.style['stroke'] = 'none'
+                                    scale_tick.style['stroke-width'] = 0
+
+                                    knob_scale_tick.append(scale_tick)
+
+                                if self.options.knob_scale_add_label:
+                                    if self.options.knob_scale_label_leftright:
+                                        tick_text = ['L', 'R']
+                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text[tick], radius + tick_length + text_spacing,
+                                                ticks_start_angle + ticks_delta*tick, text_size)
+                                    else:    
+                                        if self.options.knob_scale_label_rounding_float > 0:
+                                            if self.options.knob_scale_label_reverse_order:
+                                                #reverse
+                                                tick_text = str(round(start_num +
+                                                                    float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
+                                                                    self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
                                             else:
-                                                if self.options.knob_scale_label_reverse_order:
-                                                    #reverse
-                                                    tick_text = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
-                                                else:
-                                                    #forward
-                                                    tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
-
-                                            label = self.draw_text(bbox.center_x, bbox.center_y, tick_text, radius + tick_length + text_spacing,
-                                                    ticks_start_angle + ticks_delta*tick, text_size)
-
-                                        label.style['text-align'] = 'center'
-                                        label.style['text-anchor'] = 'middle'
-                                        label.style['alignment-baseline'] = 'center'
-                                        label.style['font-size'] = str(text_size)
-                                        label.style['vertical-align'] = 'middle'
-                                        label.style['fill'] = self.options.knob_scale_label_color
-
-                                        knob_scale_label.append(label)
-
-                                    if tick == (n_ticks - 1) :
-                                        break
-
-                                    if n_subticks > 0 and self.options.knob_scale_add_subticks:
-                                        subticks_delta = ticks_delta / (n_subticks + 1)
-                                        subtick_start_angle = ticks_start_angle + ticks_delta*tick + subticks_delta
-                                        subtick_length = self.options.knob_scale_subticks_lenght
-
-                                        for subtick in range(n_subticks):
-                                            if self.options.knob_scale_subticks_type == 1:
-                                                if self.options.knob_scale_inner_ticks:
-                                                    knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - self.options.knob_scale_subticks_offset - subtick_length - (self.options.knob_scale_arc_width / 2), subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                                else:
-                                                    knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                                    
-                                                knob_scale_subtick.style['fill'] = 'none'
-                                                knob_scale_subtick.style['stroke'] = self.options.knob_scale_subticks_color
-                                                knob_scale_subtick.style['stroke-width'] = self.options.knob_scale_subticks_width
+                                                #forward
+                                                tick_text = str(round(start_num +
+                                                                    float(tick) * (end_num - start_num) / (n_ticks - 1),
+                                                                    self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
+                                        else:
+                                            if self.options.knob_scale_label_reverse_order:
+                                                #reverse
+                                                tick_text = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
                                             else:
-                                                if self.options.knob_scale_inner_ticks:
-                                                    knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                                else:
-                                                    knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                                knob_scale_subtick.style['fill'] = self.options.knob_scale_subticks_color
-                                                knob_scale_subtick.style['stroke'] = 'none'
-                                                knob_scale_subtick.style['stroke-width'] = 0
+                                                #forward
+                                                tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
 
-                                            knob_scale_sub_tick_layer.append(knob_scale_subtick)
+                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text, radius + tick_length + text_spacing,
+                                                ticks_start_angle + ticks_delta*tick, text_size)
 
-                                #draw the arc on top of the tick when the tick are line
-                                if (self.options.knob_scale_ticks_type == 1) and self.options.knob_scale_add_arc:
-                                    knob_scale_layer.append(knob_scale_arc)
+                                    label.style['text-align'] = 'center'
+                                    label.style['text-anchor'] = 'middle'
+                                    label.style['alignment-baseline'] = 'center'
+                                    label.style['font-size'] = str(text_size)
+                                    label.style['vertical-align'] = 'middle'
+                                    label.style['fill'] = self.options.knob_scale_label_color
+
+                                    knob_scale_label.append(label)
+
+                                if tick == (n_ticks - 1) :
+                                    break
+
+                                if n_subticks > 0 and self.options.knob_scale_add_subticks:
+                                    subticks_delta = ticks_delta / (n_subticks + 1)
+                                    subtick_start_angle = ticks_start_angle + ticks_delta*tick + subticks_delta
+                                    subtick_length = self.options.knob_scale_subticks_lenght
+
+                                    for subtick in range(n_subticks):
+                                        if self.options.knob_scale_subticks_type == 1:
+                                            if self.options.knob_scale_inner_ticks:
+                                                knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - self.options.knob_scale_subticks_offset - subtick_length - (self.options.knob_scale_arc_width / 2), subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                            else:
+                                                knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                                
+                                            knob_scale_subtick.style['fill'] = 'none'
+                                            knob_scale_subtick.style['stroke'] = self.options.knob_scale_subticks_color
+                                            knob_scale_subtick.style['stroke-width'] = self.options.knob_scale_subticks_width
+                                        else:
+                                            if self.options.knob_scale_inner_ticks:
+                                                knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                            else:
+                                                knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                            knob_scale_subtick.style['fill'] = self.options.knob_scale_subticks_color
+                                            knob_scale_subtick.style['stroke'] = 'none'
+                                            knob_scale_subtick.style['stroke-width'] = 0
+
+                                        knob_scale_sub_tick_layer.append(knob_scale_subtick)
+
+                            #draw the arc on top of the tick when the tick are line
+                            if (self.options.knob_scale_ticks_type == 1) and self.options.knob_scale_add_arc:
+                                knob_scale_layer.append(knob_scale_arc)
                 
             if is_knob_selected == False and missing_knob == False:
                 inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color."))
@@ -1133,7 +1130,7 @@ class SynthPanelEffect(inkex.Effect):
                 sliders.set('id', 'sliders-group')
 
             # Slider sub layer
-            slider_layer = sliders.add(inkex.Group.new(self.options.slider_name)) #slider layer
+            slider_layer = sliders.add(inkex.Layer.new(self.options.slider_name)) #slider layer
             slider_layer_coarse = slider_layer.add(inkex.Layer.new('Coarse'))
 
             #draw coarse
@@ -1613,6 +1610,13 @@ class SynthPanelEffect(inkex.Effect):
                     drill_guide.style['stroke-width'] = self.options.slider_scale_utilities_line_width
 
                     slider_scale_drill_guide.append(drill_guide)
+
+# Borrowed from inkscape-extensions 1.1, remove when Inkscape 1.1 comes out
+def composed_transform(elem, other=None):
+    parent = elem.getparent()
+    if parent is not None and isinstance(parent, ShapeElement):
+        return parent.composed_transform() * elem.transform
+    return elem.transform
 
 if __name__ == '__main__':
     # Create effect instance and apply it.
