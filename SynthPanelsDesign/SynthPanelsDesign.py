@@ -1459,8 +1459,7 @@ class SynthPanelEffect(inkex.Effect):
                                         tick_length = (ticks_delta_lenght * tick) + tick_length_start
                                         delta_size =  (self.options.slider_scale_ticks_end_size - self.options.slider_scale_ticks_start_size) / (n_ticks - 1)
                                         ticksize = (delta_size * tick) + self.options.slider_scale_ticks_start_size
-                                        
-                                        
+                                            
                                         #top
                                         scale_tick_t = self.draw_line(
                                                     bbox.left +  ticks_delta * tick + self.options.slider_scale_h_offset /2 ,
