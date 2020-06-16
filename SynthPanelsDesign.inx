@@ -516,7 +516,9 @@
         </page>
         <page name="About" gui-text="About">
             <label appearance="header" xml:space="preserve">Need help? Check our website</label>
-            <label indent="1" appearance="url">https://synthpanels.design</label>
+            <label appearance="url">https://synthpanels.design</label>
+            <spacer/>
+            <label>Synth Panels Designer v. 1.0Beta</label>
             <spacer/>
              
             
@@ -524,7 +526,7 @@
             <separator/>
             <hbox>
                 <vbox>
-                    <label appearance="header">SOUNDMIT - ITALIAN SNTHS and PEDALS EXPO (since 2011)</label>
+                    <label appearance="header">SOUNDMIT - ITALIAN SYNTHS and PEDALS EXPO (since 2011)</label>
                     <label appearance="url">https://soundmit.com</label>
                     <image>SynthPanelsDesign/assets/sm_logo.svg</image>
                     <spacer/>
