@@ -1217,50 +1217,55 @@ class SynthPanelEffect(inkex.Effect):
                     slider_layer_tick.append(cursor_tick)
 
         elif part == 5: #slider scales
+                bbox = False
+                sslider = self.svg.get_selected()
+                for slider in self.svg.get_selected():   
+                    bbox = slider.bounding_box(composed_transform(slider))
+                    break
 
-                slider = self.svg.get_selected()
-                bbox = self.svg.get_selected_bbox()
                 missing_slider = False
-                if slider:
-                    #scale layers
-                    if self.svg.getElementById('sliders-group') is None:
-                        inkex.errormsg(_("To draw a scale, you must first draw a slider.\n")) 
-                        missing_slider = True
-                
-                    if self.svg.getElementById('slider-scales-group') is not None:
-                        slider_scales = self.svg.getElementById('slider-scales-group')
-                    else:
-                        slider_scales = self.svg.add(inkex.Layer.new('Slider Scales Group'))
+
+                #scale layers
+                if self.svg.getElementById('sliders-group') is None:
+                    missing_slider = True
+                    inkex.errormsg(_("To draw a scale, you must first draw a slider.\n")) 
                     
+                if self.svg.getElementById('slider-scales-group') is not None:
+                    slider_scales = self.svg.getElementById('slider-scales-group')
+                else:
+                    slider_scales = self.svg.add(inkex.Layer.new('Slider Scales Group'))
                     slider_scales.set('id', 'slider-scales-group')
 
-                    n_ticks = self.options.slider_scale_ticks_number
-                    n_subticks = self.options.slider_scale_subticks_number
-                    start_size = self.options.slider_scale_ticks_start_size
-                    end_size = self.options.slider_scale_ticks_end_size
-                    position = self.options.slider_scale_position
+                n_ticks = self.options.slider_scale_ticks_number
+                n_subticks = self.options.slider_scale_subticks_number
+                start_size = self.options.slider_scale_ticks_start_size
+                end_size = self.options.slider_scale_ticks_end_size
+                position = self.options.slider_scale_position
 
-                    start_num = self.options.slider_scale_label_start
-                    end_num = self.options.slider_scale_label_end
+                start_num = self.options.slider_scale_label_start
+                end_num = self.options.slider_scale_label_end
 
-                    #text_spacing = self.options.slider_scale_label_offset
-                    text_size = self.options.slider_scale_label_font_size
+                #text_spacing = self.options.slider_scale_label_offset
+                text_size = self.options.slider_scale_label_font_size
 
-                    missing_slider = True
-
+                missing_slider = True
+                is_slider_selected = False
+                if bbox != False:
                     #vertical    
                     if bbox.height > bbox.width:
                         ticks_delta = (bbox.height - self.options.slider_scale_v_offset) / (n_ticks - 1)
                         tick_length_start = self.options.slider_scale_ticks_start_lenght
                         tick_lenght_end = self.options.slider_scale_ticks_end_lenght
                         ticks_delta_lenght = (tick_lenght_end - tick_length_start) / (n_ticks -1)
-
-                        for node in slider:
+                        
+                        
+                        for node in sslider:
+                            is_slider_selected = True
                             bbox_parent =  node.getparent()
                             layer = bbox_parent.getparent()
                             selected_label = bbox_parent.get('inkscape:label')
 
-                            if(selected_label != 'Coarse'):
+                            if(selected_label == 'none'):
                                 inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's Coarse.\nYou have selected the slider %s") % selected_label)
                             
                             else:
@@ -1425,7 +1430,8 @@ class SynthPanelEffect(inkex.Effect):
                         tick_lenght_end = self.options.slider_scale_ticks_end_lenght
                         ticks_delta_lenght = (tick_lenght_end - tick_length_start) / (n_ticks -1)
 
-                        for node in slider:
+                        for node in sslider:
+                            is_slider_selected = True
                             bbox_parent =  node.getparent()
                             layer = bbox_parent.getparent()
                             selected_label = bbox_parent.get('inkscape:label')
@@ -1586,10 +1592,8 @@ class SynthPanelEffect(inkex.Effect):
 
                                     pline_t.style['stroke'] = pline_b.style['stroke'] = self.options.slider_scale_tick_color
                                     pline_t.style['stroke-width'] = pline_b.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width     
-                
-                        
-                    else:
-                        inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's coarse.")) 
+                else:
+                    inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's coarse.")) 
 
                 if self.options.slider_scale_utilities_add_drill_guide:
                     slider_scale_drill_guide = slider_scale_layer.add(inkex.Layer.new('Drill guide'))
