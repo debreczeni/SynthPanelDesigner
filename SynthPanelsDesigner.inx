@@ -482,17 +482,21 @@
             </hbox>
         </page>
         <page name="About" gui-text="About">
-            <label appearance="header" xml:space="preserve">Need help? Check our website</label>
-            <label appearance="url">https://synthpanels.design</label>
+            <label appearance="header" xml:space="preserve">NEED HELP?</label>
             <label appearance="header" xml:space="preserve">Download and read the manual first!!</label>
-            <label appearance="url">https://bit.ly/SPD_manual</label>
+            <label appearance="url">https://bit.ly/spd_manual</label>
+            <spacer/>
+            <label appearance="header" xml:space="preserve">Want to collaborate? Have you found a bug or do you want to suggest a new function? Go to our GitLab</label>
+            <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
             <label>Synth Panels Designer v. 1.0 - 27 June 2020</label>
             <spacer/>
             <separator/>
+            <label appearance="header" xml:space="preserve">NOTE</label>
             <label xml:space="preserve">
-- All product names, logos, and brands are property of their respective owners. </label> 
+All product names, logos, and brands are property of their respective owners. </label> 
+<spacer/>
             <separator/>
             <label appearance="header">SPONSORED BY</label>
             <separator/>
