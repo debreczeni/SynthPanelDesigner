@@ -2,8 +2,8 @@
 /*
 
 # Whitelist some files
-!.gitignore
-!SynthPanelsDesign.inx
+!SynthPanelsDesigner.inx
+!*.pdf
 
 # whitelist some folder
-!SynthPanelsDesign/
+!SynthPanelsDesigner/

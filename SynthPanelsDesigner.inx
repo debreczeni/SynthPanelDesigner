@@ -20,10 +20,10 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Synth Panels Designer</_name>
   <id>com.Faselunare.SPD.SynthPanelsDesign</id>
-  <dependency type="executable" location="inx">SynthPanelsDesign/SynthPanelsDesign.py</dependency>
+  <dependency type="executable" location="inx">SynthPanelsDesigner/SynthPanelsDesigner.py</dependency>
   <hbox>
         <vbox>
-            <image>SynthPanelsDesign/assets/spd_logo.svg</image>
+            <image>SynthPanelsDesigner/assets/spd_logo.svg</image>
         </vbox>
   </hbox>
   <separator/>
@@ -59,7 +59,6 @@
                     </param>
                 <separator/>
                      <label xml:space="preserve">
-- All product names, logos, and brands are property of their respective owners.
 - Eurorack 1U - IJ = Intellijel standard
 - Eurorack 1U - PL = Pulp Logic standard
                     </label>
@@ -113,8 +112,6 @@
                     <label appearance="header">19-inch Rack</label>
                     <param name="nineteen_panel_units" type="int" min="1" max="104" translatable="no" gui-text="Units">1</param>
                     <separator/>
-
-                  
                     <label appearance="header">Common Pedals enclosure</label>
                     <param name="hammond_panel_units" type="optiongroup" appearance="combo" min="1" max="200"  translatable="no" gui-text="Model">
                         <item value="1" translatable="no">1590LB - 51x51</item>
@@ -167,14 +164,11 @@
                         <param name="panel_screw_color" type="color" appearance="colorbutton" _gui-text="Screw color" default="#fefefe"></param>
                         <param name="panel_screw_stroke_color" type="color" appearance="colorbutton" _gui-text="Screw stroke color" default="#fefefe"></param>
                         <param name="panel_screw_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Screw stroke width">0.3</param>
-                        <!-- <param name="panel_screw_tick_color" type="color" appearance="colorbutton" _gui-text="Screw tick color" default="#fefefe"></param>
-                        <param name="panel_screw_tick_width" type="float" min="1" max="10" default="0.3" precision="2" _gui-text="Screw tick width">0.3</param> -->
                     <spacer/>
                     <label appearance="header">UTILITIES</label>
                     <separator/>
                     <param name="panel_lasercut" type="boolean" _gui-text="Use lasercut design">false</param>
                     <spacer/>
-                    <!-- <param name="panel_logo" type="boolean" _gui-text="Use your logo?">false</param> -->
                 </vbox>
             </hbox>
         </page>
@@ -189,20 +183,7 @@
                        <option value="1">Regular</option>
                        <option value="2">Vintage</option>
                     </param>
-                    
-                    
                     <separator/>
-                    <!--param name="knob_presets" type="optiongroup" appearance="combo" gui-text="Presets">
-                       <option value="1">Custom</option>
-                       <option value="2">Preset 1</option>
-                       <option value="3">Preset 2</option>
-                       <option value="4">Preset 3</option>
-                       <option value="5">Preset 4</option>
-                       <option value="6">Preset 5</option>
-                       <option value="7">Preset 6</option>
-                       <option value="8">Preset 7</option>
-                    </param-->
-                    
                 </vbox>
                 <spacer/>
                 <separator/>
@@ -349,10 +330,6 @@
                     <separator/>
                     <param name="knob_scale_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
                     <separator/>
-                    <!-- <param name="knob_scale_linlog" type="optiongroup" _gui-text="Lin/log" appearance="radio">
-                        <option value="1">Lin</option>
-                        <option value="2">Log</option>
-                    </param> -->
                 </vbox>
             </hbox>
         </page>
@@ -497,38 +474,33 @@
                     <param name="slider_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
                     <separator/>
                     <param name="slider_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
-                    <!-- <param name="slider_scale_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
-                        <option value="2">Cross</option>
-                        <option value="3">Dot</option>
-                        <option value="4">Contour</option>
-                    </param> -->
                     <param name="slider_scale_utilities_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
                     <separator/>
                     <param name="slider_scale_utilities_guide_round_edges" type="boolean" _gui-text="Round the edges">false</param>
-                    <!-- <param name="slider_scale_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param> -->
                     <separator/>
-                    <!-- <param name="slider_scale_linlog" type="optiongroup" _gui-text="Lin/log" appearance="radio">
-                        <option value="1">Lin</option>
-                        <option value="2">Log</option>
-                    </param> -->
                 </vbox>
             </hbox>
         </page>
         <page name="About" gui-text="About">
             <label appearance="header" xml:space="preserve">Need help? Check our website</label>
             <label appearance="url">https://synthpanels.design</label>
-            <spacer/>
-            <label>Synth Panels Designer v. 1.0Beta</label>
-            <spacer/>
-             
+            <label appearance="header" xml:space="preserve">Download and read the manual first!!</label>
+            <label appearance="url">https://bit.ly/SPD_manual</label>
             
+            <spacer/>
+            <label>Synth Panels Designer v. 1.0 - 27 June 2020</label>
+            <spacer/>
+            <separator/>
+            <label xml:space="preserve">
+- All product names, logos, and brands are property of their respective owners. </label> 
+            <separator/>
             <label appearance="header">SPONSORED BY</label>
             <separator/>
             <hbox>
                 <vbox>
                     <label appearance="header">SOUNDMIT - ITALIAN SYNTHS and PEDALS EXPO (since 2011)</label>
                     <label appearance="url">https://soundmit.com</label>
-                    <image>SynthPanelsDesign/assets/sm_logo.svg</image>
+                    <image>SynthPanelsDesigner/assets/sm_logo.svg</image>
                     <spacer/>
                 </vbox>
                 <spacer/>
@@ -537,7 +509,7 @@
                 <vbox>
                     <label appearance="header">FASELUNARE</label>
                     <label appearance="url">https://faselunare.com</label>
-                    <image>SynthPanelsDesign/assets/fl_logo.svg</image>
+                    <image>SynthPanelsDesigner/assets/fl_logo.svg</image>
                     <spacer/>
                 </vbox>
                 <spacer/>
@@ -556,6 +528,6 @@
     </effect>
 
   <script>
-    <command reldir="extensions" interpreter="python">SynthPanelsDesign/SynthPanelsDesign.py</command>
+    <command reldir="extensions" interpreter="python">SynthPanelsDesigner/SynthPanelsDesigner.py</command>
   </script>
 </inkscape-extension>

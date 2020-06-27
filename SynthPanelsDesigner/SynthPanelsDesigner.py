@@ -22,9 +22,6 @@ import inkex
 import argparse
 import os
 from inkex.elements import ShapeElement
-# import SPD_presets
-# from SPD_presets import knob_presets, slider_presets
-
 
 from lxml import etree
 from inkex.elements import Circle, PathElement, Rectangle, load_svg, Group, TextElement
@@ -1407,8 +1404,6 @@ class SynthPanelEffect(inkex.Effect):
                                                 else:       
                                                     slider_scale_ticks.append(scale_subtick_r)
                                                     slider_scale_ticks.append(scale_subtick_l)
-
-                                    
 
                                 if self.options.slider_scale_add_perpendicular_line:
 
