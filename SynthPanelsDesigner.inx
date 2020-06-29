@@ -305,6 +305,7 @@
                     <param name="knob_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="knob_scale_label_start_number" type="float" min="-9999" max="10000" default="1" precision="1" _gui-text="Start value">1</param>
                     <param name="knob_scale_label_end_number" type="float" min="-99999" default="10" max="10000" precision="1" _gui-text="End value">10</param>
+                    <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">False</param>
                     <param name="knob_scale_label_rounding_float" type="int" min="0" max="3" default="0" precision="1" _gui-text="Rounding float">0</param>
                     <param name="knob_scale_label_leftright" type="boolean" _gui-text="Left/Right">false</param>
                     <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
@@ -453,11 +454,12 @@
                     <param name="slider_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="slider_scale_label_start" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Start value">1</param>
                     <param name="slider_scale_label_end" type="float" min="-999" default="10" max="999" precision="2" _gui-text="End value">10</param>
+                    <param name="slider_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">False</param>
                     <param name="slider_scale_label_rounding_float" type="int" min="0" max="3" default="1" precision="1" _gui-text="Rounding float">1</param>
                     <param name="slider_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
                     <param name="slider_scale_label_position" default="3" type="optiongroup" appearance="combo" gui-text="Label position">
-                       <option value="1">Left</option>
-                       <option value="2">Right</option>
+                       <option value="1">Left/Top</option>
+                       <option value="2">Right/Bottom</option>
                        <option value="3">Both</option>
                     </param>
                     <param name="slider_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label font size">1</param>
@@ -490,7 +492,7 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.0 - 27 June 2020</label>
+            <label>Synth Panels Designer v. 1.0.1- 29 June 2020</label>
             <spacer/>
             <separator/>
             <label appearance="header" xml:space="preserve">NOTE</label>

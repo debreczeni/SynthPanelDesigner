@@ -147,6 +147,7 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
         pars.add_argument('--knob_scale_label_start_number', type=float, default='1', help='Start number')
         pars.add_argument('--knob_scale_label_end_number', type=float, default='10', help='End number')
+        pars.add_argument('--knob_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
         pars.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
         pars.add_argument('--knob_scale_label_leftright', type=inkex.Boolean, default='False', help='Left/Right')
         pars.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
@@ -224,6 +225,7 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--slider_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
         pars.add_argument('--slider_scale_label_start', type=float, default='1', help='Start')
         pars.add_argument('--slider_scale_label_end', type=float, default='10', help='End')
+        pars.add_argument('--slider_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
         pars.add_argument('--slider_scale_label_rounding_float', type=int, default='0', help='Rounding float')
         pars.add_argument('--slider_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
         pars.add_argument('--slider_scale_label_position', type=int, default='0', help='Label position')
@@ -1046,24 +1048,30 @@ class SynthPanelEffect(inkex.Effect):
                                         if self.options.knob_scale_label_rounding_float > 0:
                                             if self.options.knob_scale_label_reverse_order:
                                                 #reverse
-                                                tick_text = str(round(start_num +
+                                                tick_number = str(round(start_num +
                                                                     float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
-                                                                    self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
+                                                                    self.options.knob_scale_label_rounding_float))
                                             else:
                                                 #forward
-                                                tick_text = str(round(start_num +
+                                                tick_number = str(round(start_num +
                                                                     float(tick) * (end_num - start_num) / (n_ticks - 1),
-                                                                    self.options.knob_scale_label_rounding_float)) + str("") +  ((self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix  else '' )
+                                                                    self.options.knob_scale_label_rounding_float))
                                         else:
                                             if self.options.knob_scale_label_reverse_order:
                                                 #reverse
-                                                tick_text = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
+                                                tick_number = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1)))
                                             else:
                                                 #forward
-                                                tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1))) + str("") + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
+                                                tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
 
-                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text, radius + tick_length + text_spacing,
-                                                ticks_start_angle + ticks_delta*tick, text_size)
+
+                                        if (self.options.knob_scale_add_plus_sign and  int(tick_number) > 0):
+                                            tick_text = "+" + tick_number
+                                        else:
+                                            tick_text = tick_number 
+                                         
+
+                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing,ticks_start_angle + ticks_delta*tick, text_size)
 
                                     label.style['text-align'] = 'center'
                                     label.style['text-anchor'] = 'middle'
@@ -1493,18 +1501,27 @@ class SynthPanelEffect(inkex.Effect):
                                         if self.options.slider_scale_add_label:
                                             if self.options.slider_scale_label_reverse_order:
                                                 if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_text = str(round(start_num +
+                                                    tick_number = str(round(start_num +
                                                                         float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
                                                                         self.options.slider_scale_label_rounding_float))
                                                 else:
-                                                    tick_text = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
+                                                    tick_number = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
                                             else:
                                                 if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_text = str(round(start_num +
+                                                    tick_number = str(round(start_num +
                                                                         float(tick) * (end_num - start_num) / (n_ticks - 1),
                                                                         self.options.slider_scale_label_rounding_float))
                                                 else:
-                                                    tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+                                                    tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+
+
+                                            if (self.options.slider_scale_add_plus_sign and  int(tick_number) > 0):
+                                                tick_text = "+" + tick_number
+                                            else:
+                                                tick_text = tick_number 
+                                         
+
+                                        
                                                     
                                             label_t = self.draw_slider_text(
                                                                 bbox.left + ticks_delta * tick + (self.options.slider_scale_h_offset /2),
