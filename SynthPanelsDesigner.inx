@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 # Synth Panels Designer - Free Inkscape extension to draw musical instruments user interfaces
 # Copyright (C) 2020 Francesco Mulassano
@@ -16,7 +17,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Synth Panels Designer</_name>
   <id>com.Faselunare.SPD.SynthPanelsDesign</id>
@@ -197,7 +197,7 @@
                     <param name="knob_vintage_color" type="color" appearance="colorbutton" _gui-text="Vintage color" default="#333333"></param>
                     <param name="knob_vintage_stroke_color" type="color" appearance="colorbutton" _gui-text="Vintage stroke color" default="#333333"></param>
                     <separator/>
-                    <param name="knob_add_skirt" type="boolean" _gui-text="Add Skirt">False</param>
+                    <param name="knob_add_skirt" type="boolean" _gui-text="Add Skirt">false</param>
                     <param name="knob_skirt_color" type="color" appearance="colorbutton" _gui-text="Skirt color" default="#fefefe"></param>
                     <param name="knob_skirt_stroke_color" type="color" appearance="colorbutton" _gui-text="Skirt stroke color" default="#333333"></param>
                     <spacer size="expand"/>
@@ -218,7 +218,7 @@
                     <label appearance="header">DIMENSIONS</label>
                     <separator/>
                     <param name="knob_main_dimension" type="float" min="4" max="40" default="10" precision="2" _gui-text="Main dimension">10</param>
-                    <param name="knob_main_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Main stroke width" default="#000000">0.5</param>
+                    <param name="knob_main_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Main stroke width">0.5</param>
                     <separator/>
                     <param name="knob_vintage_dimension" type="float" min="1" max="40" default="10" precision="2" _gui-text="Vintage dimension">10</param>
                     <param name="knob_vintage_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Vintage sroke width">0.3</param>
@@ -228,8 +228,8 @@
                     <param name="knob_skirt_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Skirt stroke">0.5</param>
                     <spacer/>
                     <separator/>
-                    <param name="knob_tick_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Tick width" default="#000000">0.5</param>
-                    <param name="knob_tick_lenght" type="float" min="0" max="40" default="5.5" precision="1" _gui-text="Tick leght/position" default="#000000">5.5</param>
+                    <param name="knob_tick_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Tick width">0.5</param>
+                    <param name="knob_tick_lenght" type="float" min="0" max="40" default="5.5" precision="1" _gui-text="Tick leght/position">5.5</param>
 
                 </vbox>
             </hbox>
@@ -242,7 +242,7 @@
 
                     <separator/>
                     <param name="knob_scale_add_arc" type="boolean" _gui-text="Draw arc">True</param>
-                    <param indent="1" name="knob_scale_add_outer_arc" type="boolean" _gui-text="Draw outer arc">False</param>
+                    <param indent="1" name="knob_scale_add_outer_arc" type="boolean" _gui-text="Draw outer arc">false</param>
                     
                     <param name="knob_scale_outer_arc_offset" type="float" min="-10" max="10" default="0.5" precision="2" _gui-text="Outer arc offset" >0.5</param>
                     <param name="knob_scale_arc_width" type="float" min="0" max="10" default="0.5" precision="1" _gui-text="Arc line width">0.5</param>
@@ -260,8 +260,8 @@
                     <label appearance="header">TICKS</label>
                     <param name="knob_scale_ticks_color" type="color" appearance="colorbutton" _gui-text="Ticks color" default="#333333"></param>
                     <separator/>
-                    <param name="knob_scale_add_ticks" type="boolean" _gui-text="Add ticks">False</param>
-                    <param name="knob_scale_inner_ticks" type="boolean" _gui-text="Inner ticks">False</param>
+                    <param name="knob_scale_add_ticks" type="boolean" _gui-text="Add ticks">false</param>
+                    <param name="knob_scale_inner_ticks" type="boolean" _gui-text="Inner ticks">false</param>
                     <param name="knob_scale_ticks_type" type="optiongroup" gui-text="Ticks type">
                        <option value="1">Marks</option>
                        <option value="2">Dots</option>
@@ -284,7 +284,7 @@
                     <label appearance="header" >SUBTICKS</label>
                     <param name="knob_scale_subticks_color" type="color" appearance="colorbutton" _gui-text="Subticks color" default="#333333"></param>
                     <separator/>
-                    <param name="knob_scale_add_subticks" type="boolean" _gui-text="Add subticks">False</param>
+                    <param name="knob_scale_add_subticks" type="boolean" _gui-text="Add subticks">false</param>
                     <param name="knob_scale_subticks_type" type="optiongroup" gui-text="Subticks type" appearance="radio">
                        <option value="1">Marks</option>
                        <option value="2">Dots</option>
@@ -305,7 +305,7 @@
                     <param name="knob_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="knob_scale_label_start_number" type="float" min="-9999" max="10000" default="1" precision="1" _gui-text="Start value">1</param>
                     <param name="knob_scale_label_end_number" type="float" min="-99999" default="10" max="10000" precision="1" _gui-text="End value">10</param>
-                    <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">False</param>
+                    <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">false</param>
                     <param name="knob_scale_label_rounding_float" type="int" min="0" max="3" default="0" precision="1" _gui-text="Rounding float">0</param>
                     <param name="knob_scale_label_leftright" type="boolean" _gui-text="Left/Right">false</param>
                     <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
@@ -382,7 +382,7 @@
                     <separator/>
                      <param name="slider_coarse_lenght" type="float" min="1" max="120" default="60" precision="2" _gui-text="Coarse">60</param>
                      <param name="slider_coarse_gap" type="float" min="1" max="120" default="60" precision="2" _gui-text="Gap">6</param>
-                     <param name="slider_coarse_stroke_width" type="float" min="0" max="5" default="1" precision="1" _gui-text="Coarse stroke width" default="#000000">1</param>
+                     <param name="slider_coarse_stroke_width" type="float" min="0" max="5" default="1" precision="1" _gui-text="Coarse stroke width">1</param>
                      <param name="slider_coarse_round_edges" type="boolean" _gui-text="Round the edges">false</param>
 
                     <separator/>
@@ -428,7 +428,7 @@
                     <spacer/>
                     <label appearance="header">LINE</label>
                     <separator/>
-                    <param name="slider_scale_add_perpendicular_line" type="boolean" _gui-text="Add perpendicular line">False</param>
+                    <param name="slider_scale_add_perpendicular_line" type="boolean" _gui-text="Add perpendicular line">false</param>
                     <param name="slider_scale_perpendicular_line_width" type="float" min="0.1" max="20" default="0.2" precision="1" _gui-text="Perpendicular line width">0.2</param>
                 </vbox>
                 <spacer/>
@@ -438,7 +438,7 @@
                     <label appearance="header">SUBTICKS</label>
                     <param name="slider_scale_subtick_color" type="color" appearance="colorbutton" _gui-text="Subticks color" default="#333333"></param>
                     <separator/>
-                    <param name="slider_scale_add_subticks" type="boolean" _gui-text="Add subticks">False</param>
+                    <param name="slider_scale_add_subticks" type="boolean" _gui-text="Add subticks">false</param>
                     <param name="slider_scale_subticks_number" type="int" min="1" max="100" default="0" precision="1" _gui-text="Number of subticks">1</param>
                     <param name="slider_scale_subticks_size" type="float" min="0.1" max="20" default="1" precision="1" _gui-text="Subticks size">1</param>
                     <param name="slider_scale_subtick_lenght" type="float" min="0.1" max="20" default="1" precision="1" _gui-text="Subticks lenght">2</param>
@@ -454,7 +454,7 @@
                     <param name="slider_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="slider_scale_label_start" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Start value">1</param>
                     <param name="slider_scale_label_end" type="float" min="-999" default="10" max="999" precision="2" _gui-text="End value">10</param>
-                    <param name="slider_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">False</param>
+                    <param name="slider_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">false</param>
                     <param name="slider_scale_label_rounding_float" type="int" min="0" max="3" default="1" precision="1" _gui-text="Rounding float">1</param>
                     <param name="slider_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
                     <param name="slider_scale_label_position" default="3" type="optiongroup" appearance="combo" gui-text="Label position">
