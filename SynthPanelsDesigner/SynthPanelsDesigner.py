@@ -104,6 +104,10 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_skirt_dimension', type=float, default='12', help='Set the knob secondary dimension')
         pars.add_argument('--knob_skirt_stroke_width', type=float, default=1, help='Set the stroke width')
 
+        pars.add_argument('--knob_add_arrow', type=inkex.Boolean, default='False', help='Add arrow')
+        pars.add_argument('--knob_arrow_color', type=inkex.Color, default='#fefefe', help='Knob arrow color') 
+        pars.add_argument('--knob_arrow_width', type=float, default='0', help='Knob arrow width') 
+
         #knobs scale
         pars.add_argument('--knob_scale_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
         pars.add_argument('--knob_scale_add_arc', type=inkex.Boolean, default='False', help='Draw arc')
@@ -316,6 +320,11 @@ class SynthPanelEffect(inkex.Effect):
     def draw_line(self, x1, y1, x2, y2):
         line = inkex.PathElement()
         line.path = "M {},{} L {},{}".format(x1, y1, x2, y2)
+        return line
+
+    def draw_arrow(self, x1, y1, x2, y2, x3, y3, x4, y4):
+        line = inkex.PathElement()
+        line.path = "M {},{} {},{} {},{} {},{} Z".format(x1, y1, x2, y2, x3, y3, x4, y4)
         return line
 
     def draw_knob_scale_arc(self, cx, cy, angle, rotation, radius):
@@ -804,8 +813,10 @@ class SynthPanelEffect(inkex.Effect):
                     knob_layer_skirt = knob_layer.add(inkex.Layer.new('Skirt'))
                 if self.options.knob_main_style == 2:
                     knob_layer_vintage = knob_layer.add(inkex.Layer.new('Vintage knob'))
+                if (self.options.knob_add_arrow and self.options.knob_add_skirt):
+                    knob_layer_arrow = knob_layer.add(inkex.Layer.new('Arrow'))
                 knob_layer_main = knob_layer.add(inkex.Layer.new('Main color'))
-                knob_layer_tick = knob_layer.add(inkex.Layer.new('Tick'))
+                
 
                 #append the knob layer to the knobs group
                 knobs.append(knob_layer)
@@ -838,10 +849,11 @@ class SynthPanelEffect(inkex.Effect):
 
                 tlenght = self.options.knob_tick_lenght
 
-                x2 = tlenght*sin(325*pi/180)
-                y2 = tlenght*cos(325*pi/180)
+                x2 = tlenght*sin(315*pi/180)
+                y2 = tlenght*cos(315*pi/180)
 
                 if self.options.knob_add_tick:
+                    knob_layer_tick = knob_layer.add(inkex.Layer.new('Tick'))
                     if self.options.knob_tick_type == 1:
                         thetick = self.draw_line(bbox_panel.center_x, bbox_panel.center_y, x2+bbox_panel.center_x, y2+bbox_panel.center_y)
                         thetick.style['fill'] = 'none'
@@ -855,6 +867,27 @@ class SynthPanelEffect(inkex.Effect):
                     thetick.style['stroke-width'] = self.options.knob_tick_width
 
                     knob_layer_tick.append(thetick)
+
+                #add arrow
+
+                alenght = self.options.knob_skirt_dimension / 2
+
+                ax2 = alenght*sin(315*pi/180)
+                ay2 = alenght*cos(315*pi/180)
+
+                if (self.options.knob_add_arrow and self.options.knob_add_skirt):
+                    thearrow = self.draw_arrow(
+                                bbox_panel.center_x, bbox_panel.center_y, 
+                                bbox_panel.center_x - (self.options.knob_main_dimension/2) - self.options.knob_arrow_width, bbox_panel.center_y, 
+                                ax2+bbox_panel.center_x, ay2+bbox_panel.center_y, 
+                                bbox_panel.center_x, (bbox_panel.center_y + self.options.knob_main_dimension /2) + self.options.knob_arrow_width
+                            )
+
+
+                    thearrow.style['fill'] = self.options.knob_arrow_color
+                    thearrow.style['stroke'] = 'none'
+                    thearrow.style['stroke-width'] =  'none'
+                    knob_layer_arrow.append(thearrow)
 
                 mainknob.style['fill'] = self.options.knob_main_color
                 mainknob.style['stroke'] = self.options.knob_main_stroke_color
