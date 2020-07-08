@@ -97,6 +97,7 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_main_dimension', type=float, default='12', help='Set the knob main dimension')
         pars.add_argument('--knob_main_stroke_width', type=float, default=1, help='Set the stroke width')
         
+        pars.add_argument('--knob_add_tick', type=inkex.Boolean, default='False', help='Add tick')
         pars.add_argument('--knob_tick_width', type=float, default=1, help='Set the tick width')
         pars.add_argument('--knob_tick_lenght', type=float, default=5.5, help='Set the tick lenght')
 
@@ -840,19 +841,20 @@ class SynthPanelEffect(inkex.Effect):
                 x2 = tlenght*sin(325*pi/180)
                 y2 = tlenght*cos(325*pi/180)
 
-                if self.options.knob_tick_type == 1:
-                    thetick = self.draw_line(bbox_panel.center_x, bbox_panel.center_y, x2+bbox_panel.center_x, y2+bbox_panel.center_y)
-                    thetick.style['fill'] = 'none'
-                    thetick.style['stroke'] = self.options.knob_tick_color
+                if self.options.knob_add_tick:
+                    if self.options.knob_tick_type == 1:
+                        thetick = self.draw_line(bbox_panel.center_x, bbox_panel.center_y, x2+bbox_panel.center_x, y2+bbox_panel.center_y)
+                        thetick.style['fill'] = 'none'
+                        thetick.style['stroke'] = self.options.knob_tick_color
 
-                else:
-                    thetick = Circle(cx=str(x2+bbox_panel.center_x), cy=str(y2+bbox_panel.center_y), r=str(self.options.knob_tick_width))
-                    thetick.style['fill'] = self.options.knob_tick_color
-                    thetick.style['stroke'] = 'none'
+                    else:
+                        thetick = Circle(cx=str(x2+bbox_panel.center_x), cy=str(y2+bbox_panel.center_y), r=str(self.options.knob_tick_width))
+                        thetick.style['fill'] = self.options.knob_tick_color
+                        thetick.style['stroke'] = 'none'
 
-                thetick.style['stroke-width'] = self.options.knob_tick_width
+                    thetick.style['stroke-width'] = self.options.knob_tick_width
 
-                knob_layer_tick.append(thetick)
+                    knob_layer_tick.append(thetick)
 
                 mainknob.style['fill'] = self.options.knob_main_color
                 mainknob.style['stroke'] = self.options.knob_main_stroke_color

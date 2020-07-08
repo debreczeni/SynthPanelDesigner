@@ -194,21 +194,20 @@
                     <param name="knob_main_color" type="color" appearance="colorbutton" _gui-text="Main color" default="#fefefe"></param>
                     <param name="knob_main_stroke_color" type="color" appearance="colorbutton" _gui-text="Main stroke color" default="#333333"></param>
                     <separator/>
+                    <param name="knob_add_tick" type="boolean" _gui-text="Add Tick">false</param>
+                    <param name="knob_tick_color" type="color" appearance="colorbutton" _gui-text="Tick color" default="#333333"></param>
+                    <param name="knob_tick_type" type="optiongroup" gui-text="Tick type">
+                       <option value="1">Line</option>
+                       <option value="2">Dot</option>
+                    </param>
+                    <separator/>
                     <param name="knob_vintage_color" type="color" appearance="colorbutton" _gui-text="Vintage color" default="#333333"></param>
                     <param name="knob_vintage_stroke_color" type="color" appearance="colorbutton" _gui-text="Vintage stroke color" default="#333333"></param>
                     <separator/>
                     <param name="knob_add_skirt" type="boolean" _gui-text="Add Skirt">false</param>
                     <param name="knob_skirt_color" type="color" appearance="colorbutton" _gui-text="Skirt color" default="#fefefe"></param>
                     <param name="knob_skirt_stroke_color" type="color" appearance="colorbutton" _gui-text="Skirt stroke color" default="#333333"></param>
-                    <spacer size="expand"/>
-                    
                     <separator/>
-                    
-                    <param name="knob_tick_color" type="color" appearance="colorbutton" _gui-text="Tick color" default="#333333"></param>
-                    <param name="knob_tick_type" type="optiongroup" gui-text="Tick type">
-                       <option value="1">Line</option>
-                       <option value="2">Dot</option>
-                    </param>
                     <spacer/>
                 </vbox>
                 <spacer/>
@@ -220,6 +219,12 @@
                     <param name="knob_main_dimension" type="float" min="4" max="40" default="10" precision="2" _gui-text="Main dimension">10</param>
                     <param name="knob_main_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Main stroke width">0.5</param>
                     <separator/>
+                    <spacer/>
+                    <spacer/>
+                    <param name="knob_tick_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Tick width">0.5</param>
+                    <param name="knob_tick_lenght" type="float" min="0" max="40" default="5.5" precision="1" _gui-text="Tick leght/position">5.5</param>
+                    <separator/>
+                   
                     <param name="knob_vintage_dimension" type="float" min="1" max="40" default="10" precision="2" _gui-text="Vintage dimension">10</param>
                     <param name="knob_vintage_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Vintage sroke width">0.3</param>
                     <separator/>
