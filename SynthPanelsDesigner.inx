@@ -311,13 +311,18 @@
                     <param name="knob_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="knob_scale_label_start_number" type="float" min="-9999" max="10000" default="1" precision="1" _gui-text="Start value">1</param>
                     <param name="knob_scale_label_end_number" type="float" min="-99999" default="10" max="10000" precision="1" _gui-text="End value">10</param>
-                    <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numebrs">false</param>
+                    <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numbers">false</param>
                     <param name="knob_scale_label_rounding_float" type="int" min="0" max="3" default="0" precision="1" _gui-text="Rounding float">0</param>
-                    <param name="knob_scale_label_leftright" type="boolean" _gui-text="Left/Right">false</param>
                     <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
                     <param name="knob_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label size">10</param>
                     <param name="knob_scale_label_offset" type="float" min="-10" max="10" default="1" precision="2" _gui-text="Label offset">10</param>
                     <param name="knob_scale_label_add_suffix" type="string" gui-text="Label suffix"></param>
+                    <param name="knob_scale_label_add_customtext" type="boolean" _gui-text="Add custom text">false</param>
+                    <param name="knob_scale_label_customtext" type="string" gui-text="Custom text"></param>
+                    <label xml:space="preserve">
+- Comma separated words
+- Number of Ticks and Words must be the same
+                                            </label>
                 </vbox>
                 <spacer/>
                 <separator/>

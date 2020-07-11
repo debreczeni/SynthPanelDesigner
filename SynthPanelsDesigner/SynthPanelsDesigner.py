@@ -154,11 +154,12 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_label_end_number', type=float, default='10', help='End number')
         pars.add_argument('--knob_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
         pars.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
-        pars.add_argument('--knob_scale_label_leftright', type=inkex.Boolean, default='False', help='Left/Right')
         pars.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
         pars.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
         pars.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
-        pars.add_argument('--knob_scale_label_add_suffix', help='Label')
+        pars.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
+        pars.add_argument('--knob_scale_label_add_customtext', type=inkex.Boolean, help='Label add customtext')
+        pars.add_argument('--knob_scale_label_customtext', help='Label customtex')
 
         #knobs scale utilities
         pars.add_argument('--knob_scale_utilities_color', type=inkex.Color, default='#333333', help='Utilities color')
@@ -922,12 +923,8 @@ class SynthPanelEffect(inkex.Effect):
                 knob_scales = self.svg.add(inkex.Layer.new('Knob Scales Group'))
                 knob_scales.set('id', 'knob-scales-group')
 
-            if self.options.knob_scale_label_leftright:
-                n_ticks  = 2
-                n_subticks = 1
-            else:
-                n_ticks = self.options.knob_scale_ticks_number
-                n_subticks = self.options.knob_scale_subticks_number
+            n_ticks = self.options.knob_scale_ticks_number
+            n_subticks = self.options.knob_scale_subticks_number
 
             start_num = self.options.knob_scale_label_start_number
             end_num = self.options.knob_scale_label_end_number
@@ -1039,7 +1036,10 @@ class SynthPanelEffect(inkex.Effect):
 
                             ticks_delta = angle / (n_ticks - 1)
                             knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
-                            
+
+
+                            customText = self.options.knob_scale_label_customtext.split(',')
+
                             for tick in range(n_ticks):
                                 if self.options.knob_scale_ticks_type == 1:
                                     if(self.options.knob_scale_ticks_accent_number != 0):
@@ -1077,10 +1077,12 @@ class SynthPanelEffect(inkex.Effect):
                                     knob_scale_tick.append(scale_tick)
 
                                 if self.options.knob_scale_add_label:
-                                    if self.options.knob_scale_label_leftright:
-                                        tick_text = ['L', 'R']
-                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text[tick], radius + tick_length + text_spacing,
-                                                ticks_start_angle + ticks_delta*tick, text_size)
+                                    if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
+                                        
+                                        
+                                        label = self.draw_text(bbox.center_x, bbox.center_y, customText[tick], radius + tick_length + text_spacing,
+                                                    ticks_start_angle + ticks_delta*tick, text_size)
+                                        
                                     else:    
                                         if self.options.knob_scale_label_rounding_float > 0:
                                             if self.options.knob_scale_label_reverse_order:
@@ -1108,7 +1110,7 @@ class SynthPanelEffect(inkex.Effect):
                                             tick_text = tick_number 
                                          
 
-                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing,ticks_start_angle + ticks_delta*tick, text_size)
+                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
 
                                     label.style['text-align'] = 'center'
                                     label.style['text-anchor'] = 'middle'
