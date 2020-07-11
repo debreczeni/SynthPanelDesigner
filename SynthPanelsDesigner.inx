@@ -203,6 +203,9 @@
                     <separator/>
                     <param name="knob_vintage_color" type="color" appearance="colorbutton" _gui-text="Vintage color" default="#333333"></param>
                     <param name="knob_vintage_stroke_color" type="color" appearance="colorbutton" _gui-text="Vintage stroke color" default="#333333"></param>
+                    
+                    <spacer/>
+
                     <separator/>
                     <param name="knob_add_skirt" type="boolean" _gui-text="Add Skirt">false</param>
                     <param name="knob_skirt_color" type="color" appearance="colorbutton" _gui-text="Skirt color" default="#fefefe"></param>
@@ -211,7 +214,7 @@
                     
                     <param name="knob_add_arrow" type="boolean" _gui-text="Add Arrow">false</param>
                     <param name="knob_arrow_color" type="color" appearance="colorbutton" _gui-text="Arrow color" default="#FFFFFF"></param>
-                    <param name="knob_arrow_width" type="float" min="-10" max="0" default="0" precision="2" _gui-text="Arrow width">0</param>
+                    <param name="knob_arrow_width" type="float" min="-10" max="0" default="-2" precision="2" _gui-text="Arrow width">-2</param>
                     <spacer/>
                 </vbox>
                 <spacer/>
@@ -223,16 +226,18 @@
                     <param name="knob_main_dimension" type="float" min="4" max="40" default="10" precision="2" _gui-text="Main dimension">10</param>
                     <param name="knob_main_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Main stroke width">0.5</param>
                     <separator/>
-                    <spacer/>
-                    <spacer/>
+           
                     <param name="knob_tick_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Tick width">0.5</param>
                     <param name="knob_tick_lenght" type="float" min="0" max="40" default="5.5" precision="1" _gui-text="Tick leght/position">5.5</param>
                     <separator/>
                    
                     <param name="knob_vintage_dimension" type="float" min="1" max="40" default="10" precision="2" _gui-text="Vintage dimension">10</param>
                     <param name="knob_vintage_stroke_width" type="float" min="0" max="10" default="0.3" precision="2" _gui-text="Vintage sroke width">0.3</param>
+                    <param name="knob_vintage_sides" type="int" min="0" max="360" default="7"  _gui-text="Vintage sides">7</param> 
+                    <param name="knob_vintage_transform" type="float" min="0" max="10" default="1" precision="2" _gui-text="Vintage transform">1</param> 
+            
                     <separator/>
-                    
+                    <spacer/>
                     <param name="knob_skirt_dimension" type="float" min="4" max="40" default="12" precision="1" _gui-text="Skirt dimension">12</param>
                     <param name="knob_skirt_stroke_width" type="float" min="0" max="5" default="0.5" precision="1" _gui-text="Skirt stroke">0.5</param>
                     <spacer/>
