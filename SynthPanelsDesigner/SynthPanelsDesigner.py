@@ -83,7 +83,8 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_vintage_dimension', type=float, default='10', help='Knob vintage dimension')
         pars.add_argument('--knob_vintage_stroke_color', type=inkex.Color, default='#fefefe', help='Knob vintage stroke color')
         pars.add_argument('--knob_vintage_stroke_width', type=float, default='10', help='Knob vintage stroke width')
-        pars.add_argument('--knob_presets', type=int, default=1, help='Select the knob type')
+        pars.add_argument('--knob_vintage_sides', type=float, default='10', help='Knob vintage sides')
+        pars.add_argument('--knob_vintage_transform', type=float, default='10', help='Knob vintage transformation')
 
         pars.add_argument('--knob_main_color', type=inkex.Color, default='#fefefe', help='Knob main color')
         pars.add_argument('--knob_main_stroke_color', type=inkex.Color, default='#333333', help='Knob stroke color')
@@ -829,7 +830,7 @@ class SynthPanelEffect(inkex.Effect):
                 bbox_panel = self.svg.get_page_bbox()
                 
                 if self.options.knob_main_style == 2:
-                    vintage_knob = self.draw_vintage_circle(x=str(bbox_panel.center_x), y=str(bbox_panel.center_y), radius=str(self.options.knob_vintage_dimension / 2), radius2 = str(self.options.knob_vintage_dimension / 2 + 1 ), sides = 7)
+                    vintage_knob = self.draw_vintage_circle(x=str(bbox_panel.center_x), y=str(bbox_panel.center_y), radius=str(self.options.knob_vintage_dimension / 2), radius2 = str(self.options.knob_vintage_dimension / 2 + self.options.knob_vintage_transform ), sides = self.options.knob_vintage_sides)
                 
                     vintage_knob.style['fill'] = self.options.knob_vintage_color
                     vintage_knob.style['stroke'] = self.options.knob_vintage_stroke_color
