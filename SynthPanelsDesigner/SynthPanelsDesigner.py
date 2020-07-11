@@ -811,10 +811,13 @@ class SynthPanelEffect(inkex.Effect):
 
                 if self.options.knob_add_skirt: #skirt is active on presets
                     knob_layer_skirt = knob_layer.add(inkex.Layer.new('Skirt'))
-                if self.options.knob_main_style == 2:
-                    knob_layer_vintage = knob_layer.add(inkex.Layer.new('Vintage knob'))
+                
                 if (self.options.knob_add_arrow and self.options.knob_add_skirt):
                     knob_layer_arrow = knob_layer.add(inkex.Layer.new('Arrow'))
+                
+                if self.options.knob_main_style == 2:
+                    knob_layer_vintage = knob_layer.add(inkex.Layer.new('Vintage knob'))
+
                 knob_layer_main = knob_layer.add(inkex.Layer.new('Main color'))
                 
 
@@ -826,13 +829,12 @@ class SynthPanelEffect(inkex.Effect):
                 
                 if self.options.knob_main_style == 2:
                     vintage_knob = self.draw_vintage_circle(x=str(bbox_panel.center_x), y=str(bbox_panel.center_y), radius=str(self.options.knob_vintage_dimension / 2), radius2 = str(self.options.knob_vintage_dimension / 2 + 1 ), sides = 7)
-                    mainknob = Circle(cx=str(bbox_panel.center_x), cy=str(bbox_panel.center_y), r=str(self.options.knob_main_dimension / 2))
                 
                     vintage_knob.style['fill'] = self.options.knob_vintage_color
                     vintage_knob.style['stroke'] = self.options.knob_vintage_stroke_color
                     vintage_knob.style['stroke-width'] = self.options.knob_vintage_stroke_width
-                else:
-                    mainknob = Circle(cx=str(bbox_panel.center_x), cy=str(bbox_panel.center_y), r=str(self.options.knob_main_dimension / 2))
+
+                mainknob = Circle(cx=str(bbox_panel.center_x), cy=str(bbox_panel.center_y), r=str(self.options.knob_main_dimension / 2))
                     
                 mainknob.set('id', 'id_'+self.options.knob_name)
                 
