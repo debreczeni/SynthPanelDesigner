@@ -15,6 +15,10 @@
 
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Added suggestions - GaryA 15/8/2020
+# Added jacks with options for 3.5mm & 1/4in
+# Added option to define position of knobs, sliders & jacks 
 */
 -->
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
@@ -33,6 +37,7 @@
        <option value="3">UI - Knob scales</option>
        <option value="4">UI - Slider</option>
        <option value="5">UI - Slider scales</option>
+	   <option value="6">UI - Jacks</option>
   </param>
   <separator/>
   <param name="paneltab" type="notebook">
@@ -250,6 +255,17 @@
                     <spacer/>
                     <param name="knob_arrow_width" type="float" min="-10" max="0" default="-2" precision="2" _gui-text="Arrow width">-2</param>
                 </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+				    <label appearance="header">POSITION</label>
+					<separator/>
+					<param name="knob_pos_define" type="boolean" _gui-text="Define knob position">false</param>
+					<param name="knob_pos_x" type="float" min="0" max="10000" default="10" precision="2" _gui-text="X position">10.0</param>
+					<param name="knob_pos_y" type="float" min="0" max="10000" default="10" precision="2" _gui-text="Y position">10.0</param>
+					<separator/>
+				</vbox>
             </hbox>
         </page>
         <page name="Knob_Scale" gui-text="KNOB SCALE">
@@ -418,6 +434,17 @@
                      <separator/>
                      <param name="slider_cursor_tick_width" type="float" min="0" max="120" default="1" precision="2" _gui-text="Cursor tick width">0.5</param>
                 </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+				    <label appearance="header">POSITION</label>
+					<separator/>
+					<param name="slider_pos_define" type="boolean" _gui-text="Define slider position">false</param>
+					<param name="slider_pos_x" type="float" min="0" max="10000" default="10" precision="2" _gui-text="X position">10.0</param>
+					<param name="slider_pos_y" type="float" min="0" max="10000" default="10" precision="2" _gui-text="Y position">10.0</param>
+					<separator/>
+				</vbox>
             </hbox>
             <spacer />
         </page>
@@ -506,7 +533,69 @@
                 </vbox>
             </hbox>
         </page>
-        <page name="About" gui-text="About">
+         <page name="Jacks" gui-text="JACKS">
+            <hbox>
+                <vbox>
+                    <label appearance="header">JACK DESIGNER</label>
+                    <separator/>
+                    <param name="jack_name" type="string" gui-text="Name"></param>
+                    <spacer/>
+                    <param name="jack_type" default="1" type="optiongroup" appearance="combo" gui-text="Type">
+                       <option value="1">3.5mm</option>
+                       <option value="2">1/4 in</option>
+                    </param>
+                    <spacer/>
+                    <param name="jack_nut_type" default="1" type="optiongroup" appearance="combo" gui-text="Type">
+                       <option value="1">Knurled</option>
+                       <option value="2">Hex (Metal)</option>
+                       <option value="3">Hex (Plastic)</option>
+					</param>
+                   <separator/>
+                </vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+				<vbox>
+					<label appearance="header">COLORS</label>
+					<separator/>
+                    <param name="jack_color" type="color" appearance="colorbutton" _gui-text="Jack color" default="#C0C0C0"></param>
+                    <param name="jack_nut_color" type="color" appearance="colorbutton" _gui-text="Nut color" default="#808080"></param>
+                    <param name="jack_nut_outline_color" type="color" appearance="colorbutton" _gui-text="Nut outline" default="#404040"></param>
+                    <separator/>
+				</vbox>
+                <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+				    <label appearance="header">POSITION</label>
+					<separator/>
+					<param name="jack_pos_define" type="boolean" _gui-text="Define jack position">false</param>
+					<param name="jack_pos_x" type="float" min="0" max="10000" default="10" precision="2" _gui-text="X position">10.0</param>
+					<param name="jack_pos_y" type="float" min="0" max="10000" default="10" precision="2" _gui-text="Y position">10.0</param>
+					<separator/>
+				</vbox>
+                 <spacer/>
+                <separator/>
+                <spacer/>
+                <vbox>
+                    <label appearance="header">UTILITIES</label> 
+                    <param name="jack_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
+                    <separator/>
+                    <param name="jack_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
+                    <param name="jack_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
+                        <option value="2">Cross</option>
+                        <option value="3">Dot</option>
+                        <option value="4">Circle</option>
+                    </param>
+                    <param name="jack_utilities_line_width" type="float" min="0" max="10" default="0.2" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="jack_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <separator/>
+                    <param name="jack_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
+                    <separator/>
+                </vbox>
+           </hbox>
+		</page>
+       <page name="About" gui-text="About">
             <label appearance="header" xml:space="preserve">NEED HELP?</label>
             <label appearance="header" xml:space="preserve">Download and read the manual first!!</label>
             <label appearance="url">https://bit.ly/spd_manual</label>
@@ -515,7 +604,7 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.0.5- 12 July 2020</label>
+            <label>Synth Panels Designer v. 1.0.5+suggestions- 15 August 2020</label>
             <spacer/>
             <separator/>
             <label appearance="header" xml:space="preserve">NOTE</label>
