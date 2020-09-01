@@ -604,7 +604,10 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.0.5+suggestions- 15 August 2020</label>
+            <label>Synth Panels Designer v. 1.0.6 - 02 September 2020</label>
+            <label>Main developer: Francesco Mulassano</label>
+            <label>Contributors: GaryA
+            </label>
             <spacer/>
             <separator/>
             <label appearance="header" xml:space="preserve">NOTE</label>
