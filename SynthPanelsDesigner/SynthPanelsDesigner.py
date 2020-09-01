@@ -1095,8 +1095,8 @@ class SynthPanelEffect(inkex.Effect):
                             ticks_delta = angle / (n_ticks - 1)
                             knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
 
-
-                            customText = self.options.knob_scale_label_customtext.split(',')
+                            if self.options.knob_scale_label_customtext:
+                                customText = self.options.knob_scale_label_customtext.split(',')
 
                             for tick in range(n_ticks):
                                 if self.options.knob_scale_ticks_type == 1:
