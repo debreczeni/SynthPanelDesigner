@@ -378,6 +378,7 @@ class SynthPanelEffect(inkex.Effect):
         end = (angle + rotation - pi) / 2.0
         start = pi - end + rotation
         arc = PathElement.arc((cx, cy), radius, start=start, end=end, open=True)
+        arc.set('sodipodi:arc-type', 'arc')
         return arc
 
     def draw_text(self, x, y, textvalue, radius, angular_position, text_size):
