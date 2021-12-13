@@ -1000,11 +1000,13 @@ class SynthPanelEffect(inkex.Effect):
                 self.svg.append(knobs)
 
         elif part == 3: #knobs scales
-                
-            sknob = self.svg.get_selected()
-            for knob in self.svg.get_selected():   
-                bbox = knob.bounding_box(composed_transform(knob))
-                break
+            sknob = self.svg.selected
+            bbox = sknob.bounding_box()
+            if bbox:
+                center_x, center_y = bbox.center
+
+                center_x = inkex.units.convert_unit(center_x, "mm")
+                center_y = inkex.units.convert_unit(center_y, "mm")
 
             missing_knob = False
 
@@ -1012,7 +1014,7 @@ class SynthPanelEffect(inkex.Effect):
             if self.svg.getElementById('knobs-group') is None:
                 missing_knob = True
                 inkex.errormsg(_("To draw a scale, you must first draw a knob.\n")) 
-
+        
             if self.svg.getElementById('knob-scales-group') is not None:
                 knob_scales = self.svg.getElementById('knob-scales-group')
             else:
@@ -1029,192 +1031,192 @@ class SynthPanelEffect(inkex.Effect):
 
             is_knob_selected = False
 
-            for node in sknob:
+            layer = self.svg.get_current_layer()
+            parent = layer.getparent()
+            selected_label = parent.label
+
+            if sknob:
                 is_knob_selected = True
+
+            if( not is_knob_selected):
+                inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color."))
+            else:   
+                knob_name = selected_label
+                knob_scale_layer = knob_scales.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
+
+                angle = self.options.knob_scale_arc_angle*pi/180.0
+                arc_rotation = self.options.knob_scale_arc_rotation*pi/180.0 *2
                 
-                bbox_parent =  node.getparent()
-                layer = bbox_parent.getparent()
-                selected_label = bbox_parent.get('inkscape:label')
-            
-                if(selected_label == 'none'):
-                    inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color.\nYou have selected the knob %s") % selected_label)
-                else:    
-                    knob_name = layer.get('inkscape:label')
-                    knob_scale_layer = knob_scales.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
+                radius = self.options.knob_scale_arc_radius
+                offset_radius = self.options.knob_scale_arc_radius + self.options.knob_scale_outer_arc_offset - (self.options.knob_scale_arc_width /2)
 
-                    angle = self.options.knob_scale_arc_angle*pi/180.0
-                    arc_rotation = self.options.knob_scale_arc_rotation*pi/180.0 *2
+                if self.options.knob_scale_add_centering_circle:
+                    knob_scale_cc = knob_scale_layer.add(inkex.Layer.new('Centering circle'))
+                    centering_circle = Circle(cx=str(center_x), cy=str(center_y), r=str(radius + 3)) 
+
+                    centering_circle.style['fill'] = "none"
+                    centering_circle.style['stroke'] = self.options.knob_scale_utilities_color
+                    centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+
+                    knob_scale_cc.append(centering_circle)
                     
-                    radius = self.options.knob_scale_arc_radius
-                    offset_radius = self.options.knob_scale_arc_radius + self.options.knob_scale_outer_arc_offset - (self.options.knob_scale_arc_width /2)
+                if self.options.knob_scale_utilities_add_drill_guide:
+                    self.drill_guide(knob_scale_layer, center_x, center_y)
 
-                    if self.options.knob_scale_add_centering_circle:
-                        knob_scale_cc = knob_scale_layer.add(inkex.Layer.new('Centering circle'))
-                        centering_circle = Circle(cx=str(bbox.center_x), cy=str(bbox.center_y), r=str(radius + 3))
-
-                        centering_circle.style['fill'] = "none"
-                        centering_circle.style['stroke'] = self.options.knob_scale_utilities_color
-                        centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
-
-                        knob_scale_cc.append(centering_circle)
-                        
-                    if self.options.knob_scale_utilities_add_drill_guide:
-                        self.drill_guide(knob_scale_layer, bbox.center_x, bbox.center_y)
-
-                    knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
+                knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
+                
+                if self.options.knob_scale_add_arc:
+                    arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
                     
-                    if self.options.knob_scale_add_arc:
-                        arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
-                        
-                        arc.style['fill'] = 'none'
-                        arc.style['stroke'] = self.options.knob_scale_arc_color
-                        arc.style['stroke-width'] = self.options.knob_scale_arc_width
-                        
-                        knob_scale_arc.append(arc)
+                    arc.style['fill'] = 'none'
+                    arc.style['stroke'] = self.options.knob_scale_arc_color
+                    arc.style['stroke-width'] = self.options.knob_scale_arc_width
                     
-                    if self.options.knob_scale_add_outer_arc:
-                        outer_arc = self.draw_knob_scale_arc(bbox.center_x, bbox.center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
+                    knob_scale_arc.append(arc)
+                
+                if self.options.knob_scale_add_outer_arc:
+                    outer_arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
 
-                        outer_arc.style['fill'] = 'none'
-                        outer_arc.style['stroke'] = self.options.knob_scale_arc_color
-                        outer_arc.style['stroke-width'] = self.options.knob_scale_arc_width
+                    outer_arc.style['fill'] = 'none'
+                    outer_arc.style['stroke'] = self.options.knob_scale_arc_color
+                    outer_arc.style['stroke-width'] = self.options.knob_scale_arc_width
 
-                        knob_scale_arc.append(outer_arc)
+                    knob_scale_arc.append(outer_arc)
 
-                        #draw the arc before when the mark are dots
-                        if self.options.knob_scale_ticks_type == 2:
-                            knob_scale_layer.append(knob_scale_arc)
+                    #draw the arc before when the mark are dots
+                    if self.options.knob_scale_ticks_type == 2:
+                        knob_scale_layer.append(knob_scale_arc)
 
-                    if self.options.knob_scale_add_ticks:
-                        if n_ticks > 0:
-                            knob_scale_tick = knob_scale_layer.add(inkex.Layer.new('Ticks'))
-                            if n_subticks > 0 and self.options.knob_scale_add_subticks:
-                                    knob_scale_sub_tick_layer = knob_scale_layer.add(inkex.Layer.new('Subticks'))
+                if self.options.knob_scale_add_ticks:
+                    if n_ticks > 0:
+                        knob_scale_tick = knob_scale_layer.add(inkex.Layer.new('Ticks'))
+                        if n_subticks > 0 and self.options.knob_scale_add_subticks:
+                                knob_scale_sub_tick_layer = knob_scale_layer.add(inkex.Layer.new('Subticks'))
 
-                            ticks_start_angle = (1.5*pi - 0.5*angle) + (arc_rotation/2)
+                        ticks_start_angle = (1.5*pi - 0.5*angle) + (arc_rotation/2)
 
-                            ticks_delta = angle / (n_ticks - 1)
-                            knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
+                        ticks_delta = angle / (n_ticks - 1)
+                        knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
 
-                            if self.options.knob_scale_label_customtext:
-                                customText = self.options.knob_scale_label_customtext.split(',')
+                        if self.options.knob_scale_label_customtext:
+                            customText = self.options.knob_scale_label_customtext.split(',')
 
-                            for tick in range(n_ticks):
-                                if self.options.knob_scale_ticks_type == 1:
-                                    if(self.options.knob_scale_ticks_accent_number != 0):
-                                        if(tick % self.options.knob_scale_ticks_accent_number):
-                                            tick_length = self.options.knob_scale_ticks_lenght
-                                        else:    
-                                            tick_length = self.options.knob_scale_ticks_lenght + self.options.Knob_scale_ticks_accent_lenght
-                                    else:
+                        for tick in range(n_ticks):
+                            if self.options.knob_scale_ticks_type == 1:
+                                if(self.options.knob_scale_ticks_accent_number != 0):
+                                    if(tick % self.options.knob_scale_ticks_accent_number):
                                         tick_length = self.options.knob_scale_ticks_lenght
-                                        
-                                    if self.options.knob_scale_inner_ticks:
-                                        scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_ticks_offset - tick_length , ticks_start_angle + ticks_delta*tick, tick_length)
-                                    else:
-                                        scale_tick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_ticks_offset, ticks_start_angle + ticks_delta*tick, tick_length)
-                                            
-                                    if(self.options.knob_scale_ticks_accent_number != 0):
-                                        if(tick % self.options.knob_scale_ticks_accent_number):
-                                            scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
-                                        else:    
-                                            scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_accent_width
-                                    else:
-                                        scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
-
-                                    scale_tick.style['stroke'] = self.options.knob_scale_ticks_color    
-                                    knob_scale_tick.append(scale_tick)    
-
+                                    else:    
+                                        tick_length = self.options.knob_scale_ticks_lenght + self.options.Knob_scale_ticks_accent_lenght
                                 else:
                                     tick_length = self.options.knob_scale_ticks_lenght
-                                    scale_tick = self.draw_circle(bbox.center_x, bbox.center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
-
-                                    scale_tick.style['fill'] = self.options.knob_scale_ticks_color
-                                    scale_tick.style['stroke'] = 'none'
-                                    scale_tick.style['stroke-width'] = 0
-
-                                    knob_scale_tick.append(scale_tick)
-
-                                if self.options.knob_scale_add_label:
-                                    if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
+                                    
+                                if self.options.knob_scale_inner_ticks:
+                                    scale_tick = self.draw_line_mark(center_x, center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_ticks_offset - tick_length , ticks_start_angle + ticks_delta*tick, tick_length)
+                                else:
+                                    scale_tick = self.draw_line_mark(center_x, center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_ticks_offset, ticks_start_angle + ticks_delta*tick, tick_length)
                                         
-                                        
-                                        label = self.draw_text(bbox.center_x, bbox.center_y, customText[tick], radius + tick_length + text_spacing,
-                                                    ticks_start_angle + ticks_delta*tick, text_size)
-                                        
+                                if(self.options.knob_scale_ticks_accent_number != 0):
+                                    if(tick % self.options.knob_scale_ticks_accent_number):
+                                        scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
                                     else:    
-                                        if self.options.knob_scale_label_rounding_float > 0:
-                                            if self.options.knob_scale_label_reverse_order:
-                                                #reverse
-                                                tick_number = str(round(start_num +
-                                                                    float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
-                                                                    self.options.knob_scale_label_rounding_float))
-                                            else:
-                                                #forward
-                                                tick_number = str(round(start_num +
-                                                                    float(tick) * (end_num - start_num) / (n_ticks - 1),
-                                                                    self.options.knob_scale_label_rounding_float))
+                                        scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_accent_width
+                                else:
+                                    scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
+
+                                scale_tick.style['stroke'] = self.options.knob_scale_ticks_color    
+                                knob_scale_tick.append(scale_tick)    
+
+                            else:
+                                tick_length = self.options.knob_scale_ticks_lenght
+                                scale_tick = self.draw_circle(center_x, center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
+
+                                scale_tick.style['fill'] = self.options.knob_scale_ticks_color
+                                scale_tick.style['stroke'] = 'none'
+                                scale_tick.style['stroke-width'] = 0
+
+                                knob_scale_tick.append(scale_tick)
+
+                            if self.options.knob_scale_add_label:
+                                if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
+                                    
+                                    
+                                    label = self.draw_text(center_x, center_y, customText[tick], radius + tick_length + text_spacing,
+                                                ticks_start_angle + ticks_delta*tick, text_size)
+                                    
+                                else:    
+                                    if self.options.knob_scale_label_rounding_float > 0:
+                                        if self.options.knob_scale_label_reverse_order:
+                                            #reverse
+                                            tick_number = str(round(start_num +
+                                                                float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.knob_scale_label_rounding_float))
                                         else:
-                                            if self.options.knob_scale_label_reverse_order:
-                                                #reverse
-                                                tick_number = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1)))
-                                            else:
-                                                #forward
-                                                tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
-
-
-                                        if (self.options.knob_scale_add_plus_sign and  int(tick_number) > 0):
-                                            tick_text = "+" + tick_number
+                                            #forward
+                                            tick_number = str(round(start_num +
+                                                                float(tick) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.knob_scale_label_rounding_float))
+                                    else:
+                                        if self.options.knob_scale_label_reverse_order:
+                                            #reverse
+                                            tick_number = str(int(start_num + float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1)))
                                         else:
-                                            tick_text = tick_number 
-                                         
+                                            #forward
+                                            tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
 
-                                        label = self.draw_text(bbox.center_x, bbox.center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
 
-                                    label.style['text-align'] = 'center'
-                                    label.style['text-anchor'] = 'middle'
-                                    label.style['alignment-baseline'] = 'center'
-                                    label.style['font-size'] = str(text_size)
-                                    label.style['vertical-align'] = 'middle'
-                                    label.style['fill'] = self.options.knob_scale_label_color
+                                    if (self.options.knob_scale_add_plus_sign and  int(tick_number) > 0):
+                                        tick_text = "+" + tick_number
+                                    else:
+                                        tick_text = tick_number 
+                                        
 
-                                    knob_scale_label.append(label)
+                                    label = self.draw_text(center_x, center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
 
-                                if tick == (n_ticks - 1) :
-                                    break
+                                label.style['text-align'] = 'center'
+                                label.style['text-anchor'] = 'middle'
+                                label.style['alignment-baseline'] = 'center'
+                                label.style['font-size'] = str(text_size)
+                                label.style['vertical-align'] = 'middle'
+                                label.style['fill'] = self.options.knob_scale_label_color
 
-                                if n_subticks > 0 and self.options.knob_scale_add_subticks:
-                                    subticks_delta = ticks_delta / (n_subticks + 1)
-                                    subtick_start_angle = ticks_start_angle + ticks_delta*tick + subticks_delta
-                                    subtick_length = self.options.knob_scale_subticks_lenght
+                                knob_scale_label.append(label)
 
-                                    for subtick in range(n_subticks):
-                                        if self.options.knob_scale_subticks_type == 1:
-                                            if self.options.knob_scale_inner_ticks:
-                                                knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius - self.options.knob_scale_subticks_offset - subtick_length - (self.options.knob_scale_arc_width / 2), subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                            else:
-                                                knob_scale_subtick = self.draw_line_mark(bbox.center_x, bbox.center_y, radius + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                                
-                                            knob_scale_subtick.style['fill'] = 'none'
-                                            knob_scale_subtick.style['stroke'] = self.options.knob_scale_subticks_color
-                                            knob_scale_subtick.style['stroke-width'] = self.options.knob_scale_subticks_width
+                            if tick == (n_ticks - 1) :
+                                break
+
+                            if n_subticks > 0 and self.options.knob_scale_add_subticks:
+                                subticks_delta = ticks_delta / (n_subticks + 1)
+                                subtick_start_angle = ticks_start_angle + ticks_delta*tick + subticks_delta
+                                subtick_length = self.options.knob_scale_subticks_lenght
+
+                                for subtick in range(n_subticks):
+                                    if self.options.knob_scale_subticks_type == 1:
+                                        if self.options.knob_scale_inner_ticks:
+                                            knob_scale_subtick = self.draw_line_mark(center_x, center_y, radius - self.options.knob_scale_subticks_offset - subtick_length - (self.options.knob_scale_arc_width / 2), subtick_start_angle + subticks_delta*subtick, subtick_length)
                                         else:
-                                            if self.options.knob_scale_inner_ticks:
-                                                knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                            else:
-                                                knob_scale_subtick = self.draw_circle(bbox.center_x, bbox.center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
-                                            knob_scale_subtick.style['fill'] = self.options.knob_scale_subticks_color
-                                            knob_scale_subtick.style['stroke'] = 'none'
-                                            knob_scale_subtick.style['stroke-width'] = 0
+                                            knob_scale_subtick = self.draw_line_mark(center_x, center_y, radius + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                            
+                                        knob_scale_subtick.style['fill'] = 'none'
+                                        knob_scale_subtick.style['stroke'] = self.options.knob_scale_subticks_color
+                                        knob_scale_subtick.style['stroke-width'] = self.options.knob_scale_subticks_width
+                                    else:
+                                        if self.options.knob_scale_inner_ticks:
+                                            knob_scale_subtick = self.draw_circle(center_x, center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                        else:
+                                            knob_scale_subtick = self.draw_circle(center_x, center_y, radius - (self.options.knob_scale_arc_width / 2) + self.options.knob_scale_subticks_offset, subtick_start_angle + subticks_delta*subtick, subtick_length)
+                                        knob_scale_subtick.style['fill'] = self.options.knob_scale_subticks_color
+                                        knob_scale_subtick.style['stroke'] = 'none'
+                                        knob_scale_subtick.style['stroke-width'] = 0
 
-                                        knob_scale_sub_tick_layer.append(knob_scale_subtick)
+                                    knob_scale_sub_tick_layer.append(knob_scale_subtick)
 
-                            #draw the arc on top of the tick when the tick are line
-                            if (self.options.knob_scale_ticks_type == 1) and self.options.knob_scale_add_arc:
-                                knob_scale_layer.append(knob_scale_arc)
+                        #draw the arc on top of the tick when the tick are line
+                        if (self.options.knob_scale_ticks_type == 1) and self.options.knob_scale_add_arc:
+                            knob_scale_layer.append(knob_scale_arc)
                 
-            if is_knob_selected == False and missing_knob == False:
-                inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color."))
+            #if is_knob_selected == False and missing_knob == False:
+            #    inkex.errormsg(_("To draw a scale, you must first select the corresponding knob.\nPlease select the knob's main color."))
 
         elif part == 4: #sliders
             
@@ -1244,13 +1246,10 @@ class SynthPanelEffect(inkex.Effect):
                     rx = ry = coarse_width /2
             else:
                 rx = ry = 0
-                
-            if self.svg.set_selected('panel'):
-                bbox = 0
-                bbox = self.svg.get_selected_bbox()
-            else:
-                bbox = 0
-                bbox = self.svg.get_page_bbox()
+
+            bbox = self.svg.get_page_bbox()
+            if bbox:
+                center_x, center_y = bbox.center
 
             if self.options.slider_pos_define:
                 center_x = self.options.slider_pos_x
@@ -1326,12 +1325,21 @@ class SynthPanelEffect(inkex.Effect):
                     
                     slider_layer_tick.append(cursor_tick)
 
-        elif part == 5: #slider scales
-                bbox = False
-                sslider = self.svg.get_selected()
-                for slider in self.svg.get_selected():   
-                    bbox = slider.bounding_box(composed_transform(slider))
-                    break
+        elif part == 5: #slider scales    
+                sslider = self.svg.selected
+                bbox = sslider.bounding_box()
+                
+                if bbox:
+                    center_x, center_y = bbox.center
+                    center_x = inkex.units.convert_unit(center_x, "mm")
+                    center_y = inkex.units.convert_unit(center_y, "mm")
+
+                    bboxheight = inkex.units.convert_unit(bbox.height, "mm")
+                    bboxwidth = inkex.units.convert_unit(bbox.width, "mm")
+                    bboxleft = inkex.units.convert_unit(bbox.left, "mm")
+                    bboxright = inkex.units.convert_unit(bbox.right, "mm")
+                    bboxtop = inkex.units.convert_unit(bbox.top, "mm")
+                    bboxbottom = inkex.units.convert_unit(bbox.bottom, "mm")
 
                 missing_slider = False
 
@@ -1339,7 +1347,7 @@ class SynthPanelEffect(inkex.Effect):
                 if self.svg.getElementById('sliders-group') is None:
                     missing_slider = True
                     inkex.errormsg(_("To draw a scale, you must first draw a slider.\n")) 
-                    
+                        
                 if self.svg.getElementById('slider-scales-group') is not None:
                     slider_scales = self.svg.getElementById('slider-scales-group')
                 else:
@@ -1355,381 +1363,364 @@ class SynthPanelEffect(inkex.Effect):
                 start_num = self.options.slider_scale_label_start
                 end_num = self.options.slider_scale_label_end
 
-                #text_spacing = self.options.slider_scale_label_offset
                 text_size = self.options.slider_scale_label_font_size
 
-                missing_slider = True
                 is_slider_selected = False
-                if bbox != False:
-                    #vertical    
-                    if bbox.height > bbox.width:
-                        ticks_delta = (bbox.height - self.options.slider_scale_v_offset) / (n_ticks - 1)
+
+                if sslider:
+                    is_slider_selected = True
+                    layer = self.svg.get_current_layer()
+                    parent = layer.getparent()
+                    selected_label = parent.label
+                     
+                if( not is_slider_selected):
+                    inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's course."))
+                else:   
+                    #vertical  
+                    if bboxheight > bboxwidth:
+                        ticks_delta = (bboxheight - self.options.slider_scale_v_offset) / (n_ticks - 1)
                         tick_length_start = self.options.slider_scale_ticks_start_lenght
                         tick_lenght_end = self.options.slider_scale_ticks_end_lenght
                         ticks_delta_lenght = (tick_lenght_end - tick_length_start) / (n_ticks -1)
-                        
-                        
-                        for node in sslider:
-                            is_slider_selected = True
-                            bbox_parent =  node.getparent()
-                            layer = bbox_parent.getparent()
-                            selected_label = bbox_parent.get('inkscape:label')
 
-                            if(selected_label == 'none'):
-                                inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's Coarse.\nYou have selected the slider %s") % selected_label)
-                            
-                            else:
-                                l = layer.get('inkscape:label')
-                                slider_scale_layer = slider_scales.add(inkex.Layer.new(l)) #new layer with the same name of the knob
-                                slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
+                        layer_name = selected_label
+                        slider_scale_layer = slider_scales.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
+                        slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
 
-                                if n_ticks > 0:
-                                    slider_scale_ticks = slider_scale_layer.add(inkex.Layer.new('Ticks'))
-                                    if self.options.slider_scale_add_perpendicular_line:
+                        if n_ticks > 0:
+                            slider_scale_ticks = slider_scale_layer.add(inkex.Layer.new('Ticks'))
+                            if self.options.slider_scale_add_perpendicular_line:
 
-                                        pline_l = self.draw_line(
-                                                        bbox.left - self.options.slider_scale_h_offset,  #x1
-                                                        bbox.bottom - (self.options.slider_scale_v_offset /2) + start_size /2,                               #y1    
-                                                        bbox.left - self.options.slider_scale_h_offset,  #x1
-                                                        bbox.bottom - ticks_delta * (n_ticks -1) - (self.options.slider_scale_v_offset /2) - end_size /2)
+                                pline_l = self.draw_line(
+                                                bboxleft - self.options.slider_scale_h_offset,  #x1
+                                                bboxbottom - (self.options.slider_scale_v_offset /2) + start_size /2,                               #y1    
+                                                bboxleft - self.options.slider_scale_h_offset,  #x1
+                                                bboxbottom - ticks_delta * (n_ticks -1) - (self.options.slider_scale_v_offset /2) - end_size /2)
 
-                                        pline_r = self.draw_line(
-                                                        bbox.right + self.options.slider_scale_h_offset, #x1
-                                                        bbox.bottom - (self.options.slider_scale_v_offset /2) + start_size /2,                               #y1    
-                                                        bbox.right + self.options.slider_scale_h_offset,
-                                                        bbox.bottom - ticks_delta * (n_ticks -1) - (self.options.slider_scale_v_offset /2) - end_size /2)
+                                pline_r = self.draw_line(
+                                                bboxright + self.options.slider_scale_h_offset, #x1
+                                                bboxbottom - (self.options.slider_scale_v_offset /2) + start_size /2,                               #y1    
+                                                bboxright + self.options.slider_scale_h_offset,
+                                                bboxbottom - ticks_delta * (n_ticks -1) - (self.options.slider_scale_v_offset /2) - end_size /2)
 
-                                    for tick in range(n_ticks):
+                            for tick in range(n_ticks):
+                                
+                                ticks_delta = (bboxheight - self.options.slider_scale_v_offset) / (n_ticks - 1)
+
+                                tick_length = (ticks_delta_lenght * tick) + tick_length_start
+                                
+                                #left
+                                scale_tick_l = self.draw_line(
+                                                bboxleft - self.options.slider_scale_h_offset,  
+                                                bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2), 
+                                                bboxleft - self.options.slider_scale_h_offset - tick_length,  
+                                                bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2))
+
+                                #right
+                                scale_tick_r = self.draw_line(
+                                                bboxright + self.options.slider_scale_h_offset,  #x1
+                                                bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2),                               #y1    
+                                                bboxright + self.options.slider_scale_h_offset + tick_length,  #x2
+                                                bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2))  
+
+                                scale_tick_l.style['stroke'] = scale_tick_r.style['stroke'] = self.options.slider_scale_tick_color
+
+                                delta_size =  (self.options.slider_scale_ticks_end_size - self.options.slider_scale_ticks_start_size) / (n_ticks - 1)
+                                ticksize = (delta_size * tick) + self.options.slider_scale_ticks_start_size
+                                scale_tick_l.style['stroke-width'] = scale_tick_r.style['stroke-width'] = ticksize
+
+                                if position == 1:
+                                    slider_scale_ticks.append(scale_tick_l)
+
+                                elif position == 2:
+                                    slider_scale_ticks.append(scale_tick_r)
+
+                                else:       
+                                    slider_scale_ticks.append(scale_tick_r)
+                                    slider_scale_ticks.append(scale_tick_l)
+
+                                #scale add label
+                                if self.options.slider_scale_add_label:
+                                    if self.options.slider_scale_label_reverse_order:
+                                        if self.options.slider_scale_label_rounding_float > 0:
+                                            tick_text = str(round(start_num +
+                                                                float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.slider_scale_label_rounding_float))
+                                        else:
+                                            tick_text = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
+                                    else:
+                                        if self.options.slider_scale_label_rounding_float > 0:
+                                            tick_text = str(round(start_num +
+                                                                float(tick) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.slider_scale_label_rounding_float))
+                                        else:
+                                            tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+
+                                    label_r = self.draw_slider_text(
+                                                            bboxright + self.options.slider_scale_label_offset_br + tick_length + self.options.slider_scale_h_offset + text_size,                     
+                                                            bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2) + self.options.slider_scale_label_offset_adj,                                    #y
+                                                            tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),                                                                                                          #textvalue
+                                                            text_size)                                                                                                          #textsize
+
+                                    label_l = self.draw_slider_text(
+                                                            bboxleft - self.options.slider_scale_label_offset_tl - tick_length - self.options.slider_scale_h_offset - text_size,                                        #x
+                                                            bboxbottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2) + self.options.slider_scale_label_offset_adj,                                    #y
+                                                            tick_text  +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),                                                                                                          #textvalue
+                                                            text_size)                                                                                                          #textsize
+
+                                    label_l.style['text-align'] = label_r.style['text-align'] ='center'
+                                    label_l.style['text-anchor'] = label_r.style['text-anchor'] = 'middle'
+                                    label_l.style['alignment-baseline'] = label_r.style['alignment-baseline'] = 'center'
+                                    label_l.style['font-size'] = label_r.style['font-size'] = self.options.slider_scale_label_font_size
+                                    label_l.style['vertical-align'] = label_r.style['vertical-align'] = 'middle'
+                                    label_l.style['fill'] = label_r.style['fill'] = self.options.slider_scale_label_color
+
+                                    if self.options.slider_scale_label_position == 1:
+                                        slider_scale_label.append(label_l)
+                                    elif self.options.slider_scale_label_position == 2:
+                                        slider_scale_label.append(label_r)
+                                    else:
+                                        slider_scale_label.append(label_l)
+                                        slider_scale_label.append(label_r)
+
+                                if tick == (n_ticks - 1) :
+                                    break
+
+                                if n_subticks > 0 and self.options.slider_scale_add_subticks:
+                                
+                                    subtick_length = self.options.slider_scale_subtick_lenght
+
+                                    subticks_delta = ticks_delta / (n_subticks + 1)
+
+                                    if self.options.slider_scale_linlog == 2:
+                                        n_subticks = 0
+                                    for subtick in range(n_subticks):
                                         
-                                        ticks_delta = (bbox.height - self.options.slider_scale_v_offset) / (n_ticks - 1)
 
-                                        tick_length = (ticks_delta_lenght * tick) + tick_length_start
-                                        
-                                        #left
-                                        scale_tick_l = self.draw_line(
-                                                        bbox.left - self.options.slider_scale_h_offset,  
-                                                        bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2), 
-                                                        bbox.left - self.options.slider_scale_h_offset - tick_length,  
-                                                        bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2))
+                                        scale_subtick_r = self.draw_line(
+                                            bboxright + self.options.slider_scale_h_offset,  
+                                            bboxbottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2), 
+                                            bboxright + self.options.slider_scale_h_offset + subtick_length,  
+                                            bboxbottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2))                #y2
 
-                                        #right
-                                        scale_tick_r = self.draw_line(
-                                                        bbox.right + self.options.slider_scale_h_offset,  #x1
-                                                        bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2),                               #y1    
-                                                        bbox.right + self.options.slider_scale_h_offset + tick_length,  #x2
-                                                        bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2))  
+                                        scale_subtick_l = self.draw_line(
+                                            bboxleft - self.options.slider_scale_h_offset,  
+                                            bboxbottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2), 
+                                            bboxleft - self.options.slider_scale_h_offset - subtick_length,  
+                                            bboxbottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2))
 
-                                        scale_tick_l.style['stroke'] = scale_tick_r.style['stroke'] = self.options.slider_scale_tick_color
+                                        scale_subtick_l.style['stroke'] = scale_subtick_r.style['stroke'] = self.options.slider_scale_subtick_color
+                                        scale_subtick_l.style['stroke-width'] = scale_subtick_r.style['stroke-width'] = self.options.slider_scale_subticks_size
 
-                                        delta_size =  (self.options.slider_scale_ticks_end_size - self.options.slider_scale_ticks_start_size) / (n_ticks - 1)
-                                        ticksize = (delta_size * tick) + self.options.slider_scale_ticks_start_size
-                                        scale_tick_l.style['stroke-width'] = scale_tick_r.style['stroke-width'] = ticksize
+                                        if self.options.slider_scale_position == 1:
+                                            slider_scale_ticks.append(scale_subtick_l)
 
-                                        if position == 1:
-                                            slider_scale_ticks.append(scale_tick_l)
-
-                                        elif position == 2:
-                                            slider_scale_ticks.append(scale_tick_r)
+                                        elif self.options.slider_scale_position == 2:
+                                            slider_scale_ticks.append(scale_subtick_r)
 
                                         else:       
-                                            slider_scale_ticks.append(scale_tick_r)
-                                            slider_scale_ticks.append(scale_tick_l)
+                                            slider_scale_ticks.append(scale_subtick_r)
+                                            slider_scale_ticks.append(scale_subtick_l)
 
-                                        #scale add label
-                                        if self.options.slider_scale_add_label:
-                                            if self.options.slider_scale_label_reverse_order:
-                                                if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_text = str(round(start_num +
-                                                                        float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.slider_scale_label_rounding_float))
-                                                else:
-                                                    tick_text = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
-                                            else:
-                                                if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_text = str(round(start_num +
-                                                                        float(tick) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.slider_scale_label_rounding_float))
-                                                else:
-                                                    tick_text = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+                        if self.options.slider_scale_add_perpendicular_line:
 
-                                            label_r = self.draw_slider_text(
-                                                                    bbox.right + self.options.slider_scale_label_offset_br + tick_length + self.options.slider_scale_h_offset + text_size,                     
-                                                                    bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2) + self.options.slider_scale_label_offset_adj,                                    #y
-                                                                    tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),                                                                                                          #textvalue
-                                                                    text_size)                                                                                                          #textsize
+                            if self.options.slider_scale_position == 1:
+                                slider_scale_ticks.append(pline_l)
 
-                                            label_l = self.draw_slider_text(
-                                                                    bbox.left - self.options.slider_scale_label_offset_tl - tick_length - self.options.slider_scale_h_offset - text_size,                                        #x
-                                                                    bbox.bottom - ticks_delta * tick - (self.options.slider_scale_v_offset /2) + self.options.slider_scale_label_offset_adj,                                    #y
-                                                                    tick_text  +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),                                                                                                          #textvalue
-                                                                    text_size)                                                                                                          #textsize
+                            elif self.options.slider_scale_position == 2:
+                                slider_scale_ticks.append(pline_r)
+                            else:       
+                                slider_scale_ticks.append(pline_r)
+                                slider_scale_ticks.append(pline_l)
 
-                                            label_l.style['text-align'] = label_r.style['text-align'] ='center'
-                                            label_l.style['text-anchor'] = label_r.style['text-anchor'] = 'middle'
-                                            label_l.style['alignment-baseline'] = label_r.style['alignment-baseline'] = 'center'
-                                            label_l.style['font-size'] = label_r.style['font-size'] = self.options.slider_scale_label_font_size
-                                            label_l.style['vertical-align'] = label_r.style['vertical-align'] = 'middle'
-                                            label_l.style['fill'] = label_r.style['fill'] = self.options.slider_scale_label_color
-
-                                            if self.options.slider_scale_label_position == 1:
-                                                slider_scale_label.append(label_l)
-                                            elif self.options.slider_scale_label_position == 2:
-                                                slider_scale_label.append(label_r)
-                                            else:
-                                                slider_scale_label.append(label_l)
-                                                slider_scale_label.append(label_r)
-
-                                        if tick == (n_ticks - 1) :
-                                            break
-
-                                        if n_subticks > 0 and self.options.slider_scale_add_subticks:
-                                        
-                                            subtick_length = self.options.slider_scale_subtick_lenght
-
-                                            subticks_delta = ticks_delta / (n_subticks + 1)
-
-                                            if self.options.slider_scale_linlog == 2:
-                                                n_subticks = 0
-                                            for subtick in range(n_subticks):
-                                                
-
-                                                scale_subtick_r = self.draw_line(
-                                                    bbox.right + self.options.slider_scale_h_offset,  
-                                                    bbox.bottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2), 
-                                                    bbox.right + self.options.slider_scale_h_offset + subtick_length,  
-                                                    bbox.bottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2))                #y2
-
-                                                scale_subtick_l = self.draw_line(
-                                                    bbox.left - self.options.slider_scale_h_offset,  
-                                                    bbox.bottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2), 
-                                                    bbox.left - self.options.slider_scale_h_offset - subtick_length,  
-                                                    bbox.bottom - ticks_delta * tick - subticks_delta * (subtick +1) - (self.options.slider_scale_v_offset /2))
-
-                                                scale_subtick_l.style['stroke'] = scale_subtick_r.style['stroke'] = self.options.slider_scale_subtick_color
-                                                scale_subtick_l.style['stroke-width'] = scale_subtick_r.style['stroke-width'] = self.options.slider_scale_subticks_size
-
-                                                if self.options.slider_scale_position == 1:
-                                                    slider_scale_ticks.append(scale_subtick_l)
-
-                                                elif self.options.slider_scale_position == 2:
-                                                    slider_scale_ticks.append(scale_subtick_r)
-
-                                                else:       
-                                                    slider_scale_ticks.append(scale_subtick_r)
-                                                    slider_scale_ticks.append(scale_subtick_l)
-
-                                if self.options.slider_scale_add_perpendicular_line:
-
-                                    if self.options.slider_scale_position == 1:
-                                        slider_scale_ticks.append(pline_l)
-
-                                    elif self.options.slider_scale_position == 2:
-                                        slider_scale_ticks.append(pline_r)
-                                    else:       
-                                        slider_scale_ticks.append(pline_r)
-                                        slider_scale_ticks.append(pline_l)
-
-                                    pline_r.style['stroke'] = pline_l.style['stroke'] = self.options.slider_scale_tick_color
-                                    pline_r.style['stroke-width'] = pline_l.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width
+                            pline_r.style['stroke'] = pline_l.style['stroke'] = self.options.slider_scale_tick_color
+                            pline_r.style['stroke-width'] = pline_l.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width
                     
-                    elif bbox.width > bbox.height: #horizontal
-                        ticks_delta = (bbox.width - self.options.slider_scale_h_offset) / (n_ticks - 1)
+                    #horizontal
+                    elif bboxwidth > bboxheight: 
+                        ticks_delta = (bboxwidth - self.options.slider_scale_h_offset) / (n_ticks - 1)
                         tick_length_start = self.options.slider_scale_ticks_start_lenght
                         tick_lenght_end = self.options.slider_scale_ticks_end_lenght
                         ticks_delta_lenght = (tick_lenght_end - tick_length_start) / (n_ticks -1)
 
-                        for node in sslider:
-                            is_slider_selected = True
-                            bbox_parent =  node.getparent()
-                            layer = bbox_parent.getparent()
-                            selected_label = bbox_parent.get('inkscape:label')
+                        layer_name = selected_label
+                        slider_scale_layer = slider_scales.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
+                        slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
 
-                            if(selected_label != 'Coarse'):
-                                inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's Coarse.\nYou have selected the slider %s") % selected_label)
-                            
-                            else:
-                                l = layer.get('inkscape:label')
-                                slider_scale_layer = slider_scales.add(inkex.Layer.new(l)) #new layer with the same name of the knob
-                                slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
+                        if n_ticks > 0:
+                            slider_scale_ticks = slider_scale_layer.add(inkex.Layer.new('Ticks'))
+                            if self.options.slider_scale_add_perpendicular_line:
 
-                                if n_ticks > 0:
-                                    slider_scale_ticks = slider_scale_layer.add(inkex.Layer.new('Ticks'))
-                                    if self.options.slider_scale_add_perpendicular_line:
+                                pline_t = self.draw_line(
+                                                bboxleft + (self.options.slider_scale_h_offset /2) + start_size /2,
+                                                bboxtop - self.options.slider_scale_v_offset,  #x1
+                                                bboxleft + bboxwidth - (self.options.slider_scale_h_offset /2) - end_size /2,
+                                                bboxtop - self.options.slider_scale_v_offset)  #x1
 
-                                        pline_t = self.draw_line(
-                                                        bbox.left + (self.options.slider_scale_h_offset /2) + start_size /2,
-                                                        bbox.top - self.options.slider_scale_v_offset,  #x1
-                                                        bbox.left + bbox.width - (self.options.slider_scale_h_offset /2) - end_size /2,
-                                                        bbox.top - self.options.slider_scale_v_offset)  #x1
+                                pline_b = self.draw_line(
+                                                bboxleft + (self.options.slider_scale_h_offset /2) + start_size /2,
+                                                bboxbottom + self.options.slider_scale_v_offset,  #x1
+                                                bboxleft + bboxwidth - (self.options.slider_scale_h_offset /2) - end_size /2,
+                                                bboxbottom + self.options.slider_scale_v_offset)  #x1
 
-                                        pline_b = self.draw_line(
-                                                        bbox.left + (self.options.slider_scale_h_offset /2) + start_size /2,
-                                                        bbox.bottom + self.options.slider_scale_v_offset,  #x1
-                                                        bbox.left + bbox.width - (self.options.slider_scale_h_offset /2) - end_size /2,
-                                                        bbox.bottom + self.options.slider_scale_v_offset)  #x1
+                            for tick in range(n_ticks):
+                                ticks_delta = (bboxwidth - self.options.slider_scale_h_offset) / (n_ticks - 1)
+                                tick_length = (ticks_delta_lenght * tick) + tick_length_start
+                                delta_size =  (self.options.slider_scale_ticks_end_size - self.options.slider_scale_ticks_start_size) / (n_ticks - 1)
+                                ticksize = (delta_size * tick) + self.options.slider_scale_ticks_start_size
+                                    
+                                #top
+                                scale_tick_t = self.draw_line(
+                                            bboxleft +  ticks_delta * tick + self.options.slider_scale_h_offset /2 ,
+                                            bboxtop - self.options.slider_scale_v_offset + self.options.slider_scale_perpendicular_line_width /2,  
+                                            bboxleft +  ticks_delta * tick + self.options.slider_scale_h_offset /2,
+                                            bboxtop - self.options.slider_scale_v_offset - tick_length)
 
-                                    for tick in range(n_ticks):
-                                        ticks_delta = (bbox.width - self.options.slider_scale_h_offset) / (n_ticks - 1)
-                                        tick_length = (ticks_delta_lenght * tick) + tick_length_start
-                                        delta_size =  (self.options.slider_scale_ticks_end_size - self.options.slider_scale_ticks_start_size) / (n_ticks - 1)
-                                        ticksize = (delta_size * tick) + self.options.slider_scale_ticks_start_size
+                                #bottom
+                                scale_tick_b = self.draw_line(
+                                            bboxleft +  ticks_delta * tick + self.options.slider_scale_h_offset /2 ,
+                                            bboxbottom + (self.options.slider_scale_v_offset) - self.options.slider_scale_perpendicular_line_width /2,  
+                                            bboxleft +  ticks_delta * tick + self.options.slider_scale_h_offset /2,
+                                            bboxbottom + self.options.slider_scale_v_offset + tick_length)
+
+                                scale_tick_t.style['stroke'] = scale_tick_b.style['stroke'] = self.options.slider_scale_tick_color
+                                scale_tick_t.style['stroke-width'] = scale_tick_b.style['stroke-width'] = ticksize
+                                
+
+                                if position == 1:
+                                    slider_scale_ticks.append(scale_tick_t)
+
+                                elif position == 2:
+                                    slider_scale_ticks.append(scale_tick_b)
+
+                                else:       
+                                    slider_scale_ticks.append(scale_tick_t)
+                                    slider_scale_ticks.append(scale_tick_b)
+
+                                #scale add label
+                                if self.options.slider_scale_add_label:
+                                    if self.options.slider_scale_label_reverse_order:
+                                        if self.options.slider_scale_label_rounding_float > 0:
+                                            tick_number = str(round(start_num +
+                                                                float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.slider_scale_label_rounding_float))
+                                        else:
+                                            tick_number = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
+                                    else:
+                                        if self.options.slider_scale_label_rounding_float > 0:
+                                            tick_number = str(round(start_num +
+                                                                float(tick) * (end_num - start_num) / (n_ticks - 1),
+                                                                self.options.slider_scale_label_rounding_float))
+                                        else:
+                                            tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+
+
+                                    if (self.options.slider_scale_add_plus_sign and  int(tick_number) > 0):
+                                        tick_text = "+" + tick_number
+                                    else:
+                                        tick_text = tick_number 
+                                
+
+                                
                                             
-                                        #top
-                                        scale_tick_t = self.draw_line(
-                                                    bbox.left +  ticks_delta * tick + self.options.slider_scale_h_offset /2 ,
-                                                    bbox.top - self.options.slider_scale_v_offset + self.options.slider_scale_perpendicular_line_width /2,  
-                                                    bbox.left +  ticks_delta * tick + self.options.slider_scale_h_offset /2,
-                                                    bbox.top - self.options.slider_scale_v_offset - tick_length)
+                                    label_t = self.draw_slider_text(
+                                                        bboxleft + ticks_delta * tick + (self.options.slider_scale_h_offset /2),
+                                                        bboxtop - self.options.slider_scale_v_offset - self.options.slider_scale_label_offset_tl - tick_length - text_size,
+                                                            tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),    
+                                                            text_size)   
 
-                                        #bottom
-                                        scale_tick_b = self.draw_line(
-                                                    bbox.left +  ticks_delta * tick + self.options.slider_scale_h_offset /2 ,
-                                                    bbox.bottom + (self.options.slider_scale_v_offset) - self.options.slider_scale_perpendicular_line_width /2,  
-                                                    bbox.left +  ticks_delta * tick + self.options.slider_scale_h_offset /2,
-                                                    bbox.bottom + self.options.slider_scale_v_offset + tick_length)
+                                    label_b = self.draw_slider_text(
+                                                        bboxleft + ticks_delta * tick + (self.options.slider_scale_h_offset /2),
+                                                        bboxbottom + self.options.slider_scale_v_offset + self.options.slider_scale_label_offset_br + tick_length + text_size,
+                                                        tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),        
+                                                        text_size)        
+                                    
+                                    label_b.style['text-align'] = label_t.style['text-align'] ='center'
+                                    label_b.style['text-anchor'] = label_t.style['text-anchor'] = 'middle'
+                                    label_b.style['alignment-baseline'] = label_t.style['alignment-baseline'] = 'center'
+                                    label_b.style['font-size'] = label_t.style['font-size'] = self.options.slider_scale_label_font_size
+                                    label_b.style['vertical-align'] = label_t.style['vertical-align'] = 'middle'
+                                    label_b.style['fill'] = label_t.style['fill'] = self.options.slider_scale_label_color
 
-                                        scale_tick_t.style['stroke'] = scale_tick_b.style['stroke'] = self.options.slider_scale_tick_color
-                                        scale_tick_t.style['stroke-width'] = scale_tick_b.style['stroke-width'] = ticksize
+                                    if self.options.slider_scale_label_position == 1:
+                                        slider_scale_label.append(label_t)
+                                    elif self.options.slider_scale_label_position == 2:
+                                        slider_scale_label.append(label_b)
+                                    else:
+                                        slider_scale_label.append(label_t)
+                                        slider_scale_label.append(label_b)
+
+                                if tick == (n_ticks - 1) :
+                                    break
+
+                                if n_subticks > 0 and self.options.slider_scale_add_subticks:
+                                
+                                    subtick_length = self.options.slider_scale_subtick_lenght
+
+                                    subticks_delta = ticks_delta / (n_subticks + 1)
+
+                                    if self.options.slider_scale_linlog == 2:
+                                        n_subticks = 0
+                                    for subtick in range(n_subticks):
                                         
 
-                                        if position == 1:
-                                            slider_scale_ticks.append(scale_tick_t)
+                                        scale_subtick_r = self.draw_line(
+                                            bboxleft + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
+                                            bboxtop - self.options.slider_scale_v_offset + self.options.slider_scale_ticks_start_size /2, 
+                                            bboxleft + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
+                                            bboxtop - self.options.slider_scale_v_offset - subtick_length)
 
-                                        elif position == 2:
-                                            slider_scale_ticks.append(scale_tick_b)
+                                        scale_subtick_l = self.draw_line(
+                                            bboxleft + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
+                                            bboxbottom + self.options.slider_scale_v_offset - self.options.slider_scale_ticks_start_size /2, 
+                                            bboxleft + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
+                                            bboxbottom + self.options.slider_scale_v_offset + subtick_length)        
+
+                                        scale_subtick_l.style['stroke'] = scale_subtick_r.style['stroke'] = self.options.slider_scale_subtick_color
+                                        scale_subtick_l.style['stroke-width'] = scale_subtick_r.style['stroke-width'] = self.options.slider_scale_subticks_size
+
+                                        if self.options.slider_scale_position == 1:
+                                            slider_scale_ticks.append(scale_subtick_l)
+
+                                        elif self.options.slider_scale_position == 2:
+                                            slider_scale_ticks.append(scale_subtick_r)
 
                                         else:       
-                                            slider_scale_ticks.append(scale_tick_t)
-                                            slider_scale_ticks.append(scale_tick_b)
+                                            slider_scale_ticks.append(scale_subtick_r)
+                                            slider_scale_ticks.append(scale_subtick_l)
 
-                                        #scale add label
-                                        if self.options.slider_scale_add_label:
-                                            if self.options.slider_scale_label_reverse_order:
-                                                if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_number = str(round(start_num +
-                                                                        float(n_ticks - (tick +1)) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.slider_scale_label_rounding_float))
-                                                else:
-                                                    tick_number = str(int(start_num + float(n_ticks -(tick +1)) * (end_num - start_num) / (n_ticks - 1)))
-                                            else:
-                                                if self.options.slider_scale_label_rounding_float > 0:
-                                                    tick_number = str(round(start_num +
-                                                                        float(tick) * (end_num - start_num) / (n_ticks - 1),
-                                                                        self.options.slider_scale_label_rounding_float))
-                                                else:
-                                                    tick_number = str(int(start_num + float(tick) * (end_num - start_num) / (n_ticks - 1)))
+                        if self.options.slider_scale_add_perpendicular_line:
 
+                            if self.options.slider_scale_position == 1:
+                                slider_scale_ticks.append(pline_t)
 
-                                            if (self.options.slider_scale_add_plus_sign and  int(tick_number) > 0):
-                                                tick_text = "+" + tick_number
-                                            else:
-                                                tick_text = tick_number 
-                                         
+                            elif self.options.slider_scale_position == 2:
+                                slider_scale_ticks.append(pline_b)
+                            else:       
+                                slider_scale_ticks.append(pline_b)
+                                slider_scale_ticks.append(pline_t)
 
-                                        
-                                                    
-                                            label_t = self.draw_slider_text(
-                                                                bbox.left + ticks_delta * tick + (self.options.slider_scale_h_offset /2),
-                                                                bbox.top - self.options.slider_scale_v_offset - self.options.slider_scale_label_offset_tl - tick_length - text_size,
-                                                                    tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),    
-                                                                    text_size)   
+                            pline_t.style['stroke'] = pline_b.style['stroke'] = self.options.slider_scale_tick_color
+                            pline_t.style['stroke-width'] = pline_b.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width     
 
-                                            label_b = self.draw_slider_text(
-                                                                bbox.left + ticks_delta * tick + (self.options.slider_scale_h_offset /2),
-                                                                bbox.bottom + self.options.slider_scale_v_offset + self.options.slider_scale_label_offset_br + tick_length + text_size,
-                                                                tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),        
-                                                                text_size)        
-                                            
-                                            label_b.style['text-align'] = label_t.style['text-align'] ='center'
-                                            label_b.style['text-anchor'] = label_t.style['text-anchor'] = 'middle'
-                                            label_b.style['alignment-baseline'] = label_t.style['alignment-baseline'] = 'center'
-                                            label_b.style['font-size'] = label_t.style['font-size'] = self.options.slider_scale_label_font_size
-                                            label_b.style['vertical-align'] = label_t.style['vertical-align'] = 'middle'
-                                            label_b.style['fill'] = label_t.style['fill'] = self.options.slider_scale_label_color
+                            if self.options.slider_scale_utilities_add_drill_guide:
+                                slider_scale_drill_guide = slider_scale_layer.add(inkex.Layer.new('Drill guide'))
 
-                                            if self.options.slider_scale_label_position == 1:
-                                                slider_scale_label.append(label_t)
-                                            elif self.options.slider_scale_label_position == 2:
-                                                slider_scale_label.append(label_b)
-                                            else:
-                                                slider_scale_label.append(label_t)
-                                                slider_scale_label.append(label_b)
+                                if self.options.slider_scale_utilities_guide_round_edges:
+                                    if bboxwidth > bboxheight:
+                                        rx = ry = bboxheight /2
+                                    elif bboxwidth < bboxheight:
+                                        rx = ry = bboxwidth /2
+                                else:
+                                    rx = ry = 0
 
-                                        if tick == (n_ticks - 1) :
-                                            break
+                                drill_guide = self.draw_rectangle(bboxwidth, bboxheight, bboxleft , bboxtop, rx, ry)
+                            
+                                drill_guide.style['fill'] = "none"
+                                drill_guide.style['stroke'] = self.options.slider_scale_utilities_color
+                                drill_guide.style['stroke-width'] = self.options.slider_scale_utilities_line_width
 
-                                        if n_subticks > 0 and self.options.slider_scale_add_subticks:
-                                        
-                                            subtick_length = self.options.slider_scale_subtick_lenght
-
-                                            subticks_delta = ticks_delta / (n_subticks + 1)
-
-                                            if self.options.slider_scale_linlog == 2:
-                                                n_subticks = 0
-                                            for subtick in range(n_subticks):
-                                                
-
-                                                scale_subtick_r = self.draw_line(
-                                                    bbox.left + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
-                                                    bbox.top - self.options.slider_scale_v_offset + self.options.slider_scale_ticks_start_size /2, 
-                                                    bbox.left + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
-                                                    bbox.top - self.options.slider_scale_v_offset - subtick_length)
-
-                                                scale_subtick_l = self.draw_line(
-                                                    bbox.left + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
-                                                    bbox.bottom + self.options.slider_scale_v_offset - self.options.slider_scale_ticks_start_size /2, 
-                                                    bbox.left + ticks_delta * tick + subticks_delta * (subtick +1) + (self.options.slider_scale_h_offset /2),
-                                                    bbox.bottom + self.options.slider_scale_v_offset + subtick_length)        
-
-                                                scale_subtick_l.style['stroke'] = scale_subtick_r.style['stroke'] = self.options.slider_scale_subtick_color
-                                                scale_subtick_l.style['stroke-width'] = scale_subtick_r.style['stroke-width'] = self.options.slider_scale_subticks_size
-
-                                                if self.options.slider_scale_position == 1:
-                                                    slider_scale_ticks.append(scale_subtick_l)
-
-                                                elif self.options.slider_scale_position == 2:
-                                                    slider_scale_ticks.append(scale_subtick_r)
-
-                                                else:       
-                                                    slider_scale_ticks.append(scale_subtick_r)
-                                                    slider_scale_ticks.append(scale_subtick_l)
-
-                                    
-
-                                if self.options.slider_scale_add_perpendicular_line:
-
-                                    if self.options.slider_scale_position == 1:
-                                        slider_scale_ticks.append(pline_t)
-
-                                    elif self.options.slider_scale_position == 2:
-                                        slider_scale_ticks.append(pline_b)
-                                    else:       
-                                        slider_scale_ticks.append(pline_b)
-                                        slider_scale_ticks.append(pline_t)
-
-                                    pline_t.style['stroke'] = pline_b.style['stroke'] = self.options.slider_scale_tick_color
-                                    pline_t.style['stroke-width'] = pline_b.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width     
-                else:
-                    inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's coarse.")) 
-
-                if self.options.slider_scale_utilities_add_drill_guide:
-                    slider_scale_drill_guide = slider_scale_layer.add(inkex.Layer.new('Drill guide'))
-
-                    if self.options.slider_scale_utilities_guide_round_edges:
-                        if bbox.width > bbox.height:
-                            rx = ry = bbox.height /2
-                        elif bbox.width < bbox.height:
-                            rx = ry = bbox.width /2
-                    else:
-                        rx = ry = 0
-
-                    drill_guide = self.draw_rectangle(bbox.width, bbox.height, bbox.left , bbox.top, rx, ry)
-                
-                    drill_guide.style['fill'] = "none"
-                    drill_guide.style['stroke'] = self.options.slider_scale_utilities_color
-                    drill_guide.style['stroke-width'] = self.options.slider_scale_utilities_line_width
-
-                    slider_scale_drill_guide.append(drill_guide)
+                                slider_scale_drill_guide.append(drill_guide)
         elif part == 6: #jacks
             if self.svg.getElementById('jacks-group') is not None:
                 jacks = self.svg.getElementById('jacks-group')
@@ -1769,14 +1760,17 @@ class SynthPanelEffect(inkex.Effect):
                 #append the jack layer to the jacks group
                 jacks.append(jack_layer)
             
-                #get the page's bounding box
-                bbox_panel = self.svg.get_page_bbox()
+                #get the panel's bounding box
+                panel = self.svg.get_page_bbox()
+                p_center_x, p_center_y = panel.center
+
                 if self.options.jack_pos_define:
                     center_x = self.options.jack_pos_x
                     center_y = self.options.jack_pos_y
                 else:
-                    center_x = bbox_panel.center_x
-                    center_y = bbox_panel.center_y
+                    center_x = p_center_x
+                    center_y = p_center_y
+
                 mainjack = Circle(cx=str(center_x), cy=str(center_y), r=str(jack_radius))
                     
                 mainjack.set('id', 'id_'+self.options.jack_name)
@@ -1791,22 +1785,23 @@ class SynthPanelEffect(inkex.Effect):
                     thenut.style['fill'] = self.options.jack_nut_color
                     thenut.style['stroke'] = self.options.jack_nut_outline_color
                     thenut.style['stroke-width'] = str(0.1)
-                else:
+                    jack_layer_nut.append(thenut)
+
+                elif self.options.jack_nut_type == 2:
                     # metal hex nut
                     thenut = self.draw_hex_nut(x=str(center_x), y=str(center_y), radius=str(nut_radius))
                     thenut.style['fill'] = self.options.jack_nut_color
                     thenut.style['stroke'] = self.options.jack_nut_outline_color
                     thenut.style['stroke-width'] = str(0.1)
+                    jack_layer_nut.append(thenut)
 
-                if self.options.jack_nut_type == 3:
+                elif self.options.jack_nut_type == 3:
                     # plastic hex nut (with skirt)
                     thenutskirt = Circle(cx=str(center_x), cy=str(center_y), r=str(nut_radius + 2))
                     thenutskirt.style['fill'] = self.options.jack_nut_color
                     thenutskirt.style['stroke'] = self.options.jack_nut_outline_color
                     thenutskirt.style['stroke-width'] = str(0.1)
                     jack_layer_nut_skirt.append(thenutskirt)
-
-                jack_layer_nut.append(thenut)
 
                 if self.options.jack_utilities_add_drill_guide:
                     self.drill_guide(jack_layer, center_x, center_y)
