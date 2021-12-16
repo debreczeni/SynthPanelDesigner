@@ -1001,9 +1001,13 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 3: #knobs scales
             sknob = self.svg.selected
-            bbox  = self.svg.get_first_selected().bounding_box()
+            bbox = self.svg.selected.bounding_box()
+            
             if bbox:
                 center_x, center_y = bbox.center
+                center_x = inkex.units.convert_unit(center_x, "mm")
+                center_y = inkex.units.convert_unit(center_y, "mm")
+
 
             missing_knob = False
 
@@ -1324,15 +1328,20 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 5: #slider scales    
                 sslider = self.svg.selected
-                bbox  = self.svg.get_first_selected().bounding_box()
+                bbox = sslider.bounding_box()
+                
                 if bbox:
                     center_x, center_y = bbox.center
-                    bboxheight = bbox.height
-                    bboxwidth = bbox.width
-                    bboxleft = bbox.left
-                    bboxright = bbox.right
-                    bboxtop = bbox.top
-                    bboxbottom = bbox.bottom
+                    center_x = inkex.units.convert_unit(center_x, "mm")
+                    center_y = inkex.units.convert_unit(center_y, "mm")
+
+                    bboxheight = inkex.units.convert_unit(bbox.height, "mm")
+                    bboxwidth = inkex.units.convert_unit(bbox.width, "mm")
+                    bboxleft = inkex.units.convert_unit(bbox.left, "mm")
+                    bboxright = inkex.units.convert_unit(bbox.right, "mm")
+                    bboxtop = inkex.units.convert_unit(bbox.top, "mm")
+                    bboxbottom = inkex.units.convert_unit(bbox.bottom, "mm")
+
 
                 missing_slider = False
 
