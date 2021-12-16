@@ -275,7 +275,7 @@
                     <param name="knob_scale_arc_color" type="color" appearance="colorbutton" _gui-text="Arc color" default="#333333"></param>
 
                     <separator/>
-                    <param name="knob_scale_add_arc" type="boolean" _gui-text="Draw arc">True</param>
+                    <param name="knob_scale_add_arc" type="boolean" _gui-text="Draw arc">true</param>
                     <param indent="1" name="knob_scale_add_outer_arc" type="boolean" _gui-text="Draw outer arc">false</param>
                     
                     <param name="knob_scale_outer_arc_offset" type="float" min="-10" max="10" default="0.5" precision="2" _gui-text="Outer arc offset" >0.5</param>
@@ -604,7 +604,7 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.1 - 13 December 2021</label>
+            <label>Synth Panels Designer v. 1.1.2 - 13 December 2021</label>
             <label>Main developer: Francesco Mulassano</label>
             <label>Contributors: GaryA
             </label>
