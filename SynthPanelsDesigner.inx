@@ -50,7 +50,7 @@
                         <item value="e3u">Eurorack - 3U</item>
                         <item value="e1uij">Eurorack - 1U - IJ</item>
                         <item value="e1upl">Eurorack - 1U - PL</item>
-                        <item value="vcv">VCV Rack</item>
+                        <!-- <item value="vcv">VCV Rack</item> -->
                         <item value="m5u">Moog</item>
                         <item value="d5u">Dotcom</item>
                         <item value="buchla">Buchla</item>
@@ -285,7 +285,17 @@
                     <param name="knob_scale_arc_rotation" type="int" min="-360" max="360" default="45" precision="1" _gui-text="Rotation">145</param>  
                     <param name="knob_scale_arc_angle_offset" type="float" min="-360" max="360" default="1" precision="3" _gui-text="Arc angle offset">10</param>
                     <param name="knob_scale_outer_arc_angle_offset" type="float" min="-360" max="360" default="1" precision="3" _gui-text="Outer arc angle offset">10</param>
-                    <spacer/>
+                    
+                    <!-- <spacer/>
+                    <param name="knob_scale_close_arcs" type="boolean" _gui-text="Close arcs">false</param>
+                   
+                    <param name="knob_scale_close_arcs_lr" type="optiongroup" gui-text="Type of closure">
+                       <option value="0">Normal</option>
+                       <option value="1">Pointed</option>
+                       <option value="2">Left to Right</option>
+                       <option value="3">Right to Left</option>
+                    </param>
+                    <spacer/> -->
                 </vbox>
                 <spacer/>
                 <separator/>
@@ -302,19 +312,27 @@
                     </param>
                     <spacer/>
                     <param name="knob_scale_ticks_number" type="int" min="2" max="360" default="10" precision="1" _gui-text="Number of tick">10</param>
-                    <param name="knob_scale_ticks_lenght" type="float" min="0" max="20" default="1" precision="2" _gui-text="Ticks lenght/radius">2</param>
+                    <!-- param name="knob_scale_ticks_lenght" type="float" min="0" max="20" default="1" precision="2" _gui-text="Ticks lenght/radius">2</param -->
+                    <param name="knob_scale_ticks_start_lenght" type="float" min="0.1" max="999" default="1" precision="1" _gui-text="Ticks start lenght/radius">2</param>
+                    <param name="knob_scale_ticks_end_lenght" type="float" min="0" max="999" default="1" precision="1" _gui-text="Ticks end lenght">2</param>
                     <param name="knob_scale_ticks_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Ticks width">2</param>
                     <param name="knob_scale_ticks_accent_number" type="int" min="0" max="360" default="0" precision="1" _gui-text="Accent every x ticks">2</param>
                     <param name="Knob_scale_ticks_accent_lenght" type="float" min="0" max="20" default="1" precision="2" _gui-text="Accent lenght">1</param>
                     <param name="knob_scale_ticks_accent_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Accent width">2</param>
                     <param name="knob_scale_ticks_offset" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Ticks offset">0</param>
-
-                    <spacer/>
+                 <spacer/>
                 </vbox>
-                <spacer/>
+                 <spacer/>
                 <separator/>
                 <spacer/>
                 <vbox>
+                    <param name="knob_scale_add_tick_dots" type="boolean" _gui-text="Add tick dots">false</param>
+                    <param name="knob_scale_add_tick_dots_offset" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Tick dots offset">0</param>
+                    <param name="knob_scale_add_tick_dots_radius" type="float" min="-999" max="999" default="1" precision="2" _gui-text="Tick dots radius">0.3</param>
+                    <param name="knob_scale_multiple_dots_number" type="int" min="1" max="360" default="1" precision="1" _gui-text="Multiple dots">1</param>
+                    <param name="knob_scale_multiple_dots_offset" type="float" min="-999" max="999" default="2" precision="2" _gui-text="Multiple dots offset">2</param>
+                    <spacer/>
+                    <separator/>
                     <label appearance="header" >SUBTICKS</label>
                     <param name="knob_scale_subticks_color" type="color" appearance="colorbutton" _gui-text="Subticks color" default="#333333"></param>
                     <separator/>
@@ -344,7 +362,7 @@
                     <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
                     <param name="knob_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label size">10</param>
                     <param name="knob_scale_label_offset" type="float" min="-10" max="10" default="1" precision="2" _gui-text="Label offset">10</param>
-                    <param name="knob_scale_label_add_suffix" type="string" gui-text="Label suffix"></param>
+                    <param name="knob_scale_label_add_suffix" type="string" gui-text="Label suffix" width="1"></param>
                     <param name="knob_scale_label_add_customtext" type="boolean" _gui-text="Add custom text">false</param>
                     <param name="knob_scale_label_customtext" type="string" gui-text="Custom text"></param>
                     <label xml:space="preserve">
@@ -356,20 +374,35 @@
                 <separator/>
                 <spacer/>
                 <vbox>
-                    <label appearance="header">UTILITIES</label> 
-                    <param name="knob_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
+                    <label appearance="header">UTILITIES</label>
+                    <label appearance="header">CENTERING CIRCLE</label>
+                    <param name="knob_scale_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
+                    <param name="knob_scale_utilities_centering_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#008000"></param>
+                    <param name="knob_scale_utilities_centering_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.1</param>
+                    <param name="knob_scale_utilities_centering_guide_offset" type="float" min="0" max="100" default="3" precision="2" _gui-text="Guide offset">3</param>
                     <separator/>
-                    <param name="knob_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
-                    <param name="knob_scale_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
+                    <separator/>
+                    <label appearance="header">PANEL DRILLING PLAN</label>
+                    <param name="knob_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">true</param>
+                    <param name="knob_scale_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide type" appearance="combo">
                         <option value="2">Cross</option>
                         <option value="3">Dot</option>
                         <option value="4">Circle</option>
                     </param>
+                    <param name="knob_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff6600"></param>
                     <param name="knob_scale_utilities_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
-                    <param name="knob_scale_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <param name="knob_scale_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide diameter">6.5</param>
                     <separator/>
-                    <param name="knob_scale_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
-                    <separator/>
+
+                    <label appearance="header">PCB COMPONENT PLAN</label>
+                    <param name="knob_scale_utilities_add_pcb_component_guide" type="boolean" _gui-text="Add component guide">true</param>
+                    <param name="knob_scale_utilities_pcb_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff00ff"></param>
+                    <param name="knob_scale_utilities_pcb_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="knob_scale_utilities_pcb_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <separator/>   
+            
+                <spacer/>
+                    
                 </vbox>
             </hbox>
         </page>
@@ -521,7 +554,7 @@
                 <spacer/>
                 <separator/>
                 <spacer/>
-                <vbox>
+                <!-- <vbox>
                     <label appearance="header">UTILITIES</label> 
                     <param name="slider_scale_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
                     <separator/>
@@ -530,6 +563,32 @@
                     <separator/>
                     <param name="slider_scale_utilities_guide_round_edges" type="boolean" _gui-text="Round the edges">false</param>
                     <separator/>
+                </vbox> -->
+                <vbox>
+                    <label appearance="header">UTILITIES</label>
+                    <!-- <label appearance="header">CENTERING CIRCLE</label>
+                    <param name="knob_scale_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
+                    <param name="knob_scale_utilities_centering_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#008000"></param>
+                    <param name="knob_scale_utilities_centering_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.1</param>
+                    <param name="knob_scale_utilities_centering_guide_offset" type="float" min="0" max="100" default="3" precision="2" _gui-text="Guide offset">3</param>
+                    <separator/> -->
+                    <separator/>
+                    <label appearance="header">PANEL DRILLING PLAN</label>
+                    <param name="slider_scale_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">true</param>
+                    <param name="slider_scale_utilities_drill_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff6600"></param>
+                    <param name="slider_scale_utilities_drill_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="slider_scale_utilities_guide_round_edges" type="boolean" _gui-text="Round the edges">false</param>
+                    <separator/>
+
+                    <label appearance="header">PCB COMPONENT PLAN</label>
+                    <param name="slider_scale_utilities_add_pcb_component_guide" type="boolean" _gui-text="Add component guide">true</param>
+                    <param name="slider_scale_utilities_pcb_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff00ff"></param>
+                    <param name="slider_scale_utilities_pcb_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="slider_scale_utilities_pcb_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <separator/>   
+            
+                <spacer/>
+                    
                 </vbox>
             </hbox>
         </page>
@@ -578,20 +637,35 @@
                 <separator/>
                 <spacer/>
                 <vbox>
-                    <label appearance="header">UTILITIES</label> 
-                    <param name="jack_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#333333"></param>
+                    <label appearance="header">UTILITIES</label>
+                    <label appearance="header">CENTERING CIRCLE</label>
+                    <param name="jack_utilities_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
+                    <param name="jack_utilities_centering_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#008000"></param>
+                    <param name="jack_utilities_centering_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.1</param>
+                    <param name="jack_utilities_centering_guide_offset" type="float" min="0" max="100" default="3" precision="2" _gui-text="Guide offset">3</param>
                     <separator/>
-                    <param name="jack_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">false</param>
-                    <param name="jack_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide" appearance="combo">
+                    <separator/>
+                    <label appearance="header">PANEL DRILLING PLAN</label>
+                    <param name="jack_utilities_add_drill_guide" type="boolean" _gui-text="Add drill guide">true</param>
+                    <param name="jack_utilities_drill_guide_type" type="optiongroup" _gui-text="Drill guide type" appearance="combo">
                         <option value="2">Cross</option>
                         <option value="3">Dot</option>
                         <option value="4">Circle</option>
                     </param>
-                    <param name="jack_utilities_line_width" type="float" min="0" max="10" default="0.2" precision="2" _gui-text="Line width">0.2</param>
-                    <param name="jack_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <param name="jack_utilities_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff6600"></param>
+                    <param name="jack_utilities_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="jack_utilities_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide diameter">6.5</param>
                     <separator/>
-                    <param name="jack_add_centering_circle" type="boolean" _gui-text="Add centering circle">false</param>
-                    <separator/>
+
+                    <label appearance="header">PCB COMPONENT PLAN</label>
+                    <param name="jack_utilities_add_pcb_component_guide" type="boolean" _gui-text="Add component guide">true</param>
+                    <param name="jack_utilities_pcb_color" type="color" appearance="colorbutton" _gui-text="Line color" default="#ff00ff"></param>
+                    <param name="jack_utilities_pcb_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
+                    <param name="jack_utilities_pcb_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
+                    <separator/>   
+            
+                <spacer/>
+                
                 </vbox>
            </hbox>
 		</page>
@@ -604,7 +678,7 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.1.2 - 13 December 2021</label>
+            <label>Synth Panels Designer v. 1.2 (Mega Update) - 16 January 2021</label>
             <label>Main developer: Francesco Mulassano</label>
             <label>Contributors: GaryA
             </label>

@@ -1,0 +1,19 @@
+Synth Panel Designer 1.5 The Mega Update - 16 January 2022
+
+Starting from this version you need INKSCAPE 1.2
+For some reaseon, Inkscape 1.1 broke the units conversion (fixed in 1.2-dev)
+
+PANELS
+- Removed VCV Rack Panel
+
+KNOBS SCALE
+- Added the so-called Nautilus Mode. You can set Start Tick Lenght and End Tick Lenght to create a scale that grows progressively 
+- Add Tick Dots. Now you can have single or multiple dots at the end of the main ticks, by playing with negative parameters, we can create artistic compositions of ticks
+- LAYERS!! Recently I worked on a complex project for a large panel, I found myself with some difficulties that I tried to compensate by creating new layers. Now, for each scale we add a layer dedicated to the CENTERING CIRCLES, one dedicated to the DRILL PLANE (to send the panel into production) and one (the PCB PLAN) for the electronic component's position on the PCB. This makes it easier to work by activating and deactivating only the layers we need.
+
+SLIDER SCALE
+- LAYERS!! Now, for each scale we add a layer dedicated to the DRILL PLAN (to send the panel into production) and one (the PCB PLAN) for the electronic component's position on the PCB. This makes it easier to work by activating and deactivating only the layers we need.
+
+JACK
+- Improved parameters 
+- LAYERS!! Now, for each jack we add a layer dedicated to the DRILL PLAN (to send the panel into production) and one (the PCB PLAN) for the electronic component's position on the PCB. This makes it easier to work by activating and deactivating only the layers we need.

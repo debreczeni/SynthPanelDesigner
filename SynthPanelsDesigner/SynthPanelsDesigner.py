@@ -21,6 +21,7 @@
 #!/usr/bin/python
 
 import sys
+from textwrap import fill
 
 import inkex
 import argparse
@@ -119,7 +120,6 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_pos_y', type=float, default='10', help='Y position')
 
         #knobs scale
-        pars.add_argument('--knob_scale_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
         pars.add_argument('--knob_scale_add_arc', type=inkex.Boolean, default='False', help='Draw arc')
         pars.add_argument('--knob_scale_linlog', type=int, default='1', help='Lin/Log')
         pars.add_argument('--knob_scale_add_outer_arc', type=inkex.Boolean, default='False', help='Outer arc')
@@ -130,6 +130,10 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_arc_rotation', type=int, default='300', help='Arc rotation')  
         pars.add_argument('--knob_scale_arc_angle_offset', type=float, default='10', help='Arc angle offset')
         pars.add_argument('--knob_scale_outer_arc_angle_offset', type=float, default='10', help='Outer arc angle offset')
+        pars.add_argument('--knob_scale_close_arcs', type=inkex.Boolean, default='True', help='Close arcs')
+        pars.add_argument('--knob_scale_close_arcs_lr', type=int, default='0', help='Type of closure')
+        
+       
         
         #knobs scale colors
         pars.add_argument('--knob_scale_arc_color', type=inkex.Color, default='#333333', help='Scale arc color')
@@ -149,6 +153,14 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--Knob_scale_ticks_accent_lenght', type=float, default='1', help='Accent lenght')
         pars.add_argument('--knob_scale_ticks_accent_width', type=float, default='0.1', help='Accent width')
         pars.add_argument('--knob_scale_ticks_offset', type=float, default='0', help='Ticks offset')
+        pars.add_argument('--knob_scale_ticks_start_lenght', type=float, default='10', help='Ticks start lenght')
+        pars.add_argument('--knob_scale_ticks_end_lenght', type=float, default='10', help='Ticks end lenght')
+
+        pars.add_argument('--knob_scale_add_tick_dots', type=inkex.Boolean, default='True', help='Add tick dots')
+        pars.add_argument('--knob_scale_add_tick_dots_offset', type=float, default='10', help='Tick dots offset')
+        pars.add_argument('--knob_scale_add_tick_dots_radius', type=float, default='10', help='Tick dots radius')
+        pars.add_argument('--knob_scale_multiple_dots_number', type=int, default='2', help='Multiple dots number')
+        pars.add_argument('--knob_scale_multiple_dots_offset', type=float, default='10', help='Multiple dots offset')
 
         #knobs scale subticks
         pars.add_argument('--knob_scale_add_subticks', type=inkex.Boolean, default='False', help='Add sub ticks')
@@ -172,11 +184,23 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_label_customtext', help='Label customtex')
 
         #knobs scale utilities
-        pars.add_argument('--knob_scale_utilities_color', type=inkex.Color, default='#333333', help='Utilities color')
+        pars.add_argument('--knob_scale_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
+        pars.add_argument('--knob_scale_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
+        pars.add_argument('--knob_scale_utilities_centering_line_width', type=float, default='10', help='Centering line width')
+        pars.add_argument('--knob_scale_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
+
+        pars.add_argument('--knob_scale_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
         pars.add_argument('--knob_scale_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
         pars.add_argument('--knob_scale_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--knob_scale_utilities_line_width', type=float, default='10', help='Line width')
-        pars.add_argument('--knob_scale_utilities_guide_dimension', type=float, default='10', help='Guide dimension')
+        pars.add_argument('--knob_scale_utilities_line_width', type=float, default='10', help='Drill line width')
+        pars.add_argument('--knob_scale_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
+
+
+        pars.add_argument('--knob_scale_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
+        pars.add_argument('--knob_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
+        pars.add_argument('--knob_scale_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
+        pars.add_argument('--knob_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        pars.add_argument('--knob_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
 
         #SLIDERS
         pars.add_argument('--slider_name', help='Slider name')
@@ -256,12 +280,16 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--slider_scale_label_add_suffix', help='Label add suffix')
 
         #slider scale utilities
-        pars.add_argument('--slider_scale_utilities_color', type=inkex.Color, default='#333333', help='Utilities color')
-        pars.add_argument('--slider_scale_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
-        """ pars.add_argument('--slider_scale_utilities_drill_guide_type', type=int, default='0', help='Drill guide type') """
-        pars.add_argument('--slider_scale_utilities_line_width', type=float, default='10', help='Line width')
-        """ pars.add_argument('--slider_scale_utilities_guide_dimension', type=float, default='10', help='Guide dimension') """
+        pars.add_argument('--slider_scale_utilities_add_drill_guide', type=inkex.Boolean, default='True', help='Add drill guide')
+        pars.add_argument('--slider_scale_utilities_drill_color', type=inkex.Color, default='#333333', help='Utilities color')
+        pars.add_argument('--slider_scale_utilities_drill_line_width', type=float, default='10', help='Line width')
         pars.add_argument('--slider_scale_utilities_guide_round_edges', type=inkex.Boolean, default='False', help='Round guide edges')
+
+        pars.add_argument('--slider_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='True', help='Add drill guide')
+        pars.add_argument('--slider_scale_utilities_pcb_color', type=inkex.Color, default='#333333', help='Utilities color')
+        pars.add_argument('--slider_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        pars.add_argument('--slider_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
+
 
         #JACKS
         pars.add_argument('--jack_name', help='Jack name')
@@ -276,13 +304,23 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--jack_pos_y', type=float, default='10', help='Y position')
 
         #jack utilities
-        pars.add_argument('--jack_utilities_color', type=inkex.Color, default='#333333', help='Utilities color')
+        pars.add_argument('--jack_utilities_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
+        pars.add_argument('--jack_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
+        pars.add_argument('--jack_utilities_centering_line_width', type=float, default='10', help='Centering line width')
+        pars.add_argument('--jack_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
+
+        pars.add_argument('--jack_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
         pars.add_argument('--jack_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
         pars.add_argument('--jack_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--jack_utilities_line_width', type=float, default='0.2', help='Line width')
-        pars.add_argument('--jack_utilities_guide_dimension', type=float, default='6.5', help='Guide dimension')
-        pars.add_argument('--jack_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
+        pars.add_argument('--jack_utilities_line_width', type=float, default='10', help='Drill line width')
+        pars.add_argument('--jack_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
 
+
+        pars.add_argument('--jack_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
+        pars.add_argument('--jack_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
+        pars.add_argument('--jack_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
+        pars.add_argument('--jack_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        pars.add_argument('--jack_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
         #Settings
         pars.add_argument('--author', help='Author name')
         pars.add_argument('--brand', help='Company name')
@@ -381,6 +419,13 @@ class SynthPanelEffect(inkex.Effect):
         arc.set('sodipodi:arc-type', 'arc')
         return arc
 
+    def draw_knob_scale_closed_arc(self, cx, cy, angle, rotation, radius):
+        end = (angle + rotation - pi) / 2.0
+        start = pi - end + rotation
+        arc = PathElement.arc((cx, cy), radius, start=start, end=end, open=True)
+        arc.set('sodipodi:arc-type', 'arc')
+        return arc
+
     def draw_text(self, x, y, textvalue, radius, angular_position, text_size):
         # Create text element
         text = TextElement()
@@ -399,47 +444,131 @@ class SynthPanelEffect(inkex.Effect):
         text.set("y", str(y + text_size / 2))
         return text
 
-    def drill_guide(self, parent, x, y):
+    def drill_guide(self, parent, x, y, fill, stroke, stroke_width, dimension, type):
         # Create drill guide
-        layer = parent.add(inkex.Layer.new('Drill guide'))
-        if self.options.knob_scale_utilities_drill_guide_type == 2: #cross
+        if type == 2: #cross
             cross_v = self.draw_line( 
-            x + self.options.knob_scale_utilities_guide_dimension /2, 
+            x + dimension /2, 
             y, 
-            x - self.options.knob_scale_utilities_guide_dimension /2, 
+            x - dimension /2, 
             y)
 
             cross_h = self.draw_line( 
             x, 
-            y + self.options.knob_scale_utilities_guide_dimension /2, 
+            y + dimension /2, 
             x, 
-            y - self.options.knob_scale_utilities_guide_dimension /2)
+            y - dimension /2)
             
-            cross_v.style['fill'] = cross_h.style['fill'] = "none"
-            cross_v.style['stroke'] = cross_h.style['stroke'] = self.options.knob_scale_utilities_color
-            cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+            cross_v.style['fill'] = cross_h.style['fill'] = fill
+            cross_v.style['stroke'] = cross_h.style['stroke'] = stroke
+            cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = stroke_width
 
-            layer.append(cross_v)
-            layer.append(cross_h)
+            parent.append(cross_v)
+            parent.append(cross_h)
             
-        elif self.options.knob_scale_utilities_drill_guide_type == 3: #dot
-            drill_dot = Circle(cx=str(x), cy=str(y), r=str(self.options.knob_scale_utilities_guide_dimension /2))
+        elif type == 3: #dot
+            drill_dot = Circle(cx=str(x), cy=str(y), r=str(dimension /2))
 
-            drill_dot.style['fill'] = self.options.knob_scale_utilities_color
+            drill_dot.style['fill'] = stroke
             drill_dot.style['stroke'] = "none"
             drill_dot.style['stroke-width'] = 0
 
-            layer.append(drill_dot)
+            parent.append(drill_dot)
 
-        elif self.options.knob_scale_utilities_drill_guide_type == 4: #circle  
-            drill_circle = Circle(cx=str(x), cy=str(y), r=str(self.options.knob_scale_utilities_guide_dimension /2 - self.options.knob_scale_utilities_line_width /2))
+        elif type == 4: #circle  
+            drill_circle = Circle(cx=str(x), cy=str(y), r=str(dimension /2 - stroke_width /2))
 
             drill_circle.style['fill'] = "none"
-            drill_circle.style['stroke'] = self.options.knob_scale_utilities_color
-            drill_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+            drill_circle.style['stroke'] = stroke
+            drill_circle.style['stroke-width'] = stroke_width
 
-            knob_scale_drill_guide.append(drill_circle)
+            parent.append(drill_circle)
 
+    def pcb_guide(self, parent, x, y, fill, stroke, stroke_width, dimension):
+        # Create pcb guide     
+        cross_v = self.draw_line( 
+        x + dimension /2, 
+        y, 
+        x - dimension /2, 
+        y)
+
+        cross_h = self.draw_line( 
+        x, 
+        y + dimension /2, 
+        x, 
+        y - dimension /2)
+        
+        cross_v.style['fill'] = cross_h.style['fill'] = fill
+        cross_v.style['stroke'] = cross_h.style['stroke'] = stroke
+        cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = stroke_width
+
+        parent.append(cross_v)
+        parent.append(cross_h)
+        
+    def sharecropping_guide(self, parent, w, h, l, t):
+
+        # Create sharecropping guide
+        cross_v = self.draw_line( 
+        l + w/2, 
+        t -2, 
+        l + w/2, 
+        t + h + 2)
+
+        cross_h = self.draw_line( 
+        l - 2,
+        t + h/2, 
+        l + w + 2,
+        t + h/2, 
+        )
+
+        if w > h: #horizontal
+            cross_h_left = self.draw_line( 
+            l + h/2, 
+            t - 2, 
+            l + h/2, 
+            t + h + 2)
+
+            cross_h_right = self.draw_line( 
+            l + w - h/2, 
+            t -2, 
+            l + w - h/2, 
+            t + h + 2)
+
+            cross_h_left.style['fill'] = cross_h_right.style['fill'] = "none"
+            cross_h_left.style['stroke'] = cross_h_right.style['stroke'] = self.options.slider_scale_utilities_pcb_color
+            cross_h_left.style['stroke-width'] = cross_h_right.style['stroke-width'] = self.options.slider_scale_utilities_pcb_line_width
+
+            parent.append(cross_h_left)
+            parent.append(cross_h_right)
+
+        else:
+            cross_v_top = self.draw_line( 
+            l - 2,
+            t + w/2, 
+            l + w + 2,
+            t + w/2, 
+            )
+
+            cross_v_bottom = self.draw_line( 
+            l - 2,
+            t + h - w/2, 
+            l + w + 2,
+            t + h - w/2, 
+            )
+
+            cross_v_top.style['fill'] = cross_v_bottom.style['fill'] = "none"
+            cross_v_top.style['stroke'] = cross_v_bottom.style['stroke'] = self.options.slider_scale_utilities_pcb_color
+            cross_v_top.style['stroke-width'] = cross_v_bottom.style['stroke-width'] = self.options.slider_scale_utilities_pcb_line_width
+
+            parent.append(cross_v_top)
+            parent.append(cross_v_bottom)
+        
+        cross_v.style['fill'] = cross_h.style['fill'] = "none"
+        cross_v.style['stroke'] = cross_h.style['stroke'] = self.options.slider_scale_utilities_pcb_color
+        cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = self.options.slider_scale_utilities_pcb_line_width
+
+        parent.append(cross_v)
+        parent.append(cross_h)           
 
     def effect(self):
         euro_hp = self.options.eurorack_panel_hp
@@ -472,7 +601,7 @@ class SynthPanelEffect(inkex.Effect):
             # Eurorack 3U Doepfer standard
             # http://www.doepfer.de/a100_man/a100m_e.htm
 
-            if self.options.panel_type == "e3u" or self.options.panel_type == "vcv" :
+            if self.options.panel_type == "e3u" :
                 height = 128.5
                 #width = euro_hp                    
                 width = 7.5 + (euro_hp - 3) * 5.08 + 7.5
@@ -545,16 +674,11 @@ class SynthPanelEffect(inkex.Effect):
             pwidth =  width * unitfactor
 
             # New panel group
-            #panel_group = self.svg.add(inkex.Group.new('Panel Group'))
-
-            panel_group = self.svg.add(inkex.Group.new(self.options.panel_name))
+            panel_name = self.options.panel_name
+            panel_group = self.svg.add(inkex.Group.new(panel_name))
     
             # Panel sub layer
             panel_layer = panel_group.add(inkex.Layer.new('Panel'))  #panel
-
-            #vcv components layer
-            if self.options.panel_type == "vcv":
-                vcv_layer = self.svg.add(inkex.Layer.new('Components'))  #vcv
 
             if self.options.panel_holes:
                 holes_layer = panel_group.add(inkex.Layer.new('Holes'))  #holes
@@ -597,9 +721,9 @@ class SynthPanelEffect(inkex.Effect):
             RightHoles = 0
             HoleRadius = 0
 
-            # Draw  Eurorack and VCV Holes
+            # Draw  Eurorack Holes
             # http://www.doepfer.de/a100_man/a100m_e.htm
-            if self.options.panel_type == "e1uij" or self.options.panel_type == "e3u" or self.options.panel_type == "vcv"  :
+            if self.options.panel_type == "e1uij" or self.options.panel_type == "e3u" :
                 TopHoles = 3.0
                 BottomHoles = height - 3.0
 
@@ -688,9 +812,9 @@ class SynthPanelEffect(inkex.Effect):
                 gap = holeR/2
 
             #screws
-            if self.options.panel_screws == True and self.options.panel_type == "vcv" and self.options.panel_lasercut == False :
-                self.options.panel_holes == False #remove holes
-
+            #if self.options.panel_screws and self.options.panel_lasercut == False :
+            #    self.options.panel_holes == False #remove holes
+            if self.options.panel_screws:
                 screw_radius = self.options.panel_screw_radius /2
                 screw_type = self.options.panel_screw_type
                 screw_color  = self.options.panel_screw_color
@@ -790,7 +914,7 @@ class SynthPanelEffect(inkex.Effect):
                         # Vertical Line
                         center_layer_g.append(self.draw_line( leftH, topH+holeR-gap, leftH, topH-holeR+gap))
                     # Draw the Righthand side Mounting holes
-                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl" or self.options.panel_type == "vcv") and euro_hp > 10 or (self.options.panel_type == "api" and api_units >=2) or (self.options.panel_type == "m5u"  and self.options.moog_panel_units >=2) or (self.options.panel_type == "d5u"  and self.options.moog_panel_units >=2) or self.options.panel_type == "nineteen" or self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" or (self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  1) :
+                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl") and euro_hp > 10 or (self.options.panel_type == "api" and api_units >=2) or (self.options.panel_type == "m5u"  and self.options.moog_panel_units >=2) or (self.options.panel_type == "d5u"  and self.options.moog_panel_units >=2) or self.options.panel_type == "nineteen" or self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" or (self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  1) :
                         # Bottom Right
                         holes_group.append(Circle(cx=str(rightH), cy=str(bottomH), r=str(r)))
                         # Top Right
@@ -844,7 +968,7 @@ class SynthPanelEffect(inkex.Effect):
 
                     # Draw the Righthand side Mounting holes
 
-                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl" or self.options.panel_type == "vcv")  and euro_hp > 10 or (self.options.panel_type == "lw" and lw_units > 2) or (self.options.panel_type == "nineteen"):
+                    if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl")  and euro_hp > 10 or (self.options.panel_type == "lw" and lw_units > 2) or (self.options.panel_type == "nineteen"):
                         # Bottom Right
                         holes_group.append(self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,bottomH-holeR, holeR,0))
                         # Top Right
@@ -1001,13 +1125,12 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 3: #knobs scales
             sknob = self.svg.selected
-            bbox = self.svg.selected.bounding_box()
-            
+            bbox  = sknob.bounding_box()
             if bbox:
                 center_x, center_y = bbox.center
+                #fix the broken units
                 center_x = inkex.units.convert_unit(center_x, "mm")
                 center_y = inkex.units.convert_unit(center_y, "mm")
-
 
             missing_knob = False
 
@@ -1021,6 +1144,36 @@ class SynthPanelEffect(inkex.Effect):
             else:
                 knob_scales = self.svg.add(inkex.Layer.new('Knob Scales Group'))
                 knob_scales.set('id', 'knob-scales-group')
+
+            #utilities layer
+            if self.options.knob_scale_utilities_add_pcb_component_guide or self.options.knob_scale_utilities_add_drill_guide or self.options.knob_scale_add_centering_circle:
+
+                if self.svg.getElementById('knob-scales-utilities') is not None:
+                    knob_scales_utilities = self.svg.getElementById('knob-scales-utilities')
+                else:
+                    knob_scales_utilities = self.svg.add(inkex.Layer.new('Knob Scales Utilities'))
+                    knob_scales_utilities.set('id', 'knob-scales-utilities')
+
+            if self.options.knob_scale_add_centering_circle:
+                if self.svg.getElementById('knob-scales-utilities-centering') is not None:
+                    knob_scales_utilities_centering = self.svg.getElementById('knob-scales-utilities-centering')
+                else:
+                    knob_scales_utilities_centering = knob_scales_utilities.add(inkex.Layer.new('Centering circles'))
+                    knob_scales_utilities_centering.set('id', 'knob-scales-utilities-centering')
+
+            if self.options.knob_scale_utilities_add_drill_guide:
+                if self.svg.getElementById('knob-scales-utilities-drilling') is not None:  
+                    knob_scales_utilities_drilling = self.svg.getElementById('knob-scales-utilities-drilling') 
+                else:            
+                    knob_scales_utilities_drilling = knob_scales_utilities.add(inkex.Layer.new('Drill plan'))
+                    knob_scales_utilities_drilling.set('id', 'knob-scales-utilities-drilling')
+
+            if self.options.knob_scale_utilities_add_pcb_component_guide:
+                if self.svg.getElementById('knob-scales-utilities-pcb') is not None:  
+                    knob_scales_utilities_pcb = self.svg.getElementById('knob-scales-utilities-pcb')
+                else:
+                    knob_scales_utilities_pcb = knob_scales_utilities.add(inkex.Layer.new('PCB plan'))
+                    knob_scales_utilities_pcb.set('id', 'knob-scales-utilities-pcb')
 
             n_ticks = self.options.knob_scale_ticks_number
             n_subticks = self.options.knob_scale_subticks_number
@@ -1044,7 +1197,7 @@ class SynthPanelEffect(inkex.Effect):
             else:   
                 knob_name = selected_label
                 knob_scale_layer = knob_scales.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
-
+                
                 angle = self.options.knob_scale_arc_angle*pi/180.0
                 arc_rotation = self.options.knob_scale_arc_rotation*pi/180.0 *2
                 
@@ -1052,19 +1205,36 @@ class SynthPanelEffect(inkex.Effect):
                 offset_radius = self.options.knob_scale_arc_radius + self.options.knob_scale_outer_arc_offset - (self.options.knob_scale_arc_width /2)
 
                 if self.options.knob_scale_add_centering_circle:
-                    knob_scale_cc = knob_scale_layer.add(inkex.Layer.new('Centering circle'))
-                    centering_circle = Circle(cx=str(center_x), cy=str(center_y), r=str(radius + 3)) 
+                    knob_scale_centering_layer = knob_scales_utilities_centering.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
+                    centering_circle = Circle(cx=str(center_x), cy=str(center_y), r=str(offset_radius + self.options.knob_scale_utilities_centering_guide_offset)) 
 
                     centering_circle.style['fill'] = "none"
-                    centering_circle.style['stroke'] = self.options.knob_scale_utilities_color
-                    centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_line_width
+                    centering_circle.style['stroke'] = self.options.knob_scale_utilities_centering_color
+                    centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_centering_line_width
 
-                    knob_scale_cc.append(centering_circle)
+                    knob_scale_centering_layer.append(centering_circle)
                     
                 if self.options.knob_scale_utilities_add_drill_guide:
-                    self.drill_guide(knob_scale_layer, center_x, center_y)
+                    knob_scale_drilling_layer = knob_scales_utilities_drilling.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
 
-                knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
+                    fill = "none"
+                    stroke = self.options.knob_scale_utilities_color
+                    stroke_width = self.options.knob_scale_utilities_line_width
+                    dimension = self.options.knob_scale_utilities_guide_dimension
+                    type = self.options.knob_scale_utilities_drill_guide_type
+                    self.drill_guide(knob_scale_drilling_layer, center_x, center_y, fill, stroke, stroke_width, dimension, type)
+
+                if self.options.knob_scale_utilities_add_pcb_component_guide:
+                    knob_scale_pcb_layer = knob_scales_utilities_pcb.add(inkex.Layer.new(knob_name)) #new layer with the same name of the knob
+
+                    fill = "none"
+                    stroke = self.options.knob_scale_utilities_pcb_color
+                    stroke_width = self.options.knob_scale_utilities_pcb_line_width
+                    dimension = self.options.knob_scale_utilities_pcb_guide_dimension
+                    self.pcb_guide(knob_scale_pcb_layer, center_x, center_y, fill, stroke, stroke_width, dimension)
+
+                if self.options.knob_scale_add_arc or self.options.knob_scale_add_outer_arc:
+                    knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
                 
                 if self.options.knob_scale_add_arc:
                     arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
@@ -1110,7 +1280,13 @@ class SynthPanelEffect(inkex.Effect):
                                     else:    
                                         tick_length = self.options.knob_scale_ticks_lenght + self.options.Knob_scale_ticks_accent_lenght
                                 else:
-                                    tick_length = self.options.knob_scale_ticks_lenght
+                                    ###
+                                    ticks_delta =  angle / (n_ticks - 1)
+                                    tick_length_start = self.options.knob_scale_ticks_start_lenght
+                                    tick_lenght_end = self.options.knob_scale_ticks_end_lenght
+                                    ticks_delta_lenght = (tick_lenght_end - tick_length_start) / (n_ticks -1)
+                                    tick_length = (ticks_delta_lenght * tick) + tick_length_start
+                                    ###
                                     
                                 if self.options.knob_scale_inner_ticks:
                                     scale_tick = self.draw_line_mark(center_x, center_y, radius - (self.options.knob_scale_arc_width / 2) - self.options.knob_scale_ticks_offset - tick_length , ticks_start_angle + ticks_delta*tick, tick_length)
@@ -1125,8 +1301,23 @@ class SynthPanelEffect(inkex.Effect):
                                 else:
                                     scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
 
-                                scale_tick.style['stroke'] = self.options.knob_scale_ticks_color    
-                                knob_scale_tick.append(scale_tick)    
+                                scale_tick.style['stroke'] = self.options.knob_scale_ticks_color      
+                                knob_scale_tick.append(scale_tick) 
+
+                                #add point to the main ticks
+                                if self.options.knob_scale_add_tick_dots:
+                                    multiple_dots_offset = 0
+                                    i = 0
+                                    while i < self.options.knob_scale_multiple_dots_number:
+                                        tick_points = self.draw_circle(center_x, center_y, radius +  tick_length + self.options.knob_scale_add_tick_dots_offset + multiple_dots_offset, ticks_start_angle + ticks_delta*tick, self.options.knob_scale_add_tick_dots_radius) 
+                                        multiple_dots_offset = multiple_dots_offset + self.options.knob_scale_multiple_dots_offset
+                                        i = i+1
+                                        knob_scale_tick.append(tick_points)  
+                                  
+                                        tick_points.style['fill'] = self.options.knob_scale_ticks_color
+                                        tick_points.style['stroke'] = 'none'
+                                        tick_points.style['stroke-width'] = 0
+                                     
 
                             else:
                                 tick_length = self.options.knob_scale_ticks_lenght
@@ -1135,8 +1326,17 @@ class SynthPanelEffect(inkex.Effect):
                                 scale_tick.style['fill'] = self.options.knob_scale_ticks_color
                                 scale_tick.style['stroke'] = 'none'
                                 scale_tick.style['stroke-width'] = 0
-
                                 knob_scale_tick.append(scale_tick)
+
+                                #add point to the main ticks
+                                if self.options.knob_scale_add_tick_dots:
+                                    multiple_dots_offset = 0
+                                    i = 0
+                                    while i < self.options.knob_scale_multiple_dots_number:
+                                        tick_points = self.draw_circle(center_x, center_y, radius +  tick_length + self.options.knob_scale_add_tick_dots_offset + multiple_dots_offset, ticks_start_angle + ticks_delta*tick, self.options.knob_scale_add_tick_dots_radius) 
+                                        multiple_dots_offset = multiple_dots_offset + self.options.knob_scale_multiple_dots_offset
+                                        i = i+1
+                                        knob_scale_tick.append(tick_points)  
 
                             if self.options.knob_scale_add_label:
                                 if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
@@ -1328,8 +1528,8 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 5: #slider scales    
                 sslider = self.svg.selected
-                bbox = sslider.bounding_box()
-                
+                bbox  = sslider.bounding_box()
+
                 if bbox:
                     center_x, center_y = bbox.center
                     center_x = inkex.units.convert_unit(center_x, "mm")
@@ -1341,7 +1541,6 @@ class SynthPanelEffect(inkex.Effect):
                     bboxright = inkex.units.convert_unit(bbox.right, "mm")
                     bboxtop = inkex.units.convert_unit(bbox.top, "mm")
                     bboxbottom = inkex.units.convert_unit(bbox.bottom, "mm")
-
 
                 missing_slider = False
 
@@ -1355,6 +1554,28 @@ class SynthPanelEffect(inkex.Effect):
                 else:
                     slider_scales = self.svg.add(inkex.Layer.new('Slider Scales Group'))
                     slider_scales.set('id', 'slider-scales-group')
+
+                
+                if  self.options.slider_scale_utilities_add_drill_guide or self.options.slider_scale_utilities_add_pcb_component_guide:
+                    if self.svg.getElementById('slider-scales-utilities') is not None:
+                        slider_scales_utilities = self.svg.getElementById('slider-scales-utilities')
+                    else:
+                        slider_scales_utilities = self.svg.add(inkex.Layer.new('slider Scales Utilities'))
+                        slider_scales_utilities.set('id', 'slider-scales-utilities')
+
+                    if self.options.slider_scale_utilities_add_drill_guide: 
+                        if self.svg.getElementById('slider-scales-utilities-drilling') is not None:
+                            slider_scales_utilities_drilling = self.svg.getElementById('slider-scales-utilities-drilling')
+                        else:                     
+                            slider_scales_utilities_drilling = slider_scales_utilities.add(inkex.Layer.new('Drill plan'))
+                            slider_scales_utilities_drilling.set('id', 'slider-scales-utilities-drilling')
+
+                    if self.options.slider_scale_utilities_add_pcb_component_guide:
+                        if self.svg.getElementById('slider-scales-utilities-pcb') is not None:
+                            slider_scales_utilities_pcb = self.svg.getElementById('slider-scales-utilities-pcb')
+                        else:                     
+                            slider_scales_utilities_pcb = slider_scales_utilities.add(inkex.Layer.new('PCB plan'))
+                            slider_scales_utilities_pcb.set('id', 'slider-scales-utilities-pcb')    
 
                 n_ticks = self.options.slider_scale_ticks_number
                 n_subticks = self.options.slider_scale_subticks_number
@@ -1387,6 +1608,7 @@ class SynthPanelEffect(inkex.Effect):
 
                         layer_name = selected_label
                         slider_scale_layer = slider_scales.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
+                       
                         slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
 
                         if n_ticks > 0:
@@ -1547,6 +1769,7 @@ class SynthPanelEffect(inkex.Effect):
 
                         layer_name = selected_label
                         slider_scale_layer = slider_scales.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
+                        
                         slider_scale_label = slider_scale_layer.add(inkex.Layer.new('Label'))
 
                         if n_ticks > 0:
@@ -1705,30 +1928,69 @@ class SynthPanelEffect(inkex.Effect):
                             pline_t.style['stroke'] = pline_b.style['stroke'] = self.options.slider_scale_tick_color
                             pline_t.style['stroke-width'] = pline_b.style['stroke-width'] = self.options.slider_scale_perpendicular_line_width     
 
-                            if self.options.slider_scale_utilities_add_drill_guide:
-                                slider_scale_drill_guide = slider_scale_layer.add(inkex.Layer.new('Drill guide'))
+                    if self.options.slider_scale_utilities_add_drill_guide: 
+                        slider_scale_drilling_layer = slider_scales_utilities_drilling.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
 
-                                if self.options.slider_scale_utilities_guide_round_edges:
-                                    if bboxwidth > bboxheight:
-                                        rx = ry = bboxheight /2
-                                    elif bboxwidth < bboxheight:
-                                        rx = ry = bboxwidth /2
-                                else:
-                                    rx = ry = 0
+                        if self.options.slider_scale_utilities_guide_round_edges:
+                            if bboxwidth > bboxheight:
+                                rx = ry = bboxheight /2
+                            elif bboxwidth < bboxheight:
+                                rx = ry = bboxwidth /2
+                        else:
+                            rx = ry = 0
 
-                                drill_guide = self.draw_rectangle(bboxwidth, bboxheight, bboxleft , bboxtop, rx, ry)
-                            
-                                drill_guide.style['fill'] = "none"
-                                drill_guide.style['stroke'] = self.options.slider_scale_utilities_color
-                                drill_guide.style['stroke-width'] = self.options.slider_scale_utilities_line_width
+                        drill_guide = self.draw_rectangle(bboxwidth, bboxheight, bboxleft , bboxtop, rx, ry)
+                    
+                        drill_guide.style['fill'] = "none"
+                        drill_guide.style['stroke'] = self.options.slider_scale_utilities_drill_color
+                        drill_guide.style['stroke-width'] = self.options.slider_scale_utilities_drill_line_width
 
-                                slider_scale_drill_guide.append(drill_guide)
+                        slider_scale_drilling_layer.append(drill_guide)
+
+                    #pcb guide     
+                    if self.options.slider_scale_utilities_add_pcb_component_guide: 
+                        slider_scale_pcb_layer = slider_scales_utilities_pcb.add(inkex.Layer.new(layer_name)) #new layer with the same name of the slider
+
+                        if self.options.slider_scale_utilities_guide_round_edges:
+                            if bboxwidth > bboxheight:
+                                rx = ry = bboxheight /2
+                            elif bboxwidth < bboxheight:
+                                rx = ry = bboxwidth /2
+                        else:
+                            rx = ry = 0
+
+                        pcb_guide = self.draw_rectangle(bboxwidth, bboxheight, bboxleft , bboxtop, rx, ry)
+                        pcb_guide.style['fill'] = "none"
+                        pcb_guide.style['stroke'] = self.options.slider_scale_utilities_pcb_color
+                        pcb_guide.style['stroke-width'] = self.options.slider_scale_utilities_pcb_line_width
+                        slider_scale_pcb_layer.append(pcb_guide)
+
+                        #sharecropping line
+                        sharecropping = self.sharecropping_guide(slider_scale_pcb_layer, bboxwidth, bboxheight, bboxleft , bboxtop)   
+
         elif part == 6: #jacks
             if self.svg.getElementById('jacks-group') is not None:
                 jacks = self.svg.getElementById('jacks-group')
             else:
                 jacks = self.svg.add(inkex.Layer.new('Jacks Group'))
                 jacks.set('id', 'jacks-group')
+
+            #utilities layer
+            if self.options.jack_utilities_add_pcb_component_guide or self.options.jack_utilities_add_drill_guide or self.options.jack_utilities_add_centering_circle :
+                if self.svg.getElementById('jacks-utilities') is not None:
+                    jack_utilities = self.svg.getElementById('jacks-utilities')
+                else:
+                    jack_utilities = self.svg.add(inkex.Layer.new('Jacks Utilities'))
+                    jack_utilities.set('id', 'jacks-utilities')
+                if self.options.jack_utilities_add_centering_circle:
+                    jack_utilities_centering = jack_utilities.add(inkex.Layer.new('Centering circles'))
+                    jack_utilities_centering.set('id', 'jacks-utilities-centering')
+                if self.options.jack_utilities_add_drill_guide:
+                    jack_utilities_drilling = jack_utilities.add(inkex.Layer.new('Drill plan'))
+                    jack_utilities_drilling.set('id', 'jacks-utilities-drilling')
+                if self.options.jack_utilities_add_pcb_component_guide:
+                    jack_utilities_pcb = jack_utilities.add(inkex.Layer.new('PCB plan'))
+                    jack_utilities_pcb.set('id', 'jacks-utilities-pcb')
 
             # Jack sub layer
             if self.options.jack_name is None:
@@ -1754,9 +2016,6 @@ class SynthPanelEffect(inkex.Effect):
                         nut_radius = 7.5
 
                 jack_layer = jacks.add(inkex.Layer.new(self.options.jack_name)) #jack layer
-
-                jack_layer_nut_skirt = jack_layer.add(inkex.Layer.new('Nut skirt'))
-                jack_layer_nut = jack_layer.add(inkex.Layer.new('Nut'))
                 jack_layer_main = jack_layer.add(inkex.Layer.new('Main color'))
 
                 #append the jack layer to the jacks group
@@ -1787,6 +2046,7 @@ class SynthPanelEffect(inkex.Effect):
                     thenut.style['fill'] = self.options.jack_nut_color
                     thenut.style['stroke'] = self.options.jack_nut_outline_color
                     thenut.style['stroke-width'] = str(0.1)
+                    jack_layer_nut = jack_layer.add(inkex.Layer.new('Nut'))
                     jack_layer_nut.append(thenut)
 
                 elif self.options.jack_nut_type == 2:
@@ -1795,6 +2055,7 @@ class SynthPanelEffect(inkex.Effect):
                     thenut.style['fill'] = self.options.jack_nut_color
                     thenut.style['stroke'] = self.options.jack_nut_outline_color
                     thenut.style['stroke-width'] = str(0.1)
+                    jack_layer_nut = jack_layer.add(inkex.Layer.new('Nut'))
                     jack_layer_nut.append(thenut)
 
                 elif self.options.jack_nut_type == 3:
@@ -1803,18 +2064,36 @@ class SynthPanelEffect(inkex.Effect):
                     thenutskirt.style['fill'] = self.options.jack_nut_color
                     thenutskirt.style['stroke'] = self.options.jack_nut_outline_color
                     thenutskirt.style['stroke-width'] = str(0.1)
+                    jack_layer_nut_skirt = jack_layer.add(inkex.Layer.new('Nut skirt'))
                     jack_layer_nut_skirt.append(thenutskirt)
 
-                if self.options.jack_utilities_add_drill_guide:
-                    self.drill_guide(jack_layer, center_x, center_y)
 
-                if self.options.jack_add_centering_circle:
-                    jack_cc = jack_layer.add(inkex.Layer.new('Centering circle'))
-                    centering_circle = Circle(cx=str(center_x), cy=str(center_y), r=str(nut_radius + 3))
+                if self.options.jack_utilities_add_drill_guide:
+                    jack_drilling_layer = jack_utilities_drilling.add(inkex.Layer.new(self.options.jack_name)) #new layer with the same name of the jack
+
+                    fill = "none"
+                    stroke = self.options.jack_utilities_color
+                    stroke_width = self.options.jack_utilities_line_width
+                    dimension = self.options.jack_utilities_guide_dimension
+                    type = self.options.jack_utilities_drill_guide_type
+                    self.drill_guide(jack_drilling_layer, center_x, center_y, fill, stroke, stroke_width, dimension, type)
+
+                if self.options.jack_utilities_add_pcb_component_guide:
+                    jack_pcb_layer = jack_utilities_pcb.add(inkex.Layer.new(self.options.jack_name)) #new layer with the same name of the jack
+
+                    fill = "none"
+                    stroke = self.options.jack_utilities_pcb_color
+                    stroke_width = self.options.jack_utilities_pcb_line_width
+                    dimension = self.options.jack_utilities_pcb_guide_dimension
+                    self.pcb_guide(jack_pcb_layer, center_x, center_y, fill, stroke, stroke_width, dimension)
+
+                if self.options.jack_utilities_add_centering_circle:
+                    jack_cc = jack_utilities_centering.add(inkex.Layer.new(self.options.jack_name))
+                    centering_circle = Circle(cx=str(center_x), cy=str(center_y), r=str(nut_radius + self.options.jack_utilities_centering_guide_offset))
 
                     centering_circle.style['fill'] = "none"
-                    centering_circle.style['stroke'] = self.options.jack_utilities_color
-                    centering_circle.style['stroke-width'] = self.options.jack_utilities_line_width
+                    centering_circle.style['stroke'] = self.options.jack_utilities_centering_color
+                    centering_circle.style['stroke-width'] = self.options.jack_utilities_centering_line_width
 
                     jack_cc.append(centering_circle)
 
@@ -1831,4 +2110,3 @@ def composed_transform(elem, other=None):
 if __name__ == '__main__':
     # Create effect instance and apply it.
     SynthPanelEffect().run()
-
