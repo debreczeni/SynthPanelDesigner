@@ -1,9 +1,0 @@
-# Blacklist files/folders in same directory as the .gitignore file
-/*
-
-# Whitelist some files
-!SynthPanelsDesigner.inx
-!*.pdf
-
-# whitelist some folder
-!SynthPanelsDesigner/
