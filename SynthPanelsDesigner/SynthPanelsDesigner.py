@@ -178,6 +178,7 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
         pars.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
         pars.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
+        pars.add_argument('--knob_scale_label_alignment_baseline', default='middle', help='Label alignment-baseline')
         pars.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
         pars.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
         pars.add_argument('--knob_scale_label_add_customtext', type=inkex.Boolean, help='Label add customtext')
@@ -1376,7 +1377,7 @@ class SynthPanelEffect(inkex.Effect):
 
                                 label.style['text-align'] = 'center'
                                 label.style['text-anchor'] = 'middle'
-                                label.style['alignment-baseline'] = 'center'
+                                label.style['alignment-baseline'] = self.options.knob_scale_label_alignment_baseline
                                 label.style['font-size'] = str(text_size)
                                 label.style['vertical-align'] = 'middle'
                                 label.style['fill'] = self.options.knob_scale_label_color

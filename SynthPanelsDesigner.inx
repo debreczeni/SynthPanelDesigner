@@ -353,6 +353,17 @@
                 <vbox>
                     <label appearance="header">LABELS</label>
                     <param name="knob_scale_label_color" type="color" appearance="colorbutton" _gui-text="Label color" default="#333333"></param>
+                    <param name="knob_scale_label_alignment_baseline" type="optiongroup" _gui-text="Label alignment-baseline" appearance="combo">
+                        <option value="baseline">baseline</option>
+                        <option value="text-bottom">text-bottom</option>
+                        <option value="alphabetic">alphabetic</option>
+                        <option value="ideographic">ideographic</option>
+                        <option value="middle">middle</option>
+                        <option value="central">central</option>
+                        <option value="mathematical">mathematical</option>
+                        <option value="text-top">text-top</option>
+                        <option value="inherit">inherit</option>
+                    </param>
                     <separator/>
                     <param name="knob_scale_add_label" type="boolean" _gui-text="Add labels">false</param>
                     <param name="knob_scale_label_start_number" type="float" min="-9999" max="10000" default="1" precision="1" _gui-text="Start value">1</param>
