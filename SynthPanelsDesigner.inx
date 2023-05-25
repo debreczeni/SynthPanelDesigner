@@ -83,7 +83,7 @@
                     <label appearance="header"  gui-description="Set the panel dimensions!">DIMENSIONS</label>
                     <separator/>
                     <label appearance="header">Eurorack / VCVRack</label>
-                    <param name="eurorack_panel_hp" type="int" min="2" max="72"  _gui-text="HP">4</param>
+                    <param name="eurorack_panel_hp" type="int" min="2" max="84"  _gui-text="HP">4</param>
                     <separator/>
                     
                     <label appearance="header">Moog / Dotcom</label>
