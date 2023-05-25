@@ -1192,7 +1192,7 @@ class SynthPanelEffect(inkex.Effect):
             parent = layer.getparent()
             selected_label = parent.label
 
-            if sknob:
+            if len(sknob):
                 is_knob_selected = True
 
             if( not is_knob_selected):
