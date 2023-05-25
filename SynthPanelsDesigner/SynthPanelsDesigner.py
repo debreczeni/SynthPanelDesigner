@@ -1127,13 +1127,15 @@ class SynthPanelEffect(inkex.Effect):
                 self.svg.append(knobs)
 
         elif part == 3: #knobs scales
-            sknob = self.svg.selected
+            sknob = self.svg.get_current_layer()
             bbox  = sknob.bounding_box()
             if bbox:
                 center_x, center_y = bbox.center
                 #fix the broken units
-                center_x = inkex.units.convert_unit(center_x, "mm")
-                center_y = inkex.units.convert_unit(center_y, "mm")
+                # center_x = inkex.units.convert_unit(center_x, "mm")
+                # center_y = inkex.units.convert_unit(center_y, "mm")
+            
+                #print("center: %s\n" % center_x, file=sys.stderr)
 
             missing_knob = False
 
