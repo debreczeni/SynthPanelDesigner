@@ -1866,7 +1866,7 @@ class SynthPanelEffect(inkex.Effect):
                                     
                                     label_b.style['text-align'] = label_t.style['text-align'] ='center'
                                     label_b.style['text-anchor'] = label_t.style['text-anchor'] = 'middle'
-                                    label_b.style['alignment-baseline'] = label_t.style['alignment-baseline'] = 'center'
+                                    label_b.style['alignment-baseline'] = label_t.style['alignment-baseline'] = 'middle'
                                     label_b.style['font-size'] = label_t.style['font-size'] = self.options.slider_scale_label_font_size
                                     label_b.style['vertical-align'] = label_t.style['vertical-align'] = 'middle'
                                     label_b.style['fill'] = label_t.style['fill'] = self.options.slider_scale_label_color
