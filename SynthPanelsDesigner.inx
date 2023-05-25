@@ -353,6 +353,13 @@
                 <vbox>
                     <label appearance="header">LABELS</label>
                     <param name="knob_scale_label_color" type="color" appearance="colorbutton" _gui-text="Label color" default="#333333"></param>
+                    <param name="knob_scale_label_font_family" type="string" _gui-text="Label font-family" default="sans-serif"></param>
+                    <param name="knob_scale_label_text_anchor" type="optiongroup" _gui-text="Label text-anchor" appearance="combo">
+                        <option value="start">start</option>
+                        <option value="middle">middle</option>
+                        <option value="end">end</option>
+                        <option value="inherit">inherit</option>
+                    </param>
                     <param name="knob_scale_label_alignment_baseline" type="optiongroup" _gui-text="Label alignment-baseline" appearance="combo">
                         <option value="baseline">baseline</option>
                         <option value="text-bottom">text-bottom</option>

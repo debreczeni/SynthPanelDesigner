@@ -178,6 +178,8 @@ class SynthPanelEffect(inkex.Effect):
         pars.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
         pars.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
         pars.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
+        pars.add_argument('--knob_scale_label_font_family', default='sans-serif', help='Scale label font-family')
+        pars.add_argument('--knob_scale_label_text_anchor', default='middle', help='Label text-anchor')
         pars.add_argument('--knob_scale_label_alignment_baseline', default='middle', help='Label alignment-baseline')
         pars.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
         pars.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
@@ -1376,11 +1378,12 @@ class SynthPanelEffect(inkex.Effect):
                                     label = self.draw_text(center_x, center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
 
                                 label.style['text-align'] = 'center'
-                                label.style['text-anchor'] = 'middle'
+                                label.style['text-anchor'] = self.options.knob_scale_label_text_anchor
                                 label.style['alignment-baseline'] = self.options.knob_scale_label_alignment_baseline
                                 label.style['font-size'] = str(text_size)
                                 label.style['vertical-align'] = 'middle'
                                 label.style['fill'] = self.options.knob_scale_label_color
+                                label.style['font-family'] = self.options.knob_scale_label_font_family
 
                                 knob_scale_label.append(label)
 
