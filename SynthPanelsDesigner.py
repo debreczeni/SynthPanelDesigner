@@ -689,14 +689,14 @@ class SynthPanelEffect(inkex.Effect):
             pwidth =  width * unitfactor
 
             # Main layer
-            main_layer = self.svg.add(inkex.Group.new('Project ' + self.options.panel_name))
-            main_layer.set('inkscape:highlight-color', self.options.panel_color)
-            main_layer.set('sodipodi:insensitive', 'true')
-            main_layer.set('id', 'main-layer')
+            # main_layer = self.svg.add(inkex.Group.new('Project ' + self.options.panel_name))
+            # main_layer.set('inkscape:highlight-color', self.options.panel_color)
+            # # main_layer.set('sodipodi:insensitive', 'true')
+            # main_layer.set('id', 'main-layer')
 
             # New panel group
             panel_name = self.options.panel_name
-            panel_group = main_layer.add(inkex.Group.new('Panel'))
+            panel_group =  self.svg.add(inkex.Group.new('Panel'))
             panel_group.set('sodipodi:insensitive', 'true')
     
             # Panel sub layer
@@ -1062,7 +1062,7 @@ class SynthPanelEffect(inkex.Effect):
                     center_layer_g.style['fill'] = 'none'
 
         elif part == 2: #knobs
-                               
+             
             if self.svg.getElementById('knobs-group') is not None:
                 knobs = self.svg.getElementById('knobs-group')
             else:
