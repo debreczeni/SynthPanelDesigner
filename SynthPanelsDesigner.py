@@ -1,24 +1,35 @@
-# Synth Panels Designer - Free Inkscape extension to draw musical instruments user interfaces
-# Copyright (C) 2020 Francesco Mulassano
+#!/usr/bin/env python
+# coding=utf-8
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
+'''
+Synth Panels Designer - Free Inkscape extension to draw musical instruments user interfaces
+Copyright (C) 2020 Francesco Mulassano
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
 
-# Added suggestions - GaryA 15/8/2020
-# Added jacks with options for 3.5mm & 1/4in
-# Added option to define position of knobs, sliders & jacks 
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#!/usr/bin/python
+Added suggestions - GaryA 15/8/2020
+Added jacks with options for 3.5mm & 1/4in
+Added option to define position of knobs, sliders & jacks 
+
+July 2023 Update 1.8
+- migrated to inkscape 1.2+
+- fixed centering to knob for Knob scale
+- fixed centering to slider for Slider scale
+- improved layers and elements naming
+- add new sponsor: Alphalab Audio (Would you sponsor Synth Panel Designer? info@synthpanels.design)
+
+'''
 
 import sys
 from textwrap import fill
@@ -29,7 +40,7 @@ import os
 from inkex.elements import ShapeElement
 
 from lxml import etree
-from inkex.elements import Circle, PathElement, Rectangle, load_svg, Group, TextElement
+from inkex.elements import Circle, PathElement, Rectangle, TextElement
 from math import *
 
 options = argparse.ArgumentParser(description='Panel parameters')
@@ -37,308 +48,312 @@ options = argparse.ArgumentParser(description='Panel parameters')
 Orange = '#f6921e'
 Blue =   '#0000FF'
 White =  '#FFFFFF'
+Green = '#32a852'
 
 lasercut_width = '0.01mm'
 
 class SynthPanelEffect(inkex.Effect):
-
-    def add_arguments(self, pars):
+    
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
+  
         #Parts
-        pars.add_argument('--part', type=int, default=1, help='Select which part you want to draw')
+        self.arg_parser.add_argument('--part', type=int, default=1, help='Select which part you want to draw')
 
         #Panel standards
-        pars.add_argument('--panel_type', default='e3u', help='Panel type')
-        pars.add_argument('--panel_name', default='Panel', help='Panel name')
-        pars.add_argument('--eurorack_panel_hp', type=int, default=1, help='Panel HP?')
-        pars.add_argument('--api_panel_units', type=int, default=1, help='API Units?')
-        pars.add_argument('--moog_panel_units', type=int, default=1, help='Moog Units?')
-        pars.add_argument('--nineteen_panel_units', type=int, default=1, help='19inch Units?')
-        pars.add_argument('--lw_panel_units', type=int, default=1, help='Loudest Warning Units?')
-        pars.add_argument('--hammond_panel_units', type=int, default=1, help='Hammond Units?')
-        pars.add_argument('--fracrack_panel_units', type=int, default=1, help='Frackrack Units?')
+        self.arg_parser.add_argument('--panel_type', default='e3u', help='Panel type')
+        self.arg_parser.add_argument('--panel_name', default='Panel', help='Panel name')
+        self.arg_parser.add_argument('--eurorack_panel_hp', type=int, default=1, help='Panel HP?')
+        self.arg_parser.add_argument('--api_panel_units', type=int, default=1, help='API Units?')
+        self.arg_parser.add_argument('--moog_panel_units', type=int, default=1, help='Moog Units?')
+        self.arg_parser.add_argument('--nineteen_panel_units', type=int, default=1, help='19inch Units?')
+        self.arg_parser.add_argument('--lw_panel_units', type=int, default=1, help='Loudest Warning Units?')
+        self.arg_parser.add_argument('--hammond_panel_units', type=int, default=1, help='Hammond Units?')
+        self.arg_parser.add_argument('--fracrack_panel_units', type=int, default=1, help='Frackrack Units?')
 
         #panel color
-        pars.add_argument('--panel_color', type=inkex.Color, default='#e6e6e6', help='Panel color')
+        self.arg_parser.add_argument('--panel_color', type=inkex.Color, default='#e6e6e6', help='Panel color')
 
         #panel custom dimension
-        pars.add_argument('--panel_custom_width', type=float, default='100', help='Set the panel custom width')
-        pars.add_argument('--panel_custom_height', type=float, default='100', help='Set the panel custom height')
+        self.arg_parser.add_argument('--panel_custom_width', type=float, default='100', help='Set the panel custom width')
+        self.arg_parser.add_argument('--panel_custom_height', type=float, default='100', help='Set the panel custom height')
 
         #panel utility
-        pars.add_argument('--panel_holes', type=inkex.Boolean, default='False', help='Want do drill the mounting holes?')
-        pars.add_argument('--panel_centers', type=inkex.Boolean, default='False', help='Mark centers?')
-        pars.add_argument('--panel_oval', type=inkex.Boolean, default='False', help='Oval holes?')
-        pars.add_argument('--panel_lasercut', type=inkex.Boolean, default='False', help='Lasercut style?')
+        self.arg_parser.add_argument('--panel_holes', type=inkex.Boolean, default='False', help='Want do drill the mounting holes?')
+        self.arg_parser.add_argument('--panel_centers', type=inkex.Boolean, default='False', help='Mark centers?')
+        self.arg_parser.add_argument('--panel_oval', type=inkex.Boolean, default='False', help='Oval holes?')
+        self.arg_parser.add_argument('--panel_lasercut', type=inkex.Boolean, default='False', help='Lasercut style?')
         
         #Screws
-        pars.add_argument('--panel_screws', type=inkex.Boolean, default='False', help='Add screws')
-        pars.add_argument('--panel_screw_radius', type=float, default='100', help='Screw radius')
-        pars.add_argument('--panel_screw_type', type=int, default=1, help='Screw type')
-        pars.add_argument('--panel_screw_color', type=inkex.Color, default='#e6e6e6', help='Screw color')
-        pars.add_argument('--panel_screw_stroke_color', type=inkex.Color, default='#e6e6e6', help='Screw stroke color')
-        pars.add_argument('--panel_screw_stroke_width', type=float, default='100', help='Screw stroke width')
-        pars.add_argument('--panel_screw_tick_color', type=inkex.Color, default='#e6e6e6', help='Screw tick color')
-        pars.add_argument('--panel_screw_tick_width', type=float, default='100', help='Screw tick width')
+        self.arg_parser.add_argument('--panel_screws', type=inkex.Boolean, default='False', help='Add screws')
+        self.arg_parser.add_argument('--panel_screw_radius', type=float, default='100', help='Screw radius')
+        self.arg_parser.add_argument('--panel_screw_type', type=int, default=1, help='Screw type')
+        self.arg_parser.add_argument('--panel_screw_color', type=inkex.Color, default='#e6e6e6', help='Screw color')
+        self.arg_parser.add_argument('--panel_screw_stroke_color', type=inkex.Color, default='#e6e6e6', help='Screw stroke color')
+        self.arg_parser.add_argument('--panel_screw_stroke_width', type=float, default='100', help='Screw stroke width')
+        self.arg_parser.add_argument('--panel_screw_tick_color', type=inkex.Color, default='#e6e6e6', help='Screw tick color')
+        self.arg_parser.add_argument('--panel_screw_tick_width', type=float, default='100', help='Screw tick width')
 
         #UI
         #KNOBS
-        pars.add_argument('--knob_name', help='Knob name')
-        pars.add_argument('--knob_main_style', type=int, default='False', help='Knob style')
-        pars.add_argument('--knob_vintage_color', type=inkex.Color, default='#fefefe', help='Knob vintage color')
-        pars.add_argument('--knob_vintage_dimension', type=float, default='10', help='Knob vintage dimension')
-        pars.add_argument('--knob_vintage_stroke_color', type=inkex.Color, default='#fefefe', help='Knob vintage stroke color')
-        pars.add_argument('--knob_vintage_stroke_width', type=float, default='10', help='Knob vintage stroke width')
-        pars.add_argument('--knob_vintage_sides', type=float, default='10', help='Knob vintage sides')
-        pars.add_argument('--knob_vintage_transform', type=float, default='10', help='Knob vintage transformation')
-        pars.add_argument('--knob_presets', type=int, default=1, help='Select the knob type')
+        self.arg_parser.add_argument('--knob_name', help='Knob name')
+        self.arg_parser.add_argument('--knob_main_style', type=int, default='False', help='Knob style')
+        self.arg_parser.add_argument('--knob_vintage_color', type=inkex.Color, default='#fefefe', help='Knob vintage color')
+        self.arg_parser.add_argument('--knob_vintage_dimension', type=float, default='10', help='Knob vintage dimension')
+        self.arg_parser.add_argument('--knob_vintage_stroke_color', type=inkex.Color, default='#fefefe', help='Knob vintage stroke color')
+        self.arg_parser.add_argument('--knob_vintage_stroke_width', type=float, default='10', help='Knob vintage stroke width')
+        self.arg_parser.add_argument('--knob_vintage_sides', type=float, default='10', help='Knob vintage sides')
+        self.arg_parser.add_argument('--knob_vintage_transform', type=float, default='10', help='Knob vintage transformation')
+        self.arg_parser.add_argument('--knob_presets', type=int, default=1, help='Select the knob type')
 
-        pars.add_argument('--knob_main_color', type=inkex.Color, default='#fefefe', help='Knob main color')
-        pars.add_argument('--knob_main_stroke_color', type=inkex.Color, default='#333333', help='Knob stroke color')
-        pars.add_argument('--knob_tick_color', type=inkex.Color, default='#333333', help='Knob tick color')
-        pars.add_argument('--knob_tick_type', type=int, default=1, help='Select the tick type')
+        self.arg_parser.add_argument('--knob_main_color', type=inkex.Color, default='#fefefe', help='Knob main color')
+        self.arg_parser.add_argument('--knob_main_stroke_color', type=inkex.Color, default='#333333', help='Knob stroke color')
+        self.arg_parser.add_argument('--knob_tick_color', type=inkex.Color, default='#333333', help='Knob tick color')
+        self.arg_parser.add_argument('--knob_tick_type', type=int, default=1, help='Select the tick type')
 
-        pars.add_argument('--knob_add_skirt', type=inkex.Boolean, default='False', help='Add skirt')
-        pars.add_argument('--knob_skirt_color', type=inkex.Color, default='#fefefe', help='Knob skirt color')
-        pars.add_argument('--knob_skirt_stroke_color', type=inkex.Color, default='#333333', help='Knob skirt stroke color')
+        self.arg_parser.add_argument('--knob_add_skirt', type=inkex.Boolean, default='False', help='Add skirt')
+        self.arg_parser.add_argument('--knob_skirt_color', type=inkex.Color, default='#fefefe', help='Knob skirt color')
+        self.arg_parser.add_argument('--knob_skirt_stroke_color', type=inkex.Color, default='#333333', help='Knob skirt stroke color')
 
-        pars.add_argument('--knob_main_dimension', type=float, default='12', help='Set the knob main dimension')
-        pars.add_argument('--knob_main_stroke_width', type=float, default=1, help='Set the stroke width')
+        self.arg_parser.add_argument('--knob_main_dimension', type=float, default='12', help='Set the knob main dimension')
+        self.arg_parser.add_argument('--knob_main_stroke_width', type=float, default=1, help='Set the stroke width')
         
-        pars.add_argument('--knob_add_tick', type=inkex.Boolean, default='False', help='Add tick')
-        pars.add_argument('--knob_tick_width', type=float, default=1, help='Set the tick width')
-        pars.add_argument('--knob_tick_lenght', type=float, default=5.5, help='Set the tick lenght')
+        self.arg_parser.add_argument('--knob_add_tick', type=inkex.Boolean, default='False', help='Add tick')
+        self.arg_parser.add_argument('--knob_tick_width', type=float, default=1, help='Set the tick width')
+        self.arg_parser.add_argument('--knob_tick_lenght', type=float, default=5.5, help='Set the tick lenght')
 
-        pars.add_argument('--knob_skirt_dimension', type=float, default='12', help='Set the knob secondary dimension')
-        pars.add_argument('--knob_skirt_stroke_width', type=float, default=1, help='Set the stroke width')
+        self.arg_parser.add_argument('--knob_skirt_dimension', type=float, default='12', help='Set the knob secondary dimension')
+        self.arg_parser.add_argument('--knob_skirt_stroke_width', type=float, default=1, help='Set the stroke width')
 
-        pars.add_argument('--knob_add_arrow', type=inkex.Boolean, default='False', help='Add arrow')
-        pars.add_argument('--knob_arrow_color', type=inkex.Color, default='#fefefe', help='Knob arrow color') 
-        pars.add_argument('--knob_arrow_width', type=float, default='0', help='Knob arrow width') 
+        self.arg_parser.add_argument('--knob_add_arrow', type=inkex.Boolean, default='False', help='Add arrow')
+        self.arg_parser.add_argument('--knob_arrow_color', type=inkex.Color, default='#fefefe', help='Knob arrow color') 
+        self.arg_parser.add_argument('--knob_arrow_width', type=float, default='0', help='Knob arrow width') 
 
-        pars.add_argument('--knob_pos_define', type=inkex.Boolean, default='False', help='Define knob position')
-        pars.add_argument('--knob_pos_x', type=float, default='10', help='X position')
-        pars.add_argument('--knob_pos_y', type=float, default='10', help='Y position')
+        self.arg_parser.add_argument('--knob_pos_define', type=inkex.Boolean, default='False', help='Define knob position')
+        self.arg_parser.add_argument('--knob_pos_x', type=float, default='10', help='X position')
+        self.arg_parser.add_argument('--knob_pos_y', type=float, default='10', help='Y position')
 
         #knobs scale
-        pars.add_argument('--knob_scale_add_arc', type=inkex.Boolean, default='False', help='Draw arc')
-        pars.add_argument('--knob_scale_linlog', type=int, default='1', help='Lin/Log')
-        pars.add_argument('--knob_scale_add_outer_arc', type=inkex.Boolean, default='False', help='Outer arc')
-        pars.add_argument('--knob_scale_outer_arc_offset', type=float, default='0.5', help='Outer offset')
-        pars.add_argument('--knob_scale_arc_width', type=float, default='0.5', help='Width')
-        pars.add_argument('--knob_scale_arc_radius', type=float, default='10', help='Radius')
-        pars.add_argument('--knob_scale_arc_angle', type=int, default='300', help='Angle')  
-        pars.add_argument('--knob_scale_arc_rotation', type=int, default='300', help='Arc rotation')  
-        pars.add_argument('--knob_scale_arc_angle_offset', type=float, default='10', help='Arc angle offset')
-        pars.add_argument('--knob_scale_outer_arc_angle_offset', type=float, default='10', help='Outer arc angle offset')
-        pars.add_argument('--knob_scale_close_arcs', type=inkex.Boolean, default='True', help='Close arcs')
-        pars.add_argument('--knob_scale_close_arcs_lr', type=int, default='0', help='Type of closure')
+        self.arg_parser.add_argument('--knob_scale_add_arc', type=inkex.Boolean, default='False', help='Draw arc')
+        self.arg_parser.add_argument('--knob_scale_linlog', type=int, default='1', help='Lin/Log')
+        self.arg_parser.add_argument('--knob_scale_add_outer_arc', type=inkex.Boolean, default='False', help='Outer arc')
+        self.arg_parser.add_argument('--knob_scale_outer_arc_offset', type=float, default='0.5', help='Outer offset')
+        self.arg_parser.add_argument('--knob_scale_arc_width', type=float, default='0.5', help='Width')
+        self.arg_parser.add_argument('--knob_scale_arc_radius', type=float, default='10', help='Radius')
+        self.arg_parser.add_argument('--knob_scale_arc_angle', type=int, default='300', help='Angle')  
+        self.arg_parser.add_argument('--knob_scale_arc_rotation', type=int, default='300', help='Arc rotation')  
+        self.arg_parser.add_argument('--knob_scale_arc_angle_offset', type=float, default='10', help='Arc angle offset')
+        self.arg_parser.add_argument('--knob_scale_outer_arc_angle_offset', type=float, default='10', help='Outer arc angle offset')
+        self.arg_parser.add_argument('--knob_scale_close_arcs', type=inkex.Boolean, default='True', help='Close arcs')
+        self.arg_parser.add_argument('--knob_scale_close_arcs_lr', type=int, default='0', help='Type of closure')
         
        
         
         #knobs scale colors
-        pars.add_argument('--knob_scale_arc_color', type=inkex.Color, default='#333333', help='Scale arc color')
-        pars.add_argument('--knob_scale_ticks_color', type=inkex.Color, default='#333333', help='Scale ticks color')
-        pars.add_argument('--knob_scale_subticks_color', type=inkex.Color, default='#333333', help='Scale subticks color')
-        pars.add_argument('--knob_scale_label_color', type=inkex.Color, default='#333333', help='Scale label color')
+        self.arg_parser.add_argument('--knob_scale_arc_color', type=inkex.Color, default='#333333', help='Scale arc color')
+        self.arg_parser.add_argument('--knob_scale_ticks_color', type=inkex.Color, default='#333333', help='Scale ticks color')
+        self.arg_parser.add_argument('--knob_scale_subticks_color', type=inkex.Color, default='#333333', help='Scale subticks color')
+        self.arg_parser.add_argument('--knob_scale_label_color', type=inkex.Color, default='#333333', help='Scale label color')
 
         #knobs scale ticks
-        pars.add_argument('--knob_scale_add_ticks', type=inkex.Boolean, default='True', help='Add ticks')
-        pars.add_argument('--knob_scale_inner_ticks', type=inkex.Boolean, default='True', help='Add ticks')
+        self.arg_parser.add_argument('--knob_scale_add_ticks', type=inkex.Boolean, default='True', help='Add ticks')
+        self.arg_parser.add_argument('--knob_scale_inner_ticks', type=inkex.Boolean, default='True', help='Add ticks')
 
-        pars.add_argument('--knob_scale_ticks_type', type=int, default='300', help='Scale type')
-        pars.add_argument('--knob_scale_ticks_number', type=int, default='300', help='Number of tick')
-        pars.add_argument('--knob_scale_ticks_lenght', type=float, default='1', help='Ticks lenght')
-        pars.add_argument('--knob_scale_ticks_width', type=float, default='0.1', help='Ticks width') 
-        pars.add_argument('--knob_scale_ticks_accent_number', type=int, default='300', help='Accent number') 
-        pars.add_argument('--Knob_scale_ticks_accent_lenght', type=float, default='1', help='Accent lenght')
-        pars.add_argument('--knob_scale_ticks_accent_width', type=float, default='0.1', help='Accent width')
-        pars.add_argument('--knob_scale_ticks_offset', type=float, default='0', help='Ticks offset')
-        pars.add_argument('--knob_scale_ticks_start_lenght', type=float, default='10', help='Ticks start lenght')
-        pars.add_argument('--knob_scale_ticks_end_lenght', type=float, default='10', help='Ticks end lenght')
+        self.arg_parser.add_argument('--knob_scale_ticks_type', type=int, default='300', help='Scale type')
+        self.arg_parser.add_argument('--knob_scale_ticks_number', type=int, default='300', help='Number of tick')
+        self.arg_parser.add_argument('--knob_scale_ticks_lenght', type=float, default='1', help='Ticks lenght')
+        self.arg_parser.add_argument('--knob_scale_ticks_width', type=float, default='0.1', help='Ticks width') 
+        self.arg_parser.add_argument('--knob_scale_ticks_accent_number', type=int, default='300', help='Accent number') 
+        self.arg_parser.add_argument('--Knob_scale_ticks_accent_lenght', type=float, default='1', help='Accent lenght')
+        self.arg_parser.add_argument('--knob_scale_ticks_accent_width', type=float, default='0.1', help='Accent width')
+        self.arg_parser.add_argument('--knob_scale_ticks_offset', type=float, default='0', help='Ticks offset')
+        self.arg_parser.add_argument('--knob_scale_ticks_start_lenght', type=float, default='10', help='Ticks start lenght')
+        self.arg_parser.add_argument('--knob_scale_ticks_end_lenght', type=float, default='10', help='Ticks end lenght')
 
-        pars.add_argument('--knob_scale_add_tick_dots', type=inkex.Boolean, default='True', help='Add tick dots')
-        pars.add_argument('--knob_scale_add_tick_dots_offset', type=float, default='10', help='Tick dots offset')
-        pars.add_argument('--knob_scale_add_tick_dots_radius', type=float, default='10', help='Tick dots radius')
-        pars.add_argument('--knob_scale_multiple_dots_number', type=int, default='2', help='Multiple dots number')
-        pars.add_argument('--knob_scale_multiple_dots_offset', type=float, default='10', help='Multiple dots offset')
+        self.arg_parser.add_argument('--knob_scale_add_tick_dots', type=inkex.Boolean, default='True', help='Add tick dots')
+        self.arg_parser.add_argument('--knob_scale_add_tick_dots_offset', type=float, default='10', help='Tick dots offset')
+        self.arg_parser.add_argument('--knob_scale_add_tick_dots_radius', type=float, default='10', help='Tick dots radius')
+        self.arg_parser.add_argument('--knob_scale_multiple_dots_number', type=int, default='2', help='Multiple dots number')
+        self.arg_parser.add_argument('--knob_scale_multiple_dots_offset', type=float, default='10', help='Multiple dots offset')
 
         #knobs scale subticks
-        pars.add_argument('--knob_scale_add_subticks', type=inkex.Boolean, default='False', help='Add sub ticks')
-        pars.add_argument('--knob_scale_subticks_number', type=int, default='300', help='Number of subtick marks')
-        pars.add_argument('--knob_scale_subticks_lenght', type=float, default='300', help='Subticks width')
-        pars.add_argument('--knob_scale_subticks_width', type=float, default='300', help='Subticks lenght')  
-        pars.add_argument('--knob_scale_subticks_type', type=int, default='False', help='Subticks type')
-        pars.add_argument('--knob_scale_subticks_offset', type=float, default='300', help='Subticks offset')
+        self.arg_parser.add_argument('--knob_scale_add_subticks', type=inkex.Boolean, default='False', help='Add sub ticks')
+        self.arg_parser.add_argument('--knob_scale_subticks_number', type=int, default='300', help='Number of subtick marks')
+        self.arg_parser.add_argument('--knob_scale_subticks_lenght', type=float, default='300', help='Subticks width')
+        self.arg_parser.add_argument('--knob_scale_subticks_width', type=float, default='300', help='Subticks lenght')  
+        self.arg_parser.add_argument('--knob_scale_subticks_type', type=int, default='False', help='Subticks type')
+        self.arg_parser.add_argument('--knob_scale_subticks_offset', type=float, default='300', help='Subticks offset')
         
         #knobs scale label
-        pars.add_argument('--knob_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
-        pars.add_argument('--knob_scale_label_start_number', type=float, default='1', help='Start number')
-        pars.add_argument('--knob_scale_label_end_number', type=float, default='10', help='End number')
-        pars.add_argument('--knob_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
-        pars.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
-        pars.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
-        pars.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
-        pars.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
-        pars.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
-        pars.add_argument('--knob_scale_label_add_customtext', type=inkex.Boolean, help='Label add customtext')
-        pars.add_argument('--knob_scale_label_customtext', help='Label customtex')
+        self.arg_parser.add_argument('--knob_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
+        self.arg_parser.add_argument('--knob_scale_label_start_number', type=float, default='1', help='Start number')
+        self.arg_parser.add_argument('--knob_scale_label_end_number', type=float, default='10', help='End number')
+        self.arg_parser.add_argument('--knob_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
+        self.arg_parser.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
+        self.arg_parser.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
+        self.arg_parser.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
+        self.arg_parser.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
+        self.arg_parser.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
+        self.arg_parser.add_argument('--knob_scale_label_add_customtext', type=inkex.Boolean, help='Label add customtext')
+        self.arg_parser.add_argument('--knob_scale_label_customtext', help='Label customtex')
 
         #knobs scale utilities
-        pars.add_argument('--knob_scale_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
-        pars.add_argument('--knob_scale_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
-        pars.add_argument('--knob_scale_utilities_centering_line_width', type=float, default='10', help='Centering line width')
-        pars.add_argument('--knob_scale_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
+        self.arg_parser.add_argument('--knob_scale_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
+        self.arg_parser.add_argument('--knob_scale_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
+        self.arg_parser.add_argument('--knob_scale_utilities_centering_line_width', type=float, default='10', help='Centering line width')
+        self.arg_parser.add_argument('--knob_scale_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
 
-        pars.add_argument('--knob_scale_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
-        pars.add_argument('--knob_scale_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
-        pars.add_argument('--knob_scale_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--knob_scale_utilities_line_width', type=float, default='10', help='Drill line width')
-        pars.add_argument('--knob_scale_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
+        self.arg_parser.add_argument('--knob_scale_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
+        self.arg_parser.add_argument('--knob_scale_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
+        self.arg_parser.add_argument('--knob_scale_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
+        self.arg_parser.add_argument('--knob_scale_utilities_line_width', type=float, default='10', help='Drill line width')
+        self.arg_parser.add_argument('--knob_scale_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
 
 
-        pars.add_argument('--knob_scale_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
-        pars.add_argument('--knob_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
-        pars.add_argument('--knob_scale_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--knob_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
-        pars.add_argument('--knob_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
+        self.arg_parser.add_argument('--knob_scale_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
+        self.arg_parser.add_argument('--knob_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
+        self.arg_parser.add_argument('--knob_scale_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
+        self.arg_parser.add_argument('--knob_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        self.arg_parser.add_argument('--knob_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
 
         #SLIDERS
-        pars.add_argument('--slider_name', help='Slider name')
-        pars.add_argument('--slider_orientation', type=int, default=1, help='Select the slider type') 
-        pars.add_argument('--slider_scale_linlog', type=int, default='1', help='Lin/Log')
-        pars.add_argument('--slider_presets', type=int, default=1, help='Select the knob type')
+        self.arg_parser.add_argument('--slider_name', help='Slider name')
+        self.arg_parser.add_argument('--slider_orientation', type=int, default=1, help='Select the slider type') 
+        self.arg_parser.add_argument('--slider_scale_linlog', type=int, default='1', help='Lin/Log')
+        self.arg_parser.add_argument('--slider_presets', type=int, default=1, help='Select the knob type')
 
         #sliders colors
         #coarse
-        pars.add_argument('--slider_coarse_color', type=inkex.Color, default='#fefefe', help='Slider coarse color')
-        pars.add_argument('--slider_coarse_stroke_color', type=inkex.Color, default='#333333', help='Slider coarse stroke color')
+        self.arg_parser.add_argument('--slider_coarse_color', type=inkex.Color, default='#fefefe', help='Slider coarse color')
+        self.arg_parser.add_argument('--slider_coarse_stroke_color', type=inkex.Color, default='#333333', help='Slider coarse stroke color')
 
         #cursor
-        pars.add_argument('--slider_cursor_color', type=inkex.Color, default='#fefefe', help='Slider cursor color')
-        pars.add_argument('--slider_cursor_stroke_color', type=inkex.Color, default='#fefefe', help='Slider cursor stroke color')
-        pars.add_argument('--slider_cursor_type', type=int, default=1, help='Select the cursor type')
-        pars.add_argument('--slider_cursor_tick_color', type=inkex.Color, default='#fefefe', help='Slider cursor tick color')
+        self.arg_parser.add_argument('--slider_cursor_color', type=inkex.Color, default='#fefefe', help='Slider cursor color')
+        self.arg_parser.add_argument('--slider_cursor_stroke_color', type=inkex.Color, default='#fefefe', help='Slider cursor stroke color')
+        self.arg_parser.add_argument('--slider_cursor_type', type=int, default=1, help='Select the cursor type')
+        self.arg_parser.add_argument('--slider_cursor_tick_color', type=inkex.Color, default='#fefefe', help='Slider cursor tick color')
 
         #sliders dimension
         #coarse
-        pars.add_argument('--slider_coarse_lenght', type=float, default=100, help='Coarse')
-        pars.add_argument('--slider_coarse_gap', type=float, default=6, help='Gap')
-        pars.add_argument('--slider_coarse_stroke_width', type=float, default=1, help='Coarse stroke width')
-        pars.add_argument('--slider_coarse_round_edges', type=inkex.Boolean, default='False', help='Round the edges')
+        self.arg_parser.add_argument('--slider_coarse_lenght', type=float, default=100, help='Coarse')
+        self.arg_parser.add_argument('--slider_coarse_gap', type=float, default=6, help='Gap')
+        self.arg_parser.add_argument('--slider_coarse_stroke_width', type=float, default=1, help='Coarse stroke width')
+        self.arg_parser.add_argument('--slider_coarse_round_edges', type=inkex.Boolean, default='False', help='Round the edges')
 
         #cursor
-        pars.add_argument('--slider_cursor_height', type=float, default=100, help='Cursor height')
-        pars.add_argument('--slider_cursor_width', type=float, default=100, help='Cursor width')
-        pars.add_argument('--slider_cursor_stroke_width', type=float, default=100, help='Cursor stroke width')
-        pars.add_argument('--slider_cursor_tick_width', type=float, default=0.1, help='Cursor tick width')
-        pars.add_argument('--slider_cursor_round_edges', type=float, default='False', help='Round the edges')
+        self.arg_parser.add_argument('--slider_cursor_height', type=float, default=100, help='Cursor height')
+        self.arg_parser.add_argument('--slider_cursor_width', type=float, default=100, help='Cursor width')
+        self.arg_parser.add_argument('--slider_cursor_stroke_width', type=float, default=100, help='Cursor stroke width')
+        self.arg_parser.add_argument('--slider_cursor_tick_width', type=float, default=0.1, help='Cursor tick width')
+        self.arg_parser.add_argument('--slider_cursor_round_edges', type=float, default='False', help='Round the edges')
 
-        pars.add_argument('--slider_pos_define', type=inkex.Boolean, default='False', help='Define slider position')
-        pars.add_argument('--slider_pos_x', type=float, default='10', help='X position')
-        pars.add_argument('--slider_pos_y', type=float, default='10', help='Y position')
+        self.arg_parser.add_argument('--slider_pos_define', type=inkex.Boolean, default='False', help='Define slider position')
+        self.arg_parser.add_argument('--slider_pos_x', type=float, default='10', help='X position')
+        self.arg_parser.add_argument('--slider_pos_y', type=float, default='10', help='Y position')
 
         #SLIDER SCALES
-        pars.add_argument('--slider_scale_position', type=int, default='1', help='Position')
-        pars.add_argument('--slider_scale_h_offset', type=float, default='1', help='H offset')
-        pars.add_argument('--slider_scale_v_offset', type=float, default='1', help='V offset')
+        self.arg_parser.add_argument('--slider_scale_position', type=int, default='1', help='Position')
+        self.arg_parser.add_argument('--slider_scale_h_offset', type=float, default='1', help='H offset')
+        self.arg_parser.add_argument('--slider_scale_v_offset', type=float, default='1', help='V offset')
 
         #slider scale colors
-        pars.add_argument('--slider_scale_tick_color', type=inkex.Color, default='#fefefe', help='Slider tick color')
-        pars.add_argument('--slider_scale_subtick_color', type=inkex.Color, default='#fefefe', help='Slider subtick color')
-        pars.add_argument('--slider_scale_label_color', type=inkex.Color, default='#fefefe', help='Slider label color')
+        self.arg_parser.add_argument('--slider_scale_tick_color', type=inkex.Color, default='#fefefe', help='Slider tick color')
+        self.arg_parser.add_argument('--slider_scale_subtick_color', type=inkex.Color, default='#fefefe', help='Slider subtick color')
+        self.arg_parser.add_argument('--slider_scale_label_color', type=inkex.Color, default='#fefefe', help='Slider label color')
         
         #slider scale ticks
-        pars.add_argument('--slider_scale_ticks_number', type=int, default='300', help='Number of tick marks')
-        pars.add_argument('--slider_scale_ticks_start_size', type=float, default='1', help='Ticks start size')
-        pars.add_argument('--slider_scale_ticks_end_size', type=float, default='1', help='Ticks end size')
-        pars.add_argument('--slider_scale_ticks_start_lenght', type=float, default='10', help='Ticks start lenght')
-        pars.add_argument('--slider_scale_ticks_end_lenght', type=float, default='10', help='Ticks end lenght')
+        self.arg_parser.add_argument('--slider_scale_ticks_number', type=int, default='300', help='Number of tick marks')
+        self.arg_parser.add_argument('--slider_scale_ticks_start_size', type=float, default='1', help='Ticks start size')
+        self.arg_parser.add_argument('--slider_scale_ticks_end_size', type=float, default='1', help='Ticks end size')
+        self.arg_parser.add_argument('--slider_scale_ticks_start_lenght', type=float, default='10', help='Ticks start lenght')
+        self.arg_parser.add_argument('--slider_scale_ticks_end_lenght', type=float, default='10', help='Ticks end lenght')
 
         #slider scale subticks
-        pars.add_argument('--slider_scale_add_subticks', type=inkex.Boolean, default='False', help='Add subticks')
-        pars.add_argument('--slider_scale_subticks_number', type=int, default='300', help='Number of subtick marks')
-        pars.add_argument('--slider_scale_subticks_size', type=float, default='300', help='Subticks size')
-        pars.add_argument('--slider_scale_subtick_lenght', type=float, default='5', help='Subticks lenght')
+        self.arg_parser.add_argument('--slider_scale_add_subticks', type=inkex.Boolean, default='False', help='Add subticks')
+        self.arg_parser.add_argument('--slider_scale_subticks_number', type=int, default='300', help='Number of subtick marks')
+        self.arg_parser.add_argument('--slider_scale_subticks_size', type=float, default='300', help='Subticks size')
+        self.arg_parser.add_argument('--slider_scale_subtick_lenght', type=float, default='5', help='Subticks lenght')
         
         #slider scale perpendicular line
-        pars.add_argument('--slider_scale_add_perpendicular_line', type=inkex.Boolean, default='False', help='Add perpendicular line')
-        pars.add_argument('--slider_scale_perpendicular_line_width', type=float, default='300', help='Perpendicular line width')
+        self.arg_parser.add_argument('--slider_scale_add_perpendicular_line', type=inkex.Boolean, default='False', help='Add perpendicular line')
+        self.arg_parser.add_argument('--slider_scale_perpendicular_line_width', type=float, default='300', help='Perpendicular line width')
 
         #sliders scale label
-        pars.add_argument('--slider_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
-        pars.add_argument('--slider_scale_label_start', type=float, default='1', help='Start')
-        pars.add_argument('--slider_scale_label_end', type=float, default='10', help='End')
-        pars.add_argument('--slider_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
-        pars.add_argument('--slider_scale_label_rounding_float', type=int, default='0', help='Rounding float')
-        pars.add_argument('--slider_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
-        pars.add_argument('--slider_scale_label_position', type=int, default='0', help='Label position')
-        pars.add_argument('--slider_scale_label_font_size', type=float, default='10', help='Label font size')
-        pars.add_argument('--slider_scale_label_offset_tl', type=float, default='10', help='Offset')
-        pars.add_argument('--slider_scale_label_offset_br', type=float, default='10', help='Offset') 
-        pars.add_argument('--slider_scale_label_offset_adj', type=float, default='10', help='Offset') 
+        self.arg_parser.add_argument('--slider_scale_add_label', type=inkex.Boolean, default='False', help='Add label')
+        self.arg_parser.add_argument('--slider_scale_label_start', type=float, default='1', help='Start')
+        self.arg_parser.add_argument('--slider_scale_label_end', type=float, default='10', help='End')
+        self.arg_parser.add_argument('--slider_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
+        self.arg_parser.add_argument('--slider_scale_label_rounding_float', type=int, default='0', help='Rounding float')
+        self.arg_parser.add_argument('--slider_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
+        self.arg_parser.add_argument('--slider_scale_label_position', type=int, default='0', help='Label position')
+        self.arg_parser.add_argument('--slider_scale_label_font_size', type=float, default='10', help='Label font size')
+        self.arg_parser.add_argument('--slider_scale_label_offset_tl', type=float, default='10', help='Offset')
+        self.arg_parser.add_argument('--slider_scale_label_offset_br', type=float, default='10', help='Offset') 
+        self.arg_parser.add_argument('--slider_scale_label_offset_adj', type=float, default='10', help='Offset') 
 
-        pars.add_argument('--slider_scale_label_add_suffix', help='Label add suffix')
+        self.arg_parser.add_argument('--slider_scale_label_add_suffix', help='Label add suffix')
 
         #slider scale utilities
-        pars.add_argument('--slider_scale_utilities_add_drill_guide', type=inkex.Boolean, default='True', help='Add drill guide')
-        pars.add_argument('--slider_scale_utilities_drill_color', type=inkex.Color, default='#333333', help='Utilities color')
-        pars.add_argument('--slider_scale_utilities_drill_line_width', type=float, default='10', help='Line width')
-        pars.add_argument('--slider_scale_utilities_guide_round_edges', type=inkex.Boolean, default='False', help='Round guide edges')
+        self.arg_parser.add_argument('--slider_scale_utilities_add_drill_guide', type=inkex.Boolean, default='True', help='Add drill guide')
+        self.arg_parser.add_argument('--slider_scale_utilities_drill_color', type=inkex.Color, default='#333333', help='Utilities color')
+        self.arg_parser.add_argument('--slider_scale_utilities_drill_line_width', type=float, default='10', help='Line width')
+        self.arg_parser.add_argument('--slider_scale_utilities_guide_round_edges', type=inkex.Boolean, default='False', help='Round guide edges')
 
-        pars.add_argument('--slider_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='True', help='Add drill guide')
-        pars.add_argument('--slider_scale_utilities_pcb_color', type=inkex.Color, default='#333333', help='Utilities color')
-        pars.add_argument('--slider_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
-        pars.add_argument('--slider_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
+        self.arg_parser.add_argument('--slider_scale_utilities_add_pcb_component_guide', type=inkex.Boolean, default='True', help='Add drill guide')
+        self.arg_parser.add_argument('--slider_scale_utilities_pcb_color', type=inkex.Color, default='#333333', help='Utilities color')
+        self.arg_parser.add_argument('--slider_scale_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        self.arg_parser.add_argument('--slider_scale_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
 
 
         #JACKS
-        pars.add_argument('--jack_name', help='Jack name')
-        pars.add_argument('--jack_type', type=int, default=1, help='Select the jack type') 
-        pars.add_argument('--jack_nut_type', type=int, default=1, help='Select the nut type') 
-        pars.add_argument('--jack_color', type=inkex.Color, default='#000000', help='Jack color')
-        pars.add_argument('--jack_nut_color', type=inkex.Color, default='#808080', help='Jack nut color')
-        pars.add_argument('--jack_nut_outline_color', type=inkex.Color, default='#000000', help='Jack nut outline')
+        self.arg_parser.add_argument('--jack_name', help='Jack name')
+        self.arg_parser.add_argument('--jack_type', type=int, default=1, help='Select the jack type') 
+        self.arg_parser.add_argument('--jack_nut_type', type=int, default=1, help='Select the nut type') 
+        self.arg_parser.add_argument('--jack_color', type=inkex.Color, default='#000000', help='Jack color')
+        self.arg_parser.add_argument('--jack_nut_color', type=inkex.Color, default='#808080', help='Jack nut color')
+        self.arg_parser.add_argument('--jack_nut_outline_color', type=inkex.Color, default='#000000', help='Jack nut outline')
         #jack position
-        pars.add_argument('--jack_pos_define', type=inkex.Boolean, default='False', help='Define jack position')
-        pars.add_argument('--jack_pos_x', type=float, default='10', help='X position')
-        pars.add_argument('--jack_pos_y', type=float, default='10', help='Y position')
+        self.arg_parser.add_argument('--jack_pos_define', type=inkex.Boolean, default='False', help='Define jack position')
+        self.arg_parser.add_argument('--jack_pos_x', type=float, default='10', help='X position')
+        self.arg_parser.add_argument('--jack_pos_y', type=float, default='10', help='Y position')
 
         #jack utilities
-        pars.add_argument('--jack_utilities_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
-        pars.add_argument('--jack_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
-        pars.add_argument('--jack_utilities_centering_line_width', type=float, default='10', help='Centering line width')
-        pars.add_argument('--jack_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
+        self.arg_parser.add_argument('--jack_utilities_add_centering_circle', type=inkex.Boolean, default='False', help='Add centering circle')
+        self.arg_parser.add_argument('--jack_utilities_centering_color', type=inkex.Color, default='#008000', help='Centering stroke color')
+        self.arg_parser.add_argument('--jack_utilities_centering_line_width', type=float, default='10', help='Centering line width')
+        self.arg_parser.add_argument('--jack_utilities_centering_guide_offset', type=float, default='10', help='Centering guide offset')
 
-        pars.add_argument('--jack_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
-        pars.add_argument('--jack_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
-        pars.add_argument('--jack_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--jack_utilities_line_width', type=float, default='10', help='Drill line width')
-        pars.add_argument('--jack_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
+        self.arg_parser.add_argument('--jack_utilities_color', type=inkex.Color, default='#ff00ff', help='Drill stroke color')
+        self.arg_parser.add_argument('--jack_utilities_add_drill_guide', type=inkex.Boolean, default='False', help='Add drill guide')
+        self.arg_parser.add_argument('--jack_utilities_drill_guide_type', type=int, default='0', help='Drill guide type')
+        self.arg_parser.add_argument('--jack_utilities_line_width', type=float, default='10', help='Drill line width')
+        self.arg_parser.add_argument('--jack_utilities_guide_dimension', type=float, default='10', help='Drill guide dimension')
 
 
-        pars.add_argument('--jack_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
-        pars.add_argument('--jack_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
-        pars.add_argument('--jack_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
-        pars.add_argument('--jack_utilities_pcb_line_width', type=float, default='10', help='Line width')
-        pars.add_argument('--jack_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
+        self.arg_parser.add_argument('--jack_utilities_pcb_color', type=inkex.Color, default='#ff00ff', help='Utilities color')
+        self.arg_parser.add_argument('--jack_utilities_add_pcb_component_guide', type=inkex.Boolean, default='False', help='Add PCB drill guide')
+        self.arg_parser.add_argument('--jack_utilities_component_guide_type', type=int, default='0', help='Drill guide type')
+        self.arg_parser.add_argument('--jack_utilities_pcb_line_width', type=float, default='10', help='Line width')
+        self.arg_parser.add_argument('--jack_utilities_pcb_guide_dimension', type=float, default='10', help='Guide dimension')
         #Settings
-        pars.add_argument('--author', help='Author name')
-        pars.add_argument('--brand', help='Company name')
-        pars.add_argument('--copyright', help='Copyright')
-        pars.add_argument('--releasedate', help='Release date')
-        pars.add_argument('--moduleversion', help='Module version')
-        pars.add_argument('--logo', help='Company Logo')
-        pars.add_argument('--globalfont', help='Global font')
-        pars.add_argument('--globalholecolor', type=inkex.Color, default='#cccccc', help='Global hole color')
-        pars.add_argument('--globalstrokesize', help='Global stroke size')
-        pars.add_argument('--globallasercutcolor', type=inkex.Color, default='#cccccc', help='Global lasercut color')
-        pars.add_argument('--globallasercutstrokesize', help='Global lasercut stroke size')
+        self.arg_parser.add_argument('--author', help='Author name')
+        self.arg_parser.add_argument('--brand', help='Company name')
+        self.arg_parser.add_argument('--copyright', help='Copyright')
+        self.arg_parser.add_argument('--releasedate', help='Release date')
+        self.arg_parser.add_argument('--moduleversion', help='Module version')
+        self.arg_parser.add_argument('--logo', help='Company Logo')
+        self.arg_parser.add_argument('--globalfont', help='Global font')
+        self.arg_parser.add_argument('--globalholecolor', type=inkex.Color, default='#cccccc', help='Global hole color')
+        self.arg_parser.add_argument('--globalstrokesize', help='Global stroke size')
+        self.arg_parser.add_argument('--globallasercutcolor', type=inkex.Color, default='#cccccc', help='Global lasercut color')
+        self.arg_parser.add_argument('--globallasercutstrokesize', help='Global lasercut stroke size')
         
         #About
 
         #Extra
-        pars.add_argument('--paneltab')
-        pars.add_argument('--uitab')
+        self.arg_parser.add_argument('--paneltab')
+        self.arg_parser.add_argument('--uitab')
 
     def draw_rectangle(self, w, h, x, y, rx, ry):
         rect = Rectangle(
@@ -407,16 +422,20 @@ class SynthPanelEffect(inkex.Effect):
         line.path = "M {},{} L {},{}".format(x1, y1, x2, y2)
         return line
 
-    def draw_arrow(self, x1, y1, x2, y2, x3, y3, x4, y4):
+    def draw_arrow(self, x1, y1, x2, y2, x3, y3, x4, y4, name):
         line = inkex.PathElement()
         line.path = "M {},{} {},{} {},{} {},{} Z".format(x1, y1, x2, y2, x3, y3, x4, y4)
+        line.set('inkscape:type', 'line')
+        line.set('inkscape:label', name)    
         return line
 
-    def draw_knob_scale_arc(self, cx, cy, angle, rotation, radius):
+    def draw_knob_scale_arc(self, cx, cy, angle, rotation, radius, name):
         end = (angle + rotation - pi) / 2.0
         start = pi - end + rotation
         arc = PathElement.arc((cx, cy), radius, start=start, end=end, open=True)
-        arc.set('sodipodi:arc-type', 'arc')
+        arc.set('inkscape:type', 'arc')
+        arc.set('inkscape:open', 'true')
+        arc.set('inkscape:label', name)
         return arc
 
     def draw_knob_scale_closed_arc(self, cx, cy, angle, rotation, radius):
@@ -443,28 +462,28 @@ class SynthPanelEffect(inkex.Effect):
         text.set("x", str(x))
         text.set("y", str(y + text_size / 2))
         return text
+    
+    def draw_cross(self, x, y, dimension):
+        half_dimension = dimension / 2
+        path_data = f"M {x} {y - half_dimension} L {x} {y + half_dimension} M {x - half_dimension} {y} L {x + half_dimension} {y}"
+
+        cross = inkex.PathElement()
+        cross.path = path_data
+        return cross
 
     def drill_guide(self, parent, x, y, fill, stroke, stroke_width, dimension, type):
         # Create drill guide
         if type == 2: #cross
-            cross_v = self.draw_line( 
-            x + dimension /2, 
-            y, 
-            x - dimension /2, 
-            y)
+            cross = self.draw_cross(x, y, dimension)
 
-            cross_h = self.draw_line( 
-            x, 
-            y + dimension /2, 
-            x, 
-            y - dimension /2)
-            
-            cross_v.style['fill'] = cross_h.style['fill'] = fill
-            cross_v.style['stroke'] = cross_h.style['stroke'] = stroke
-            cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = stroke_width
+            cross.style['fill'] = fill
+            cross.style['stroke'] = stroke
+            cross.style['stroke-width'] = stroke_width
+            cross.set('inkscape:label','cross')
 
-            parent.append(cross_v)
-            parent.append(cross_h)
+            group = inkex.Group.new('Drilling mark')
+            group.append(cross)
+            parent.append(group)
             
         elif type == 3: #dot
             drill_dot = Circle(cx=str(x), cy=str(y), r=str(dimension /2))
@@ -473,7 +492,9 @@ class SynthPanelEffect(inkex.Effect):
             drill_dot.style['stroke'] = "none"
             drill_dot.style['stroke-width'] = 0
 
-            parent.append(drill_dot)
+            group = inkex.Group.new('Component mark')
+            group.append(drill_dot)
+            parent.append(group)
 
         elif type == 4: #circle  
             drill_circle = Circle(cx=str(x), cy=str(y), r=str(dimension /2 - stroke_width /2))
@@ -482,28 +503,22 @@ class SynthPanelEffect(inkex.Effect):
             drill_circle.style['stroke'] = stroke
             drill_circle.style['stroke-width'] = stroke_width
 
-            parent.append(drill_circle)
+            group = inkex.Group.new('Component mark')
+            group.append(drill_circle)
+            parent.append(group)
 
     def pcb_guide(self, parent, x, y, fill, stroke, stroke_width, dimension):
         # Create pcb guide     
-        cross_v = self.draw_line( 
-        x + dimension /2, 
-        y, 
-        x - dimension /2, 
-        y)
+        cross = self.draw_cross(x, y, dimension)
 
-        cross_h = self.draw_line( 
-        x, 
-        y + dimension /2, 
-        x, 
-        y - dimension /2)
-        
-        cross_v.style['fill'] = cross_h.style['fill'] = fill
-        cross_v.style['stroke'] = cross_h.style['stroke'] = stroke
-        cross_v.style['stroke-width'] = cross_h.style['stroke-width'] = stroke_width
+        cross.style['fill'] = fill
+        cross.style['stroke'] = stroke
+        cross.style['stroke-width'] = stroke_width
+        cross.set('inkscape:label','cross')
 
-        parent.append(cross_v)
-        parent.append(cross_h)
+        group = inkex.Group.new('PCB mark')
+        group.append(cross)
+        parent.append(group)
         
     def sharecropping_guide(self, parent, w, h, l, t):
 
@@ -673,29 +688,48 @@ class SynthPanelEffect(inkex.Effect):
             pheight = height * unitfactor
             pwidth =  width * unitfactor
 
+            # Main layer
+            main_layer = self.svg.add(inkex.Group.new('Project ' + self.options.panel_name))
+            main_layer.set('inkscape:highlight-color', self.options.panel_color)
+            main_layer.set('sodipodi:insensitive', 'true')
+            main_layer.set('id', 'main-layer')
+
             # New panel group
             panel_name = self.options.panel_name
-            panel_group = self.svg.add(inkex.Group.new(panel_name))
+            panel_group = main_layer.add(inkex.Group.new('Panel'))
+            panel_group.set('sodipodi:insensitive', 'true')
     
             # Panel sub layer
-            panel_layer = panel_group.add(inkex.Layer.new('Panel'))  #panel
+            panel_layer = panel_group.add(inkex.Layer.new(panel_name + '\'s Panel'))  #panel
+            panel_layer.set('inkscape:highlight-color','#3ea4e3')
+            panel_layer.set('sodipodi:insensitive', 'true')
 
             if self.options.panel_holes:
-                holes_layer = panel_group.add(inkex.Layer.new('Holes'))  #holes
-                holes_group = holes_layer.add(inkex.Group.new('Holes'))  #holes group
+                holes_layer = panel_group.add(inkex.Layer.new('Holes layer'))
+                holes_layer.set('inkscape:highlight-color','#3ea4e3')
+                holes_layer.set('sodipodi:insensitive', 'true')
+                holes_group = holes_layer.add(inkex.Group.new('Holes group'))
 
             if self.options.panel_screws:
-                screws_layer = panel_group.add(inkex.Layer.new('Screws'))  #screws
-                screws_group = screws_layer.add(inkex.Group.new('Screws'))  #screws group
+                screws_layer = panel_group.add(inkex.Layer.new('Screws layer')) 
+                screws_layer.set('inkscape:highlight-color',Green) 
+                screws_layer.set('sodipodi:insensitive', 'true')  
+                screws_group = screws_layer.add(inkex.Group.new('Screws group'))
 
             if self.options.panel_centers:
-                center_layer = panel_group.add(inkex.Layer.new('Center')) #center
-                center_layer_g = center_layer.add(inkex.Group.new('Center')) #center group
+                center_layer = panel_group.add(inkex.Layer.new('Drilling layer'))
+                center_layer.set('inkscape:highlight-color', Orange)
+                center_layer.set('sodipodi:insensitive', 'true')
+                center_layer_g = center_layer.add(inkex.Group.new('Drilling group'))
+
 
             # Draw Panel
             panel = self.draw_rectangle(pwidth, pheight, 0, 0, 0, 0)
+            panel.set('inkscape:label', 'Panel')
+            
             panel_layer.append(panel)
             panel_layer.set('id', 'panel')
+            panel_layer.set('inkscape:highlight-color', self.options.panel_color)
 
             #panel style
             if self.options.panel_lasercut:
@@ -824,37 +858,37 @@ class SynthPanelEffect(inkex.Effect):
                 screw_tick_color = self.options.panel_screw_tick_color
 
                 # Bottom Left
-                if self.options.panel_screw_type == 1:
+                if screw_type == 1:
                     screws_group.append(self.draw_knurled_screw(x=str(leftH), y=str(bottomH), radius=str(screw_radius), radius2 = str(screw_radius/1.1), sides = 50))
                 else:
                     screws_group.append(Circle(cx=str(leftH), cy=str(bottomH), r=str(screw_radius)))
                         
                 # Top Left
-                if self.options.panel_screw_type == 1:
+                if screw_type == 1:
                     screws_group.append(self.draw_knurled_screw(x=str(leftH), y=str(topH), radius=str(screw_radius), radius2 = str(screw_radius/1.1), sides = 50))
                 else:
                     screws_group.append(Circle(cx=str(leftH), cy=str(topH), r=str(screw_radius)))
                     
                 # Bottom Right
-                if self.options.panel_screw_type == 1:
+                if screw_type == 1:
                     screws_group.append(self.draw_knurled_screw(x=str(rightH), y=str(bottomH), radius=str(screw_radius), radius2 = str(screw_radius/1.1), sides = 50))
                 else:
                     screws_group.append(Circle(cx=str(rightH), cy=str(bottomH), r=str(screw_radius)))
                 
                 # Top Right
-                if self.options.panel_screw_type == 1:
+                if screw_type == 1:
                     screws_group.append(self.draw_knurled_screw(x=str(rightH), y=str(topH), radius=str(screw_radius), radius2 = str(screw_radius/1.1), sides = 50))
                 else:
                     screws_group.append(Circle(cx=str(rightH), cy=str(topH), r=str(screw_radius)))
                 
                 # screw type
-                if self.options.panel_screw_type == 2 or self.options.panel_screw_type == 3 :
+                if screw_type == 2 or screw_type == 3 :
                     screws_group.append(self.draw_line(leftH-holeR, bottomH, leftH+holeR, bottomH))
                     screws_group.append(self.draw_line( leftH-holeR, topH, leftH+holeR, topH))
                     screws_group.append(self.draw_line(rightH-holeR, bottomH, rightH+holeR, bottomH))
                     screws_group.append(self.draw_line(rightH-holeR, topH, rightH+holeR, topH))
                     
-                if self.options.panel_screw_type == 3 :
+                if screw_type == 3 :
                     screws_group.append(self.draw_line( leftH, bottomH+holeR, leftH, bottomH-holeR))
                     screws_group.append(self.draw_line( leftH, topH+holeR, leftH, topH-holeR))
                     screws_group.append(self.draw_line(rightH, bottomH+holeR, rightH, bottomH-holeR))
@@ -872,9 +906,14 @@ class SynthPanelEffect(inkex.Effect):
                 if oval == False:  # Draw Round holes
                     r = HoleRadius * unitfactor
                     # Bottom Left
-                    holes_group.append(Circle(cx=str(leftH), cy=str(bottomH), r=str(r)))
+                    bottom_left_hole = Circle(cx=str(leftH), cy=str(bottomH), r=str(r))
+                    bottom_left_hole.set('inkscape:label', 'Bottom left')
+                    holes_group.append(bottom_left_hole)
+
                     # Top Left
-                    holes_group.append(Circle(cx=str(leftH), cy=str(topH), r=str(r)))
+                    top_left_hole = Circle(cx=str(leftH), cy=str(topH), r=str(r))
+                    top_left_hole.set('inkscape:label', 'Top left')
+                    holes_group.append(top_left_hole)
 
                     if self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  2:
                         # Center top
@@ -901,34 +940,37 @@ class SynthPanelEffect(inkex.Effect):
                             center_layer_g.append(self.draw_line( width/2, bottomH+holeR-gap, width/2, bottomH-holeR+gap))
 
                         # Bottom Left Centers
-                        # Horizontal Line
-                        center_layer_g.append(self.draw_line(leftH-holeR+gap, bottomH, leftH+holeR-gap, bottomH))
+                        center_cross_bottom_left = self.draw_cross(leftH, bottomH, 2 * (holeR - gap))
+                        center_cross_bottom_left.set('inkscape:label', 'Bottom left')
+                        center_layer_g.append(center_cross_bottom_left)
 
-                        # Vertical Line
-                        center_layer_g.append(self.draw_line( leftH, bottomH+holeR-gap, leftH, bottomH-holeR+gap))
+                        #top left centers
+                        center_cross_top_left = self.draw_cross(leftH, topH, 2 * (holeR - gap))
+                        center_cross_top_left.set('inkscape:label', 'Top left')
 
-                        # Top Left Centers
-                        # Horizontal Line
-                        center_layer_g.append(self.draw_line( leftH-holeR+gap, topH, leftH+holeR-gap, topH))
+                        center_layer_g.append(center_cross_top_left)
 
-                        # Vertical Line
-                        center_layer_g.append(self.draw_line( leftH, topH+holeR-gap, leftH, topH-holeR+gap))
                     # Draw the Righthand side Mounting holes
                     if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl") and euro_hp > 10 or (self.options.panel_type == "api" and api_units >=2) or (self.options.panel_type == "m5u"  and self.options.moog_panel_units >=2) or (self.options.panel_type == "d5u"  and self.options.moog_panel_units >=2) or self.options.panel_type == "nineteen" or self.options.panel_type == "lw" or self.options.panel_type == "serge" or self.options.panel_type == "buchla" or (self.options.panel_type == "fracrack" and self.options.fracrack_panel_units >  1) :
                         # Bottom Right
-                        holes_group.append(Circle(cx=str(rightH), cy=str(bottomH), r=str(r)))
+                        bottom_right_hole = Circle(cx=str(rightH), cy=str(bottomH), r=str(r))
+                        bottom_right_hole.set('inkscape:label', 'Bottom right')
+                        holes_group.append(bottom_right_hole)
+
                         # Top Right
-                        holes_group.append(Circle(cx=str(rightH), cy=str(topH), r=str(r)))
+                        top_right_hole = Circle(cx=str(rightH), cy=str(topH), r=str(r))
+                        top_right_hole.set('inkscape:label', 'Top right')
+                        holes_group.append(top_right_hole)
                         # Draw Right-side Centers
                         if centers == True:
-                            # Bottom Right Centers - Horizontal Line
-                            center_layer_g.append(self.draw_line(rightH-holeR+gap, bottomH, rightH+holeR-gap, bottomH))
-                            # Vertical Line
-                            center_layer_g.append(self.draw_line(rightH, bottomH+holeR-gap, rightH, bottomH-holeR+gap))
-                            # Top Right Centers - Horizontal Line
-                            center_layer_g.append(self.draw_line(rightH-holeR+gap, topH, rightH+holeR-gap, topH))
-                            # Vertical Line
-                            center_layer_g.append(self.draw_line(rightH, topH+holeR-gap, rightH, topH-holeR+gap))
+                            center_cross_bottom_right = self.draw_cross(rightH, bottomH, 2 * (holeR - gap))
+                            center_cross_bottom_right.set('inkscape:label', 'Bottom right')
+                            center_layer_g.append(center_cross_bottom_right)
+
+                            # Top Right Centers
+                            center_cross_top_right = self.draw_cross(rightH, topH, 2 * (holeR - gap))
+                            center_cross_top_right.set('inkscape:label', 'Top right')
+                            center_layer_g.append(center_cross_top_right)
 
                 else: # oval == True
                 
@@ -945,9 +987,14 @@ class SynthPanelEffect(inkex.Effect):
                     oval_height = HoleRadius*2*unitfactor
 
                     # Bottom Left
-                    holes_group.append(self.draw_rectangle(oval_width,oval_height,leftH-oval_stretch*unitfactor,bottomH-holeR, holeR,0))
+                    bottom_left = self.draw_rectangle(oval_width,oval_height,leftH-oval_stretch*unitfactor,bottomH-holeR, holeR,0)
+                    bottom_left.set('inkscape:label', 'Bottom left')
+                    holes_group.append( bottom_left )
+
                     # Top Left
-                    holes_group.append(self.draw_rectangle(oval_width,oval_height, leftH-oval_stretch*unitfactor,topH-holeR, holeR,0))
+                    top_left = self.draw_rectangle(oval_width,oval_height, leftH-oval_stretch*unitfactor,topH-holeR, holeR,0)
+                    top_left.set('inkscape:label', 'Top left')
+                    holes_group.append(top_left)
 
                     # Draw Left-side Centers
                     if centers == True:
@@ -970,9 +1017,14 @@ class SynthPanelEffect(inkex.Effect):
 
                     if (self.options.panel_type == "e3u" or self.options.panel_type == "e1uij" or self.options.panel_type == "e1upl")  and euro_hp > 10 or (self.options.panel_type == "lw" and lw_units > 2) or (self.options.panel_type == "nineteen"):
                         # Bottom Right
-                        holes_group.append(self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,bottomH-holeR, holeR,0))
+                        bottom_right = self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,bottomH-holeR, holeR,0)
+                        bottom_right.set('inkscape:label', 'Bottom right')
+                        holes_group.append(bottom_right)
+
                         # Top Right
-                        holes_group.append(self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,topH-holeR, holeR,0))
+                        top_right = self.draw_rectangle(oval_width,oval_height, rightH-oval_stretch*unitfactor,topH-holeR, holeR,0)
+                        top_right.set('inkscape:label', 'Top right')
+                        holes_group.append(top_right)
 
                         # Draw Left-side Centers
                         if centers == True:
@@ -1010,7 +1062,7 @@ class SynthPanelEffect(inkex.Effect):
                     center_layer_g.style['fill'] = 'none'
 
         elif part == 2: #knobs
-
+                               
             if self.svg.getElementById('knobs-group') is not None:
                 knobs = self.svg.getElementById('knobs-group')
             else:
@@ -1054,10 +1106,12 @@ class SynthPanelEffect(inkex.Effect):
                     vintage_knob.style['fill'] = self.options.knob_vintage_color
                     vintage_knob.style['stroke'] = self.options.knob_vintage_stroke_color
                     vintage_knob.style['stroke-width'] = self.options.knob_vintage_stroke_width
+                    
+                    vintage_knob.set('inkscape:label', 'Vintage')
 
                 mainknob = Circle(cx=str(center_x), cy=str(center_y), r=str(self.options.knob_main_dimension / 2))
                     
-                mainknob.set('id', 'id_'+self.options.knob_name)
+                mainknob.set('inkscape:label', 'Main')
                 
                 if self.options.knob_main_style == 2:
                     knob_layer_vintage.append(vintage_knob)
@@ -1067,7 +1121,7 @@ class SynthPanelEffect(inkex.Effect):
 
                 if self.options.knob_add_skirt:
                     knob_skirt = Circle(cx=str(center_x), cy=str(center_y), r=str(self.options.knob_skirt_dimension / 2))
-                    knob_skirt.set('id', 'id_s_'+self.options.knob_name)
+                    knob_skirt.set('inkscape:label', 'Skirt')
                     knob_layer_skirt.append(knob_skirt)
 
                 tlenght = self.options.knob_tick_lenght
@@ -1079,6 +1133,7 @@ class SynthPanelEffect(inkex.Effect):
                     knob_layer_tick = knob_layer.add(inkex.Layer.new('Tick'))
                     if self.options.knob_tick_type == 1:
                         thetick = self.draw_line(center_x, center_y, x2+center_x, y2+center_y)
+                        thetick.set('inkscape:label', 'Tick')
                         thetick.style['fill'] = 'none'
                         thetick.style['stroke'] = self.options.knob_tick_color
 
@@ -1103,7 +1158,7 @@ class SynthPanelEffect(inkex.Effect):
                                 center_x, center_y, 
                                 center_x - (self.options.knob_main_dimension/2) - self.options.knob_arrow_width, center_y, 
                                 ax2+center_x, ay2+center_y, 
-                                center_x, (center_y + self.options.knob_main_dimension /2) + self.options.knob_arrow_width
+                                center_x, (center_y + self.options.knob_main_dimension /2) + self.options.knob_arrow_width, 'Arrow'
                             )
 
 
@@ -1125,13 +1180,14 @@ class SynthPanelEffect(inkex.Effect):
 
         elif part == 3: #knobs scales
             sknob = self.svg.selected
-            bbox  = sknob.bounding_box()
-            if bbox:
-                center_x, center_y = bbox.center
-                #fix the broken units
-                center_x = inkex.units.convert_unit(center_x, "mm")
-                center_y = inkex.units.convert_unit(center_y, "mm")
-
+            bboxes = [node.bounding_box().center for node in self.svg.selected.values()]
+            centers = [ (c.x,c.y) for c in bboxes] # turn vectors into lists
+			
+            # find average of all centers.
+            if len(centers) > 0:
+                center_x = sum([c[0] for c in centers]) / len(centers)
+                center_y = sum([c[1] for c in centers]) / len(centers)
+                                
             missing_knob = False
 
             #scale layers
@@ -1180,7 +1236,7 @@ class SynthPanelEffect(inkex.Effect):
 
             start_num = self.options.knob_scale_label_start_number
             end_num = self.options.knob_scale_label_end_number
-            text_spacing = self.options.knob_scale_label_offset
+            text_spacing = self.options.knob_scale_label_offset +3
             text_size = self.options.knob_scale_label_font_size
 
             is_knob_selected = False
@@ -1212,6 +1268,8 @@ class SynthPanelEffect(inkex.Effect):
                     centering_circle.style['stroke'] = self.options.knob_scale_utilities_centering_color
                     centering_circle.style['stroke-width'] = self.options.knob_scale_utilities_centering_line_width
 
+                    centering_circle.set('inkscape:label', 'Circle')
+
                     knob_scale_centering_layer.append(centering_circle)
                     
                 if self.options.knob_scale_utilities_add_drill_guide:
@@ -1237,7 +1295,7 @@ class SynthPanelEffect(inkex.Effect):
                     knob_scale_arc = knob_scale_layer.add(inkex.Layer.new('Arcs'))
                 
                 if self.options.knob_scale_add_arc:
-                    arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius)
+                    arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_arc_angle_offset, arc_rotation, radius, 'Main arc')
                     
                     arc.style['fill'] = 'none'
                     arc.style['stroke'] = self.options.knob_scale_arc_color
@@ -1246,7 +1304,7 @@ class SynthPanelEffect(inkex.Effect):
                     knob_scale_arc.append(arc)
                 
                 if self.options.knob_scale_add_outer_arc:
-                    outer_arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius)
+                    outer_arc = self.draw_knob_scale_arc(center_x, center_y, angle + self.options.knob_scale_outer_arc_angle_offset, arc_rotation, offset_radius, 'Outer arc')
 
                     outer_arc.style['fill'] = 'none'
                     outer_arc.style['stroke'] = self.options.knob_scale_arc_color
@@ -1260,19 +1318,27 @@ class SynthPanelEffect(inkex.Effect):
 
                 if self.options.knob_scale_add_ticks:
                     if n_ticks > 0:
-                        knob_scale_tick = knob_scale_layer.add(inkex.Layer.new('Ticks'))
-                        if n_subticks > 0 and self.options.knob_scale_add_subticks:
-                                knob_scale_sub_tick_layer = knob_scale_layer.add(inkex.Layer.new('Subticks'))
+                        knob_scale_ticks = knob_scale_layer.add(inkex.Layer.new('Ticks'))
+                        knob_scale_mainticks = knob_scale_ticks.add(inkex.Layer.new('Main ticks'))
+                        
+                        if self.options.knob_scale_add_subticks:
+                            knob_scale_subticks = knob_scale_ticks.add(inkex.Layer.new('Sub ticks'))
+                        
+                        if self.options.knob_scale_add_tick_dots:
+                            knob_scale_dotticks = knob_scale_ticks.add(inkex.Layer.new('Dots ticks'))
 
                         ticks_start_angle = (1.5*pi - 0.5*angle) + (arc_rotation/2)
 
                         ticks_delta = angle / (n_ticks - 1)
-                        knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
+                        if self.options.knob_scale_add_label:
+                            knob_scale_label = knob_scale_layer.add(inkex.Layer.new('Labels'))
 
                         if self.options.knob_scale_label_customtext:
                             customText = self.options.knob_scale_label_customtext.split(',')
-
-                        for tick in range(n_ticks):
+                        
+                        count = 1
+                        for count, tick in enumerate(range(n_ticks), start=1):
+                            
                             if self.options.knob_scale_ticks_type == 1:
                                 if(self.options.knob_scale_ticks_accent_number != 0):
                                     if(tick % self.options.knob_scale_ticks_accent_number):
@@ -1300,33 +1366,38 @@ class SynthPanelEffect(inkex.Effect):
                                         scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_accent_width
                                 else:
                                     scale_tick.style['stroke-width'] = self.options.knob_scale_ticks_width
+                                    
+                                scale_tick.set('inkscape:label', 'tick_'+ str(count))
 
                                 scale_tick.style['stroke'] = self.options.knob_scale_ticks_color      
-                                knob_scale_tick.append(scale_tick) 
+                                knob_scale_mainticks.append(scale_tick) 
 
                                 #add point to the main ticks
                                 if self.options.knob_scale_add_tick_dots:
                                     multiple_dots_offset = 0
                                     i = 0
                                     while i < self.options.knob_scale_multiple_dots_number:
-                                        tick_points = self.draw_circle(center_x, center_y, radius +  tick_length + self.options.knob_scale_add_tick_dots_offset + multiple_dots_offset, ticks_start_angle + ticks_delta*tick, self.options.knob_scale_add_tick_dots_radius) 
+                                        tick_dots = self.draw_circle(center_x, center_y, radius +  tick_length + self.options.knob_scale_add_tick_dots_offset + multiple_dots_offset, ticks_start_angle + ticks_delta*tick, self.options.knob_scale_add_tick_dots_radius) 
                                         multiple_dots_offset = multiple_dots_offset + self.options.knob_scale_multiple_dots_offset
                                         i = i+1
-                                        knob_scale_tick.append(tick_points)  
+                                        knob_scale_dotticks.append(tick_dots)  
                                   
-                                        tick_points.style['fill'] = self.options.knob_scale_ticks_color
-                                        tick_points.style['stroke'] = 'none'
-                                        tick_points.style['stroke-width'] = 0
-                                     
+                                        tick_dots.style['fill'] = self.options.knob_scale_ticks_color
+                                        tick_dots.style['stroke'] = 'none'
+                                        tick_dots.style['stroke-width'] = 0
+                                        tick_dots.set('inkscape:label', 'tick_dot_'+ str(count))
 
                             else:
                                 tick_length = self.options.knob_scale_ticks_lenght
                                 scale_tick = self.draw_circle(center_x, center_y, radius , ticks_start_angle + ticks_delta*tick, tick_length)
+                                
+                                scale_tick.set('inkscape:label', 'main_tick_'+ str(count))                                
 
                                 scale_tick.style['fill'] = self.options.knob_scale_ticks_color
                                 scale_tick.style['stroke'] = 'none'
                                 scale_tick.style['stroke-width'] = 0
-                                knob_scale_tick.append(scale_tick)
+                                knob_scale_mainticks.append(scale_tick)
+                                
 
                                 #add point to the main ticks
                                 if self.options.knob_scale_add_tick_dots:
@@ -1336,15 +1407,15 @@ class SynthPanelEffect(inkex.Effect):
                                         tick_points = self.draw_circle(center_x, center_y, radius +  tick_length + self.options.knob_scale_add_tick_dots_offset + multiple_dots_offset, ticks_start_angle + ticks_delta*tick, self.options.knob_scale_add_tick_dots_radius) 
                                         multiple_dots_offset = multiple_dots_offset + self.options.knob_scale_multiple_dots_offset
                                         i = i+1
-                                        knob_scale_tick.append(tick_points)  
+                                        
+                                        tick_points.set('inkscape:label', 'tick_dot_'+ str(i) + str(count))    
+                                        
+                                        knob_scale_dotticks.append(tick_points)  
 
                             if self.options.knob_scale_add_label:
                                 if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
-                                    
-                                    
                                     label = self.draw_text(center_x, center_y, customText[tick], radius + tick_length + text_spacing,
                                                 ticks_start_angle + ticks_delta*tick, text_size)
-                                    
                                 else:    
                                     if self.options.knob_scale_label_rounding_float > 0:
                                         if self.options.knob_scale_label_reverse_order:
@@ -1373,12 +1444,12 @@ class SynthPanelEffect(inkex.Effect):
                                         
 
                                     label = self.draw_text(center_x, center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
+                                
+                                    label.set('inkscape:label', tick_text)
 
-                                label.style['text-align'] = 'center'
                                 label.style['text-anchor'] = 'middle'
-                                label.style['alignment-baseline'] = 'center'
                                 label.style['font-size'] = str(text_size)
-                                label.style['vertical-align'] = 'middle'
+                                label.style['dominant-baseline'] = 'auto'
                                 label.style['fill'] = self.options.knob_scale_label_color
 
                                 knob_scale_label.append(label)
@@ -1410,7 +1481,7 @@ class SynthPanelEffect(inkex.Effect):
                                         knob_scale_subtick.style['stroke'] = 'none'
                                         knob_scale_subtick.style['stroke-width'] = 0
 
-                                    knob_scale_sub_tick_layer.append(knob_scale_subtick)
+                                    knob_scale_subticks.append(knob_scale_subtick)
 
                         #draw the arc on top of the tick when the tick are line
                         if (self.options.knob_scale_ticks_type == 1) and self.options.knob_scale_add_arc:
@@ -1527,21 +1598,25 @@ class SynthPanelEffect(inkex.Effect):
                     slider_layer_tick.append(cursor_tick)
 
         elif part == 5: #slider scales    
-                sslider = self.svg.selected
-                bbox  = sslider.bounding_box()
+                sslider = self.svg.selection.first()
+                bbox = sslider.bounding_box()
 
-                if bbox:
-                    center_x, center_y = bbox.center
-                    center_x = inkex.units.convert_unit(center_x, "mm")
-                    center_y = inkex.units.convert_unit(center_y, "mm")
+                bboxes = [node.bounding_box().center for node in self.svg.selected.values()]
+                centers = [ (c.x,c.y) for c in bboxes] # turn vectors into lists
+			
+                # find average of all centers.
+                if len(centers) > 0:
+                    center_x = sum([c[0] for c in centers]) / len(centers)
+                    center_y = sum([c[1] for c in centers]) / len(centers)
 
-                    bboxheight = inkex.units.convert_unit(bbox.height, "mm")
-                    bboxwidth = inkex.units.convert_unit(bbox.width, "mm")
-                    bboxleft = inkex.units.convert_unit(bbox.left, "mm")
-                    bboxright = inkex.units.convert_unit(bbox.right, "mm")
-                    bboxtop = inkex.units.convert_unit(bbox.top, "mm")
-                    bboxbottom = inkex.units.convert_unit(bbox.bottom, "mm")
+                     # Calculate bounding box dimensions
+                    bboxwidth =  bbox.width
+                    bboxheight = bbox.height
 
+                    bboxleft = bbox.left
+                    bboxright = bbox.right
+                    bboxtop = bbox.top
+                    bboxbottom = bbox.bottom
                 missing_slider = False
 
                 #scale layers
@@ -1567,7 +1642,7 @@ class SynthPanelEffect(inkex.Effect):
                         if self.svg.getElementById('slider-scales-utilities-drilling') is not None:
                             slider_scales_utilities_drilling = self.svg.getElementById('slider-scales-utilities-drilling')
                         else:                     
-                            slider_scales_utilities_drilling = slider_scales_utilities.add(inkex.Layer.new('Drill plan'))
+                            slider_scales_utilities_drilling = slider_scales_utilities.add(inkex.Layer.new('Drilling plan'))
                             slider_scales_utilities_drilling.set('id', 'slider-scales-utilities-drilling')
 
                     if self.options.slider_scale_utilities_add_pcb_component_guide:
@@ -1590,16 +1665,17 @@ class SynthPanelEffect(inkex.Effect):
 
                 is_slider_selected = False
 
-                if sslider:
+                if sslider is not None:
                     is_slider_selected = True
                     layer = self.svg.get_current_layer()
                     parent = layer.getparent()
                     selected_label = parent.label
-                     
+                    
                 if( not is_slider_selected):
                     inkex.errormsg(_("To draw a scale, you must first select the corresponding slider.\nPlease select the slider's course."))
                 else:   
                     #vertical  
+                   
                     if bboxheight > bboxwidth:
                         ticks_delta = (bboxheight - self.options.slider_scale_v_offset) / (n_ticks - 1)
                         tick_length_start = self.options.slider_scale_ticks_start_lenght
@@ -1692,11 +1768,9 @@ class SynthPanelEffect(inkex.Effect):
                                                             tick_text  +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),                                                                                                          #textvalue
                                                             text_size)                                                                                                          #textsize
 
-                                    label_l.style['text-align'] = label_r.style['text-align'] ='center'
                                     label_l.style['text-anchor'] = label_r.style['text-anchor'] = 'middle'
-                                    label_l.style['alignment-baseline'] = label_r.style['alignment-baseline'] = 'center'
                                     label_l.style['font-size'] = label_r.style['font-size'] = self.options.slider_scale_label_font_size
-                                    label_l.style['vertical-align'] = label_r.style['vertical-align'] = 'middle'
+                                    label_l.style['dominant-baseline'] = label_r.style['dominant-baseline'] = 'auto'
                                     label_l.style['fill'] = label_r.style['fill'] = self.options.slider_scale_label_color
 
                                     if self.options.slider_scale_label_position == 1:
@@ -1860,11 +1934,9 @@ class SynthPanelEffect(inkex.Effect):
                                                         tick_text +  ((self.options.slider_scale_label_add_suffix) if self.options.slider_scale_label_add_suffix  else '' ),        
                                                         text_size)        
                                     
-                                    label_b.style['text-align'] = label_t.style['text-align'] ='center'
                                     label_b.style['text-anchor'] = label_t.style['text-anchor'] = 'middle'
-                                    label_b.style['alignment-baseline'] = label_t.style['alignment-baseline'] = 'center'
                                     label_b.style['font-size'] = label_t.style['font-size'] = self.options.slider_scale_label_font_size
-                                    label_b.style['vertical-align'] = label_t.style['vertical-align'] = 'middle'
+                                    label_b.style['dominant-baseline'] = label_t.style['dominant-baseline'] = 'auto'
                                     label_b.style['fill'] = label_t.style['fill'] = self.options.slider_scale_label_color
 
                                     if self.options.slider_scale_label_position == 1:

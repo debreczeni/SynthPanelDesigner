@@ -22,26 +22,30 @@
 */
 -->
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Synth Panels Designer</_name>
-  <id>com.Faselunare.SPD.SynthPanelsDesign</id>
-  <dependency type="executable" location="inx">SynthPanelsDesigner/SynthPanelsDesigner.py</dependency>
-  <hbox>
+    <name>Synth Panels Designer</name>
+    <id>Faselunare.Render.SynthPanelsDesigner</id>
+    <dependency type="executable" location="inx">SynthPanelsDesigner.py</dependency>
+    <hbox>
         <vbox>
-            <image>SynthPanelsDesigner/assets/spd_logo.svg</image>
+            <image>assets/spd_logo.svg</image>
         </vbox>
-  </hbox>
-  <separator/>
-  <param name="part" type="optiongroup" gui-text="which part do you want to draw?" appearance="combo" gui-description="The first thing you need to do is: Choose what you want to draw!">
-       <option value="1">Panel</option>
-       <option value="2">UI - Knob</option>
-       <option value="3">UI - Knob scales</option>
-       <option value="4">UI - Slider</option>
-       <option value="5">UI - Slider scales</option>
-	   <option value="6">UI - Jacks</option>
-  </param>
-  <separator/>
-  <param name="paneltab" type="notebook">
-        <page name="Options" gui-text="PANEL">
+    </hbox>
+    <separator/>
+    <hbox indent="40">
+        <vbox>
+            <param name="part" type="optiongroup" gui-text="which part do you want to draw?   " appearance="combo" gui-description="The first thing you need to do is: Choose what you want to draw!">
+                <item value="1">Panel</item>
+                <item value="2">UI - Knob</item>
+                <item value="3">UI - Knob scales</item>
+                <item value="4">UI - Slider</item>
+                <item value="5">UI - Slider scales</item>
+                <item value="6">UI - Jacks</item>
+            </param>
+        </vbox>
+    </hbox>
+    <separator/>
+    <param name="paneltab" type="notebook">
+        <page name="Panel" gui-text="PANEL">
             <hbox>
                 <vbox>
                     <label appearance="header">PANEL DESIGNER</label>
@@ -64,8 +68,8 @@
                     </param>
                 <separator/>
                      <label xml:space="preserve">
-- Eurorack 1U - IJ = Intellijel standard
-- Eurorack 1U - PL = Pulp Logic standard
+                        - Eurorack 1U - IJ = Intellijel standard
+                        - Eurorack 1U - PL = Pulp Logic standard
                     </label>
                     
                     <spacer/>
@@ -366,9 +370,9 @@
                     <param name="knob_scale_label_add_customtext" type="boolean" _gui-text="Add custom text">false</param>
                     <param name="knob_scale_label_customtext" type="string" gui-text="Custom text"></param>
                     <label xml:space="preserve">
-- Comma separated words
-- Number of Ticks and Words must be the same
-                                            </label>
+                        - Comma separated words
+                        - Number of Ticks and Words must be the same
+                    </label>
                 </vbox>
                 <spacer/>
                 <separator/>
@@ -663,7 +667,6 @@
                     <param name="jack_utilities_pcb_line_width" type="float" min="0" max="10" default="1" precision="2" _gui-text="Line width">0.2</param>
                     <param name="jack_utilities_pcb_guide_dimension" type="float" min="0" max="100" default="6.5" precision="2" _gui-text="Guide dimension">6.5</param>
                     <separator/>   
-            
                 <spacer/>
                 
                 </vbox>
@@ -678,7 +681,7 @@
             <label appearance="url">https://bit.ly/spd_gitlab</label>
             
             <spacer/>
-            <label>Synth Panels Designer v. 1.5 (Mega Update) - 16 January 2022</label>
+            <label>Synth Panels Designer v. 1.8 (Inkscape 1.2+) - 7 September 2023</label>
             <label>Main developer: Francesco Mulassano</label>
             <label>Contributors: GaryA
             </label>
@@ -686,43 +689,48 @@
             <separator/>
             <label appearance="header" xml:space="preserve">NOTE</label>
             <label xml:space="preserve">
-All product names, logos, and brands are property of their respective owners. </label> 
-<spacer/>
+                All product names, logos, and brands are property of their respective owners. 
+            </label> 
+            <spacer/>
             <separator/>
             <label appearance="header">SPONSORED BY</label>
             <separator/>
             <hbox>
                 <vbox>
-                    <label appearance="header">SOUNDMIT - ITALIAN SYNTHS and PEDALS EXPO (since 2011)</label>
+                    <label appearance="header">SOUNDMIT - ITALIAN SYNTHS and MUSIC TECH EXPO (since 2011)</label>
                     <label appearance="url">https://soundmit.com</label>
-                    <image>SynthPanelsDesigner/assets/sm_logo.svg</image>
+                    <image>assets/sm_logo.svg</image>
                     <spacer/>
                 </vbox>
                 <spacer/>
                 <separator/>
                 <spacer/>
                 <vbox>
-                    <label appearance="header">FASELUNARE</label>
+                    <label appearance="header">FASELUNARE - Eurorack and Synthesizers</label>
                     <label appearance="url">https://faselunare.com</label>
-                    <image>SynthPanelsDesigner/assets/fl_logo.svg</image>
+                    <image>assets/fl_logo.svg</image>
                     <spacer/>
                 </vbox>
                 <spacer/>
                 <separator/>
                 <spacer/>
+                <vbox>
+                    <label appearance="header">ALPHALAB AUDIO - Design / Planning / Prototyping / Production / Revamp</label>
+                    <label appearance="url">https://alphalab.audio/en/design</label>
+                    <image>assets/al_logo.svg</image>
+                    <spacer/>
+                </vbox>
             </hbox>
         </page>
-
-
-</param>
+    </param>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Render"/>
+            <submenu name="Render"/>
         </effects-menu>
     </effect>
 
-  <script>
-    <command reldir="extensions" interpreter="python">SynthPanelsDesigner/SynthPanelsDesigner.py</command>
-  </script>
+    <script>
+        <command location="inx" interpreter="python">SynthPanelsDesigner.py</command>
+    </script>
 </inkscape-extension>
