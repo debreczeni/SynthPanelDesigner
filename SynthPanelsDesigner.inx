@@ -364,8 +364,12 @@
                     <param name="knob_scale_add_plus_sign" type="boolean" _gui-text="Add '+' sign to positive numbers">false</param>
                     <param name="knob_scale_label_rounding_float" type="int" min="0" max="3" default="0" precision="1" _gui-text="Rounding float">0</param>
                     <param name="knob_scale_label_reverse_order" type="boolean" _gui-text="Reverse order">false</param>
+                    <param name="knob_scale_label_font_family" type="string" default="sans-serif" _gui-text="Label font family">sans-serif</param>
                     <param name="knob_scale_label_font_size" type="float" min="1" max="10" default="1" precision="1" _gui-text="Label size">10</param>
+                    <param name="knob_scale_label_y_stretch" type="float" min="-10" max="10" default="0" precision="2" _gui-text="Label Y-stretch">0</param>
                     <param name="knob_scale_label_offset" type="float" min="-10" max="10" default="1" precision="2" _gui-text="Label offset">10</param>
+                    <param name="knob_scale_label_offset_x" type="float" min="-10" max="10" default="0" precision="2" _gui-text="Label offset X">0</param>
+                    <param name="knob_scale_label_offset_y" type="float" min="-10" max="10" default="0" precision="2" _gui-text="Label offset Y">0</param>
                     <param name="knob_scale_label_add_suffix" type="string" gui-text="Label suffix" width="1"></param>
                     <param name="knob_scale_label_add_customtext" type="boolean" _gui-text="Add custom text">false</param>
                     <param name="knob_scale_label_customtext" type="string" gui-text="Custom text"></param>

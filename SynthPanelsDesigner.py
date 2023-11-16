@@ -29,6 +29,9 @@ July 2023 Update 1.8
 - improved layers and elements naming
 - add new sponsor: Alphalab Audio (Would you sponsor Synth Panel Designer? info@synthpanels.design)
 
+Knob Scale Improvements - debreczeni 16/11/2023
+- Allow fine-tuning with custom Font family, Y-offset and Y-stretch
+- Dynamic text-anchor based on relative position to the center allowing any custom text change after applying the scale while keeping label positions intact  
 '''
 
 import sys
@@ -192,8 +195,13 @@ class SynthPanelEffect(inkex.Effect):
         self.arg_parser.add_argument('--knob_scale_add_plus_sign', type=inkex.Boolean, default='True', help='Add + sign to positive numebrs')
         self.arg_parser.add_argument('--knob_scale_label_rounding_float', type=int, default='0', help='Rounding float')
         self.arg_parser.add_argument('--knob_scale_label_reverse_order', type=inkex.Boolean, default='False', help='Reverse order')
+        self.arg_parser.add_argument('--knob_scale_label_font_family', default='sans-serif', help='Label font family')
         self.arg_parser.add_argument('--knob_scale_label_font_size', type=float, default='10', help='Label size')
-        self.arg_parser.add_argument('--knob_scale_label_offset', type=float, default='10', help='Offset')
+        self.arg_parser.add_argument('--knob_scale_label_offset', type=float, default='10', help='Radial Offset')
+        self.arg_parser.add_argument('--knob_scale_label_offset_x', type=float, default='0', help='Offset X')
+        self.arg_parser.add_argument('--knob_scale_label_offset_y', type=float, default='0', help='Offset Y')
+        self.arg_parser.add_argument('--knob_scale_label_y_stretch', type=float, default='0', help='Stretch Y')
+        
         self.arg_parser.add_argument('--knob_scale_label_add_suffix', help='Label add suffix') 
         self.arg_parser.add_argument('--knob_scale_label_add_customtext', type=inkex.Boolean, help='Label add customtext')
         self.arg_parser.add_argument('--knob_scale_label_customtext', help='Label customtex')
@@ -1413,9 +1421,21 @@ class SynthPanelEffect(inkex.Effect):
                                         knob_scale_dotticks.append(tick_points)  
 
                             if self.options.knob_scale_add_label:
+                                label_angle = (ticks_start_angle + ticks_delta * tick) % 360
+                                label_angle_deg_mod = (label_angle / pi * 180) % 360
+                                label_position = radius + tick_length + text_spacing
+                                
+                                # print(label_angle, file=sys.stderr)
+                                # print(label_position * sin(label_angle), file=sys.stderr)
+
+                                label_y_stretch = self.options.knob_scale_label_y_stretch * sin(label_angle)
+
+                                label_x = center_x + self.options.knob_scale_label_offset_x
+                                label_y = center_y + self.options.knob_scale_label_offset_y + label_y_stretch
+
                                 if (self.options.knob_scale_label_add_customtext and self.options.knob_scale_label_customtext and len(customText) == n_ticks ):
-                                    label = self.draw_text(center_x, center_y, customText[tick], radius + tick_length + text_spacing,
-                                                ticks_start_angle + ticks_delta*tick, text_size)
+                                    label = self.draw_text(label_x, label_y, customText[tick], label_position,
+                                                label_angle, text_size)
                                 else:    
                                     if self.options.knob_scale_label_rounding_float > 0:
                                         if self.options.knob_scale_label_reverse_order:
@@ -1442,15 +1462,21 @@ class SynthPanelEffect(inkex.Effect):
                                     else:
                                         tick_text = tick_number 
                                         
+                                    label_text = tick_text + (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' )
+                                    label = self.draw_text(label_x, label_y, label_text, label_position, label_angle, text_size)
+           
+                                    label.set('inkscape:label', label_text)
 
-                                    label = self.draw_text(center_x, center_y, tick_text +  (str(self.options.knob_scale_label_add_suffix) if self.options.knob_scale_label_add_suffix else '' ), radius + tick_length + text_spacing, ticks_start_angle + ticks_delta*tick, text_size)
-                                
-                                    label.set('inkscape:label', tick_text)
-
-                                label.style['text-anchor'] = 'middle'
+                                if (label_angle_deg_mod > 90 and label_angle_deg_mod < 270): 
+                                    label.style['text-anchor'] = 'end'
+                                elif (label_angle_deg_mod > 270 or label_angle_deg_mod < 90):
+                                    label.style['text-anchor'] = 'start'
+                                else:
+                                    label.style['text-anchor'] = 'middle'
                                 label.style['font-size'] = str(text_size)
                                 label.style['dominant-baseline'] = 'auto'
                                 label.style['fill'] = self.options.knob_scale_label_color
+                                label.style['font-family'] = self.options.knob_scale_label_font_family
 
                                 knob_scale_label.append(label)
 
